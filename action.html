@@ -308,7 +308,18 @@
        </main>
 
        <!-- FOOTER -->
-       <footer class="game-footer"><div class="footer-content" id="event-log">Bienvenue dans Empire !</div></footer>
+       <footer class="game-footer">
+           <div class="footer-content">
+               <div style="display: flex; justify-content: space-between; align-items: center;">
+                   <div id="event-log">Bienvenue dans Empire !</div>
+                   <div style="display: flex; gap: 1rem;">
+                       <button onclick="showHelp('buildings')" style="background: none; border: 1px solid var(--color-border); color: var(--color-text); padding: 0.25rem 0.5rem; border-radius: 0.25rem; cursor: pointer; font-size: 0.8rem;">💡 Aide</button>
+                       <button onclick="saveState(); logEvent('💾 Jeu sauvegardé manuellement')" style="background: none; border: 1px solid var(--color-border); color: var(--color-text); padding: 0.25rem 0.5rem; border-radius: 0.25rem; cursor: pointer; font-size: 0.8rem;">💾 Sauvegarder</button>
+                       <button onclick="if(confirm('Êtes-vous sûr de vouloir recommencer ? Toute progression sera perdue.')) { localStorage.removeItem('empireGameState'); location.reload(); }" style="background: none; border: 1px solid var(--color-danger); color: var(--color-danger); padding: 0.25rem 0.5rem; border-radius: 0.25rem; cursor: pointer; font-size: 0.8rem;">🔄 Reset</button>
+                   </div>
+               </div>
+           </div>
+       </footer>
 
        <!-- NAVIGATION MOBILE -->
        <nav class="mobile-nav main-nav">
