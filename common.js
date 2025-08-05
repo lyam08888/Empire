@@ -1,6 +1,6 @@
 const changeAction = type => {
   if (type === "login") {
-    const url = `http://${document.loginForm.universe.value}/index.html`;
+    const url = `http://${document.loginForm.universe.value}/action.html`;
     document.getElementById("loginForm").action = url;
   } else if (type === "getpw") {
     const url = `http://${document.loginForm.universe.value}/mail.html`;
