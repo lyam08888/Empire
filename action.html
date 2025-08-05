@@ -69,11 +69,435 @@
        .main-view h2 { color: var(--color-primary); margin-bottom: 1rem; font-size: 1.8rem; }
        
        /* --- VUE VILLE AMÉLIORÉE --- */
+       .city-container {
+           display: flex; flex-direction: column; height: 100%; gap: 1rem;
+           padding: 1rem; background: var(--color-background);
+       }
+       
+       .city-header {
+           background: var(--color-panel-light); border-radius: 1rem; padding: 1.5rem;
+           display: flex; justify-content: space-between; align-items: center;
+           box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+       }
+       
+       .city-title h2 {
+           margin: 0; color: var(--color-primary); font-size: 1.8rem;
+       }
+       
+       .city-level {
+           color: var(--color-text-muted); font-size: 0.9rem; margin-top: 0.25rem;
+       }
+       
+       .city-vital-stats {
+           display: flex; gap: 2rem;
+       }
+       
+       .vital-stat {
+           display: flex; align-items: center; gap: 0.75rem;
+           background: var(--color-panel); padding: 1rem; border-radius: 0.75rem;
+           transition: all 0.3s ease; cursor: pointer;
+       }
+       
+       .vital-stat:hover {
+           transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+       }
+       
+       .stat-icon {
+           font-size: 2rem; opacity: 0.8;
+       }
+       
+       .stat-value {
+           font-size: 1.4rem; font-weight: bold; color: var(--color-text);
+       }
+       
+       .stat-label {
+           font-size: 0.8rem; color: var(--color-text-muted); margin-top: 0.25rem;
+       }
+       
+       .stat-growth, .stat-trend, .stat-modifier, .stat-impact {
+           font-size: 0.75rem; margin-top: 0.25rem; font-weight: 500;
+       }
+       
+       .stat-growth { color: var(--color-success); }
+       .stat-trend { color: var(--color-warning); }
+       .stat-modifier { color: var(--color-primary); }
+       .stat-impact { color: var(--color-danger); }
+       
+       .city-districts-panel {
+           display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;
+       }
+       
+       .district-card {
+           background: var(--color-panel-light); border-radius: 1rem; padding: 1.25rem;
+           cursor: pointer; transition: all 0.3s ease; position: relative;
+           border: 2px solid transparent; overflow: hidden;
+       }
+       
+       .district-card::before {
+           content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+           transition: all 0.3s ease;
+       }
+       
+       .district-card.residential::before { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+       .district-card.commercial::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+       .district-card.industrial::before { background: linear-gradient(90deg, #ef4444, #f87171); }
+       .district-card.cultural::before { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+       
+       .district-card:hover {
+           transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+           border-color: var(--color-primary);
+       }
+       
+       .district-card:hover::before {
+           height: 6px;
+       }
+       
+       .district-header {
+           display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;
+       }
+       
+       .district-icon {
+           font-size: 2.5rem; opacity: 0.8;
+       }
+       
+       .district-title h4 {
+           margin: 0; color: var(--color-text); font-size: 1.1rem;
+       }
+       
+       .district-level {
+           font-size: 0.8rem; color: var(--color-text-muted); margin-top: 0.25rem;
+       }
+       
+       .district-efficiency {
+           font-size: 0.9rem; font-weight: bold; color: var(--color-success);
+           background: rgba(34, 197, 94, 0.1); padding: 0.25rem 0.5rem;
+           border-radius: 0.5rem;
+       }
+       
+       .district-stats {
+           margin-bottom: 1rem;
+       }
+       
+       .district-stat {
+           display: flex; justify-content: space-between; margin-bottom: 0.5rem;
+           font-size: 0.9rem;
+       }
+       
+       .district-stat span:first-child {
+           color: var(--color-text-muted);
+       }
+       
+       .district-stat span:last-child {
+           color: var(--color-text); font-weight: 500;
+       }
+       
+       .district-production {
+           border-top: 1px solid var(--color-border); padding-top: 0.75rem;
+       }
+       
+       .production-item {
+           font-size: 0.9rem; font-weight: 500; color: var(--color-success);
+       }
+       
+       .city-main-area {
+           display: flex; gap: 1rem; flex: 1;
+       }
+       
+       .city-map-section {
+           flex: 2; position: relative; background: var(--color-panel-light);
+           border-radius: 1rem; overflow: hidden;
+       }
+       
        .city-view-content { 
            position: relative; width: 100%; height: 100%; min-height: 500px;
            background: linear-gradient(135deg, #2d5016, #3d6b1f), url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grass" patternUnits="userSpaceOnUse" width="20" height="20"><rect width="20" height="20" fill="%23355e3b"/><circle cx="5" cy="5" r="1" fill="%234a7c59"/><circle cx="15" cy="15" r="1" fill="%234a7c59"/></pattern></defs><rect width="100" height="100" fill="url(%23grass)"/></svg>');
            border-radius: 1rem;
            overflow: hidden;
+       }
+       
+       .city-roads {
+           position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+           pointer-events: none; z-index: 50;
+       }
+       
+       .road-connection {
+           position: absolute; height: 3px;
+           background: linear-gradient(90deg, #a16207, #ca8a04);
+           border-radius: 2px; opacity: 0.8;
+           box-shadow: 0 0 5px rgba(161, 98, 7, 0.5);
+       }
+       
+       .city-overlay-info {
+           position: absolute; top: 1rem; right: 1rem; z-index: 100;
+           display: flex; flex-direction: column; gap: 0.5rem;
+       }
+       
+       .weather-indicator, .time-indicator {
+           background: rgba(0,0,0,0.8); color: white; padding: 0.5rem 0.75rem;
+           border-radius: 0.5rem; font-size: 0.8rem; text-align: center;
+           backdrop-filter: blur(10px);
+       }
+       
+       .city-details-panel {
+           flex: 1; background: var(--color-panel-light); border-radius: 1rem;
+           display: flex; flex-direction: column; overflow: hidden;
+       }
+       
+       .details-header {
+           background: var(--color-panel); padding: 1rem; display: flex;
+           justify-content: space-between; align-items: center;
+           border-bottom: 1px solid var(--color-border);
+       }
+       
+       .details-header h3 {
+           margin: 0; color: var(--color-text);
+       }
+       
+       .close-details {
+           background: none; border: none; color: var(--color-text-muted);
+           font-size: 1.2rem; cursor: pointer; padding: 0.25rem;
+           border-radius: 0.25rem; transition: all 0.2s ease;
+       }
+       
+       .close-details:hover {
+           background: var(--color-danger); color: white;
+       }
+       
+       .details-content {
+           flex: 1; padding: 1rem; overflow-y: auto;
+       }
+       
+       .city-overview h4 {
+           color: var(--color-primary); margin: 0 0 1rem 0; font-size: 1.1rem;
+       }
+       
+       .management-actions {
+           display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem;
+       }
+       
+       .management-btn {
+           background: var(--color-panel); border: 1px solid var(--color-border);
+           color: var(--color-text); padding: 0.75rem; border-radius: 0.5rem;
+           cursor: pointer; transition: all 0.3s ease; text-align: left;
+           font-size: 0.9rem;
+       }
+       
+       .management-btn:hover {
+           background: var(--color-primary); color: white;
+           transform: translateX(4px);
+       }
+       
+       .detailed-stats {
+           background: var(--color-panel); border-radius: 0.5rem; padding: 1rem;
+       }
+       
+       .stat-row {
+           display: flex; justify-content: space-between; margin-bottom: 0.75rem;
+           font-size: 0.9rem;
+       }
+       
+       .stat-row:last-child {
+           margin-bottom: 0; padding-top: 0.75rem;
+           border-top: 1px solid var(--color-border); font-weight: bold;
+       }
+       
+       .stat-row span:first-child {
+           color: var(--color-text-muted);
+       }
+       
+       .stat-row .positive {
+           color: var(--color-success);
+       }
+       
+       .stat-row .negative {
+           color: var(--color-danger);
+       }
+       
+       /* Styles pour les districts focalisés et les détails */
+       .district-card.focused {
+           border-color: var(--color-primary) !important;
+           box-shadow: 0 0 20px rgba(59, 130, 246, 0.3) !important;
+           transform: translateY(-6px) !important;
+       }
+       
+       .district-details {
+           display: flex; flex-direction: column; gap: 1.5rem;
+       }
+       
+       .overview-stats {
+           display: flex; flex-direction: column; gap: 0.5rem;
+       }
+       
+       .overview-stat {
+           display: flex; justify-content: space-between; align-items: center;
+           padding: 0.5rem; background: var(--color-panel); border-radius: 0.5rem;
+       }
+       
+       .level-badge, .efficiency-badge, .contribution-badge {
+           background: var(--color-primary); color: white; padding: 0.25rem 0.5rem;
+           border-radius: 0.25rem; font-weight: bold; font-size: 0.8rem;
+       }
+       
+       .efficiency-badge {
+           background: var(--color-success);
+       }
+       
+       .contribution-badge {
+           background: var(--color-warning);
+       }
+       
+       .upgrade-info {
+           background: var(--color-panel); border-radius: 0.5rem; padding: 1rem;
+       }
+       
+       .next-level {
+           font-size: 1.1rem; font-weight: bold; color: var(--color-primary);
+           margin-bottom: 0.5rem;
+       }
+       
+       .upgrade-cost {
+           color: var(--color-text-muted); margin-bottom: 1rem;
+       }
+       
+       .upgrade-benefits ul {
+           margin: 0.5rem 0; padding-left: 1.5rem;
+       }
+       
+       .upgrade-benefits li {
+           margin-bottom: 0.25rem; color: var(--color-success);
+       }
+       
+       .upgrade-btn {
+           background: var(--color-primary); color: white; border: none;
+           padding: 0.75rem 1.5rem; border-radius: 0.5rem; cursor: pointer;
+           font-weight: bold; transition: all 0.3s ease; width: 100%;
+       }
+       
+       .upgrade-btn:hover:not(:disabled) {
+           background: var(--color-primary-dark); transform: translateY(-2px);
+       }
+       
+       .upgrade-btn:disabled {
+           background: var(--color-text-muted); cursor: not-allowed;
+       }
+       
+       .policy-options {
+           display: flex; flex-direction: column; gap: 0.5rem;
+       }
+       
+       .policy-option {
+           background: var(--color-panel); border: 1px solid var(--color-border);
+           border-radius: 0.5rem; padding: 0.75rem; cursor: pointer;
+           transition: all 0.3s ease;
+       }
+       
+       .policy-option:hover {
+           border-color: var(--color-primary); transform: translateX(4px);
+       }
+       
+       .policy-option.active {
+           background: var(--color-primary); color: white;
+           border-color: var(--color-primary);
+       }
+       
+       .policy-name {
+           font-weight: bold; margin-bottom: 0.25rem;
+       }
+       
+       .policy-effect {
+           font-size: 0.9rem; margin-bottom: 0.25rem;
+       }
+       
+       .policy-cost {
+           font-size: 0.8rem; color: var(--color-warning);
+       }
+       
+       .policy-option.active .policy-cost {
+           color: rgba(255,255,255,0.8);
+       }
+       
+       /* Styles pour les modales de politiques et infrastructure */
+       .city-policies, .infrastructure-panel, .city-events {
+           max-width: 600px;
+       }
+       
+       .policy-grid {
+           display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;
+           margin-top: 1rem;
+       }
+       
+       .policy-card {
+           background: var(--color-panel-light); border: 1px solid var(--color-border);
+           border-radius: 0.5rem; padding: 1rem; cursor: pointer;
+           transition: all 0.3s ease;
+       }
+       
+       .policy-card:hover {
+           border-color: var(--color-primary); transform: translateY(-2px);
+       }
+       
+       .policy-card h5 {
+           margin: 0 0 0.5rem 0; color: var(--color-primary);
+       }
+       
+       .policy-card p {
+           margin: 0 0 0.5rem 0; font-size: 0.9rem; color: var(--color-text-muted);
+       }
+       
+       .policy-status {
+           font-size: 0.8rem; color: var(--color-success); font-weight: bold;
+       }
+       
+       .infrastructure-projects {
+           display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;
+       }
+       
+       .project-card {
+           background: var(--color-panel-light); border: 1px solid var(--color-border);
+           border-radius: 0.5rem; padding: 1rem;
+       }
+       
+       .project-card h5 {
+           margin: 0 0 0.5rem 0; color: var(--color-primary);
+       }
+       
+       .project-card p {
+           margin: 0 0 0.5rem 0; font-size: 0.9rem;
+       }
+       
+       .project-cost {
+           font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 1rem;
+       }
+       
+       .project-btn {
+           background: var(--color-success); color: white; border: none;
+           padding: 0.5rem 1rem; border-radius: 0.25rem; cursor: pointer;
+           transition: all 0.3s ease;
+       }
+       
+       .project-btn:hover {
+           background: var(--color-success-dark); transform: translateY(-1px);
+       }
+       
+       .events-list {
+           max-height: 300px; overflow-y: auto; margin-bottom: 1rem;
+       }
+       
+       .event-item {
+           background: var(--color-panel-light); border-left: 3px solid var(--color-primary);
+           padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 0.25rem;
+       }
+       
+       .event-title {
+           font-weight: bold; margin-bottom: 0.25rem;
+       }
+       
+       .event-description {
+           font-size: 0.9rem; margin-bottom: 0.25rem;
+       }
+       
+       .event-time {
+           font-size: 0.8rem; color: var(--color-text-muted);
        }
        
        .city-districts {
@@ -566,26 +990,211 @@
            <!-- VUE CENTRALE (Conteneur pour toutes les vues) -->
            <div class="main-view-container">
                <section id="view-city" class="main-view">
-                   <div class="city-view-content" id="city-grid">
-                       <div class="city-districts">
-                           <div class="district-indicator residential">
-                               <div>🏠 Résidentiel</div>
-                               <div id="residential-level">Niv. 1</div>
+                   <div class="city-container">
+                       <!-- En-tête de la ville avec statistiques détaillées -->
+                       <div class="city-header">
+                           <div class="city-title">
+                               <h2>🏛️ <span id="city-name">Capitale Impériale</span></h2>
+                               <div class="city-level">Niveau <span id="city-level">1</span></div>
                            </div>
-                           <div class="district-indicator commercial">
-                               <div>🏪 Commercial</div>
-                               <div id="commercial-level">Niv. 1</div>
-                           </div>
-                           <div class="district-indicator industrial">
-                               <div>🏭 Industriel</div>
-                               <div id="industrial-level">Niv. 1</div>
-                           </div>
-                           <div class="district-indicator cultural">
-                               <div>🎭 Culturel</div>
-                               <div id="cultural-level">Niv. 1</div>
+                           <div class="city-vital-stats">
+                               <div class="vital-stat population">
+                                   <div class="stat-icon">👥</div>
+                                   <div class="stat-info">
+                                       <div class="stat-value" id="city-population">1000</div>
+                                       <div class="stat-label">Population</div>
+                                       <div class="stat-growth" id="population-growth">+5/min</div>
+                                   </div>
+                               </div>
+                               <div class="vital-stat happiness">
+                                   <div class="stat-icon">😊</div>
+                                   <div class="stat-info">
+                                       <div class="stat-value" id="city-happiness">75%</div>
+                                       <div class="stat-label">Bonheur</div>
+                                       <div class="stat-trend" id="happiness-trend">Stable</div>
+                                   </div>
+                               </div>
+                               <div class="vital-stat efficiency">
+                                   <div class="stat-icon">⚡</div>
+                                   <div class="stat-info">
+                                       <div class="stat-value" id="city-efficiency">85%</div>
+                                       <div class="stat-label">Efficacité</div>
+                                       <div class="stat-modifier" id="efficiency-modifier">+10%</div>
+                                   </div>
+                               </div>
+                               <div class="vital-stat pollution">
+                                   <div class="stat-icon">🌫️</div>
+                                   <div class="stat-info">
+                                       <div class="stat-value" id="city-pollution">25%</div>
+                                       <div class="stat-label">Pollution</div>
+                                       <div class="stat-impact" id="pollution-impact">Faible</div>
+                                   </div>
+                               </div>
                            </div>
                        </div>
-                       <div class="city-roads" id="city-roads"></div>
+
+                       <!-- Districts avec informations détaillées -->
+                       <div class="city-districts-panel">
+                           <div class="district-card residential" onclick="focusDistrict('residential')">
+                               <div class="district-header">
+                                   <div class="district-icon">🏠</div>
+                                   <div class="district-title">
+                                       <h4>Résidentiel</h4>
+                                       <div class="district-level">Niv. <span id="residential-level">1</span></div>
+                                   </div>
+                                   <div class="district-efficiency" id="residential-efficiency">100%</div>
+                               </div>
+                               <div class="district-stats">
+                                   <div class="district-stat">
+                                       <span>Logements:</span>
+                                       <span id="residential-capacity">500</span>
+                                   </div>
+                                   <div class="district-stat">
+                                       <span>Qualité:</span>
+                                       <span id="residential-quality">Basique</span>
+                                   </div>
+                               </div>
+                               <div class="district-production">
+                                   <div class="production-item">
+                                       <span>👥 +<span id="residential-population-bonus">5</span>/min</span>
+                                   </div>
+                               </div>
+                           </div>
+
+                           <div class="district-card commercial" onclick="focusDistrict('commercial')">
+                               <div class="district-header">
+                                   <div class="district-icon">🏪</div>
+                                   <div class="district-title">
+                                       <h4>Commercial</h4>
+                                       <div class="district-level">Niv. <span id="commercial-level">1</span></div>
+                                   </div>
+                                   <div class="district-efficiency" id="commercial-efficiency">100%</div>
+                               </div>
+                               <div class="district-stats">
+                                   <div class="district-stat">
+                                       <span>Boutiques:</span>
+                                       <span id="commercial-shops">10</span>
+                                   </div>
+                                   <div class="district-stat">
+                                       <span>Attractivité:</span>
+                                       <span id="commercial-appeal">Moyenne</span>
+                                   </div>
+                               </div>
+                               <div class="district-production">
+                                   <div class="production-item">
+                                       <span>💰 +<span id="commercial-gold-bonus">15</span>/min</span>
+                                   </div>
+                               </div>
+                           </div>
+
+                           <div class="district-card industrial" onclick="focusDistrict('industrial')">
+                               <div class="district-header">
+                                   <div class="district-icon">🏭</div>
+                                   <div class="district-title">
+                                       <h4>Industriel</h4>
+                                       <div class="district-level">Niv. <span id="industrial-level">1</span></div>
+                                   </div>
+                                   <div class="district-efficiency" id="industrial-efficiency">100%</div>
+                               </div>
+                               <div class="district-stats">
+                                   <div class="district-stat">
+                                       <span>Usines:</span>
+                                       <span id="industrial-factories">3</span>
+                                   </div>
+                                   <div class="district-stat">
+                                       <span>Pollution:</span>
+                                       <span id="industrial-pollution">+15%</span>
+                                   </div>
+                               </div>
+                               <div class="district-production">
+                                   <div class="production-item">
+                                       <span>🔨 +<span id="industrial-production-bonus">10</span>/min</span>
+                                   </div>
+                               </div>
+                           </div>
+
+                           <div class="district-card cultural" onclick="focusDistrict('cultural')">
+                               <div class="district-header">
+                                   <div class="district-icon">🎭</div>
+                                   <div class="district-title">
+                                       <h4>Culturel</h4>
+                                       <div class="district-level">Niv. <span id="cultural-level">1</span></div>
+                                   </div>
+                                   <div class="district-efficiency" id="cultural-efficiency">100%</div>
+                               </div>
+                               <div class="district-stats">
+                                   <div class="district-stat">
+                                       <span>Monuments:</span>
+                                       <span id="cultural-monuments">2</span>
+                                   </div>
+                                   <div class="district-stat">
+                                       <span>Influence:</span>
+                                       <span id="cultural-influence">Locale</span>
+                                   </div>
+                               </div>
+                               <div class="district-production">
+                                   <div class="production-item">
+                                       <span>😊 +<span id="cultural-happiness-bonus">10</span>%</span>
+                                   </div>
+                               </div>
+                           </div>
+                       </div>
+
+                       <!-- Zone principale avec carte de la ville et panneau de détails -->
+                       <div class="city-main-area">
+                           <div class="city-map-section">
+                               <div class="city-view-content" id="city-grid">
+                                   <div class="city-roads" id="city-roads"></div>
+                               </div>
+                               <div class="city-overlay-info">
+                                   <div class="weather-indicator" id="city-weather">☀️ Ensoleillé</div>
+                                   <div class="time-indicator" id="city-time">Jour 1 - 08:00</div>
+                               </div>
+                           </div>
+
+                           <div class="city-details-panel" id="city-details">
+                               <div class="details-header">
+                                   <h3 id="details-title">Aperçu de la Ville</h3>
+                                   <button class="close-details" onclick="closeCityDetails()">✕</button>
+                               </div>
+                               <div class="details-content" id="details-content">
+                                   <div class="city-overview">
+                                       <h4>🏛️ Gestion Urbaine</h4>
+                                       <div class="management-actions">
+                                           <button class="management-btn" onclick="openCityPolicies()">
+                                               📋 Politiques Urbaines
+                                           </button>
+                                           <button class="management-btn" onclick="openInfrastructure()">
+                                               🛤️ Infrastructure
+                                           </button>
+                                           <button class="management-btn" onclick="openCityEvents()">
+                                               📰 Événements Locaux
+                                           </button>
+                                       </div>
+                                       
+                                       <h4>📊 Statistiques Détaillées</h4>
+                                       <div class="detailed-stats">
+                                           <div class="stat-row">
+                                               <span>Croissance démographique:</span>
+                                               <span id="population-growth-rate">+2.5%/jour</span>
+                                           </div>
+                                           <div class="stat-row">
+                                               <span>Revenus fiscaux:</span>
+                                               <span id="tax-income">+45 or/min</span>
+                                           </div>
+                                           <div class="stat-row">
+                                               <span>Coûts d'entretien:</span>
+                                               <span id="maintenance-cost">-20 or/min</span>
+                                           </div>
+                                           <div class="stat-row">
+                                               <span>Bilan net:</span>
+                                               <span id="net-income" class="positive">+25 or/min</span>
+                                           </div>
+                                       </div>
+                                   </div>
+                               </div>
+                           </div>
+                       </div>
                    </div>
                </section>
                
@@ -1271,11 +1880,633 @@
                
                if (islandData && islandData.districts) {
                    const districts = islandData.districts;
-                   document.getElementById('residential-level').textContent = `Niv. ${districts.residential.level}`;
-                   document.getElementById('commercial-level').textContent = `Niv. ${districts.commercial.level}`;
-                   document.getElementById('industrial-level').textContent = `Niv. ${districts.industrial.level}`;
-                   document.getElementById('cultural-level').textContent = `Niv. ${districts.cultural?.level || 1}`;
+                   document.getElementById('residential-level').textContent = districts.residential.level;
+                   document.getElementById('commercial-level').textContent = districts.commercial.level;
+                   document.getElementById('industrial-level').textContent = districts.industrial.level;
+                   document.getElementById('cultural-level').textContent = districts.cultural?.level || 1;
+                   
+                   // Mettre à jour les statistiques détaillées des districts
+                   updateDistrictStats(districts);
                }
+               
+               // Mettre à jour les statistiques vitales de la ville
+               updateCityVitalStats();
+           }
+           
+           function updateDistrictStats(districts) {
+               // District résidentiel
+               const resCapacity = districts.residential.level * 500;
+               const resQuality = getQualityLevel(districts.residential.level);
+               const resPopBonus = districts.residential.level * 5;
+               const resEfficiency = calculateDistrictEfficiency('residential');
+               
+               document.getElementById('residential-capacity').textContent = resCapacity;
+               document.getElementById('residential-quality').textContent = resQuality;
+               document.getElementById('residential-population-bonus').textContent = resPopBonus;
+               document.getElementById('residential-efficiency').textContent = `${resEfficiency}%`;
+               
+               // District commercial
+               const comShops = districts.commercial.level * 10;
+               const comAppeal = getAppealLevel(districts.commercial.level);
+               const comGoldBonus = districts.commercial.level * 15;
+               const comEfficiency = calculateDistrictEfficiency('commercial');
+               
+               document.getElementById('commercial-shops').textContent = comShops;
+               document.getElementById('commercial-appeal').textContent = comAppeal;
+               document.getElementById('commercial-gold-bonus').textContent = comGoldBonus;
+               document.getElementById('commercial-efficiency').textContent = `${comEfficiency}%`;
+               
+               // District industriel
+               const indFactories = districts.industrial.level * 3;
+               const indPollution = districts.industrial.level * 15;
+               const indProdBonus = districts.industrial.level * 10;
+               const indEfficiency = calculateDistrictEfficiency('industrial');
+               
+               document.getElementById('industrial-factories').textContent = indFactories;
+               document.getElementById('industrial-pollution').textContent = `+${indPollution}%`;
+               document.getElementById('industrial-production-bonus').textContent = indProdBonus;
+               document.getElementById('industrial-efficiency').textContent = `${indEfficiency}%`;
+               
+               // District culturel
+               const culMonuments = (districts.cultural?.level || 1) * 2;
+               const culInfluence = getInfluenceLevel(districts.cultural?.level || 1);
+               const culHappinessBonus = (districts.cultural?.level || 1) * 10;
+               const culEfficiency = calculateDistrictEfficiency('cultural');
+               
+               document.getElementById('cultural-monuments').textContent = culMonuments;
+               document.getElementById('cultural-influence').textContent = culInfluence;
+               document.getElementById('cultural-happiness-bonus').textContent = culHappinessBonus;
+               document.getElementById('cultural-efficiency').textContent = `${culEfficiency}%`;
+           }
+           
+           function updateCityVitalStats() {
+               const currentIslandKey = `${gameState.currentIsland.x}-${gameState.currentIsland.y}`;
+               const islandData = gameState.islandDetails[currentIslandKey];
+               
+               if (!islandData) return;
+               
+               // Population
+               const population = islandData.population || 1000;
+               const popGrowth = calculatePopulationGrowth();
+               document.getElementById('city-population').textContent = population.toLocaleString();
+               document.getElementById('population-growth').textContent = `+${popGrowth}/min`;
+               
+               // Bonheur
+               const happiness = islandData.happiness || 75;
+               const happinessTrend = getHappinessTrend(happiness);
+               document.getElementById('city-happiness').textContent = `${happiness}%`;
+               document.getElementById('happiness-trend').textContent = happinessTrend;
+               
+               // Efficacité
+               const efficiency = calculateCityEfficiency();
+               const efficiencyModifier = getEfficiencyModifier();
+               document.getElementById('city-efficiency').textContent = `${efficiency}%`;
+               document.getElementById('efficiency-modifier').textContent = `+${efficiencyModifier}%`;
+               
+               // Pollution
+               const pollution = calculateCityPollution();
+               const pollutionImpact = getPollutionImpact(pollution);
+               document.getElementById('city-pollution').textContent = `${pollution}%`;
+               document.getElementById('pollution-impact').textContent = pollutionImpact;
+               
+               // Statistiques détaillées
+               updateDetailedCityStats();
+           }
+           
+           function updateDetailedCityStats() {
+               const popGrowthRate = (calculatePopulationGrowth() / 10).toFixed(1);
+               const taxIncome = calculateTaxIncome();
+               const maintenanceCost = calculateMaintenanceCost();
+               const netIncome = taxIncome - maintenanceCost;
+               
+               document.getElementById('population-growth-rate').textContent = `+${popGrowthRate}%/jour`;
+               document.getElementById('tax-income').textContent = `+${taxIncome} or/min`;
+               document.getElementById('maintenance-cost').textContent = `-${maintenanceCost} or/min`;
+               
+               const netIncomeEl = document.getElementById('net-income');
+               netIncomeEl.textContent = `${netIncome >= 0 ? '+' : ''}${netIncome} or/min`;
+               netIncomeEl.className = netIncome >= 0 ? 'positive' : 'negative';
+           }
+           
+           // Fonctions utilitaires pour les calculs
+           function getQualityLevel(level) {
+               if (level >= 5) return 'Luxueux';
+               if (level >= 3) return 'Confortable';
+               if (level >= 2) return 'Correct';
+               return 'Basique';
+           }
+           
+           function getAppealLevel(level) {
+               if (level >= 5) return 'Exceptionnelle';
+               if (level >= 3) return 'Élevée';
+               if (level >= 2) return 'Bonne';
+               return 'Moyenne';
+           }
+           
+           function getInfluenceLevel(level) {
+               if (level >= 5) return 'Mondiale';
+               if (level >= 3) return 'Régionale';
+               if (level >= 2) return 'Insulaire';
+               return 'Locale';
+           }
+           
+           function calculateDistrictEfficiency(districtType) {
+               const baseEfficiency = 100;
+               const pollution = calculateCityPollution();
+               const happiness = gameState.islandDetails[`${gameState.currentIsland.x}-${gameState.currentIsland.y}`]?.happiness || 75;
+               
+               let efficiency = baseEfficiency;
+               
+               // La pollution affecte l'efficacité
+               efficiency -= Math.floor(pollution / 5);
+               
+               // Le bonheur affecte l'efficacité
+               if (happiness < 50) efficiency -= (50 - happiness);
+               else if (happiness > 80) efficiency += Math.floor((happiness - 80) / 2);
+               
+               // Bonus spécifiques par district
+               switch (districtType) {
+                   case 'industrial':
+                       // L'industrie est moins affectée par la pollution
+                       efficiency += Math.floor(pollution / 10);
+                       break;
+                   case 'cultural':
+                       // La culture bénéficie du bonheur
+                       efficiency += Math.floor((happiness - 50) / 5);
+                       break;
+               }
+               
+               return Math.max(50, Math.min(150, efficiency));
+           }
+           
+           function calculatePopulationGrowth() {
+               const currentIslandKey = `${gameState.currentIsland.x}-${gameState.currentIsland.y}`;
+               const islandData = gameState.islandDetails[currentIslandKey];
+               
+               if (!islandData) return 5;
+               
+               const districts = islandData.districts;
+               const baseGrowth = districts.residential.level * 5;
+               const happinessBonus = Math.floor((islandData.happiness - 50) / 10);
+               
+               return Math.max(1, baseGrowth + happinessBonus);
+           }
+           
+           function calculateCityEfficiency() {
+               const happiness = gameState.islandDetails[`${gameState.currentIsland.x}-${gameState.currentIsland.y}`]?.happiness || 75;
+               const pollution = calculateCityPollution();
+               
+               let efficiency = 85; // Base
+               efficiency += Math.floor((happiness - 50) / 5);
+               efficiency -= Math.floor(pollution / 3);
+               
+               return Math.max(30, Math.min(120, efficiency));
+           }
+           
+           function calculateCityPollution() {
+               const currentIslandKey = `${gameState.currentIsland.x}-${gameState.currentIsland.y}`;
+               const islandData = gameState.islandDetails[currentIslandKey];
+               
+               if (!islandData) return 25;
+               
+               const districts = islandData.districts;
+               const industrialPollution = districts.industrial.level * 15;
+               const basePollution = 10;
+               
+               return Math.min(100, basePollution + industrialPollution);
+           }
+           
+           function getHappinessTrend(happiness) {
+               if (happiness >= 80) return 'En hausse';
+               if (happiness >= 60) return 'Stable';
+               if (happiness >= 40) return 'En baisse';
+               return 'Critique';
+           }
+           
+           function getEfficiencyModifier() {
+               const weather = getCurrentWeather();
+               switch (weather) {
+                   case 'sunny': return 10;
+                   case 'rainy': return 5;
+                   case 'stormy': return -5;
+                   default: return 0;
+               }
+           }
+           
+           function getPollutionImpact(pollution) {
+               if (pollution >= 70) return 'Critique';
+               if (pollution >= 50) return 'Élevé';
+               if (pollution >= 30) return 'Modéré';
+               return 'Faible';
+           }
+           
+           function calculateTaxIncome() {
+               const currentIslandKey = `${gameState.currentIsland.x}-${gameState.currentIsland.y}`;
+               const islandData = gameState.islandDetails[currentIslandKey];
+               
+               if (!islandData) return 45;
+               
+               const districts = islandData.districts;
+               const commercialIncome = districts.commercial.level * 15;
+               const populationTax = Math.floor(islandData.population / 100);
+               
+               return commercialIncome + populationTax;
+           }
+           
+           function calculateMaintenanceCost() {
+               const currentIslandKey = `${gameState.currentIsland.x}-${gameState.currentIsland.y}`;
+               const islandData = gameState.islandDetails[currentIslandKey];
+               
+               if (!islandData) return 20;
+               
+               const districts = islandData.districts;
+               const totalLevels = districts.residential.level + districts.commercial.level + 
+                                 districts.industrial.level + (districts.cultural?.level || 1);
+               
+               return totalLevels * 5;
+           }
+           
+           function getCurrentWeather() {
+               const weathers = ['sunny', 'cloudy', 'rainy', 'stormy'];
+               const hour = new Date().getHours();
+               return weathers[hour % weathers.length];
+           }
+           
+           // Nouvelles fonctions d'interaction pour la ville
+           function focusDistrict(districtType) {
+               // Mettre en évidence le district sélectionné
+               document.querySelectorAll('.district-card').forEach(card => {
+                   card.classList.remove('focused');
+               });
+               document.querySelector(`.district-card.${districtType}`).classList.add('focused');
+               
+               // Afficher les détails du district dans le panneau
+               showDistrictDetails(districtType);
+           }
+           
+           function showDistrictDetails(districtType) {
+               const currentIslandKey = `${gameState.currentIsland.x}-${gameState.currentIsland.y}`;
+               const islandData = gameState.islandDetails[currentIslandKey];
+               const districts = islandData?.districts;
+               
+               if (!districts) return;
+               
+               const district = districts[districtType] || { level: 1 };
+               const detailsTitle = document.getElementById('details-title');
+               const detailsContent = document.getElementById('details-content');
+               
+               const districtInfo = getDistrictInfo(districtType);
+               
+               detailsTitle.textContent = `${districtInfo.icon} District ${districtInfo.name}`;
+               
+               detailsContent.innerHTML = `
+                   <div class="district-details">
+                       <div class="district-overview">
+                           <h4>📊 Aperçu du District</h4>
+                           <div class="overview-stats">
+                               <div class="overview-stat">
+                                   <span>Niveau actuel:</span>
+                                   <span class="level-badge">${district.level}</span>
+                               </div>
+                               <div class="overview-stat">
+                                   <span>Efficacité:</span>
+                                   <span class="efficiency-badge">${calculateDistrictEfficiency(districtType)}%</span>
+                               </div>
+                               <div class="overview-stat">
+                                   <span>Contribution:</span>
+                                   <span class="contribution-badge">${getDistrictContribution(districtType, district.level)}</span>
+                               </div>
+                           </div>
+                       </div>
+                       
+                       <div class="district-upgrade">
+                           <h4>⬆️ Amélioration</h4>
+                           <div class="upgrade-info">
+                               <div class="next-level">Niveau ${district.level + 1}</div>
+                               <div class="upgrade-cost">
+                                   ${getUpgradeCost(districtType, district.level)}
+                               </div>
+                               <div class="upgrade-benefits">
+                                   <strong>Nouveaux avantages:</strong>
+                                   <ul>
+                                       ${getUpgradeBenefits(districtType, district.level).map(benefit => `<li>${benefit}</li>`).join('')}
+                                   </ul>
+                               </div>
+                               <button class="upgrade-btn" onclick="upgradeDistrict('${districtType}')" 
+                                       ${canAffordUpgrade(districtType, district.level) ? '' : 'disabled'}>
+                                   🔨 Améliorer le District
+                               </button>
+                           </div>
+                       </div>
+                       
+                       <div class="district-policies">
+                           <h4>📋 Politiques du District</h4>
+                           <div class="policy-options">
+                               ${getDistrictPolicies(districtType).map(policy => `
+                                   <div class="policy-option ${policy.active ? 'active' : ''}" 
+                                        onclick="toggleDistrictPolicy('${districtType}', '${policy.id}')">
+                                       <div class="policy-name">${policy.name}</div>
+                                       <div class="policy-effect">${policy.effect}</div>
+                                       <div class="policy-cost">${policy.cost}</div>
+                                   </div>
+                               `).join('')}
+                           </div>
+                       </div>
+                   </div>
+               `;
+           }
+           
+           function getDistrictInfo(districtType) {
+               const info = {
+                   residential: { icon: '🏠', name: 'Résidentiel' },
+                   commercial: { icon: '🏪', name: 'Commercial' },
+                   industrial: { icon: '🏭', name: 'Industriel' },
+                   cultural: { icon: '🎭', name: 'Culturel' }
+               };
+               return info[districtType];
+           }
+           
+           function getDistrictContribution(districtType, level) {
+               switch (districtType) {
+                   case 'residential': return `+${level * 5} pop/min`;
+                   case 'commercial': return `+${level * 15} or/min`;
+                   case 'industrial': return `+${level * 10} prod/min`;
+                   case 'cultural': return `+${level * 10}% bonheur`;
+                   default: return 'N/A';
+               }
+           }
+           
+           function getUpgradeCost(districtType, currentLevel) {
+               const baseCosts = {
+                   residential: { gold: 500, wood: 200, marble: 100 },
+                   commercial: { gold: 800, wood: 150, marble: 200 },
+                   industrial: { gold: 1000, wood: 300, sulfur: 150 },
+                   cultural: { gold: 1200, marble: 300, wine: 100 }
+               };
+               
+               const cost = baseCosts[districtType];
+               const multiplier = currentLevel + 1;
+               
+               return Object.entries(cost)
+                   .map(([resource, amount]) => `${amount * multiplier} ${resource}`)
+                   .join(', ');
+           }
+           
+           function getUpgradeBenefits(districtType, currentLevel) {
+               const benefits = {
+                   residential: [
+                       `+500 capacité de logement`,
+                       `+5 croissance de population/min`,
+                       `Amélioration de la qualité de vie`
+                   ],
+                   commercial: [
+                       `+10 boutiques`,
+                       `+15 revenus d'or/min`,
+                       `Augmentation de l'attractivité commerciale`
+                   ],
+                   industrial: [
+                       `+3 usines`,
+                       `+10 production/min`,
+                       `Nouvelles technologies disponibles`
+                   ],
+                   cultural: [
+                       `+2 monuments`,
+                       `+10% bonheur de la population`,
+                       `Extension de l'influence culturelle`
+                   ]
+               };
+               
+               return benefits[districtType] || [];
+           }
+           
+           function getDistrictPolicies(districtType) {
+               const policies = {
+                   residential: [
+                       { id: 'luxury_housing', name: 'Logements de Luxe', effect: '+20% bonheur, -10% croissance', cost: '50 or/min', active: false },
+                       { id: 'social_programs', name: 'Programmes Sociaux', effect: '+15% croissance, -30 or/min', cost: '30 or/min', active: false }
+                   ],
+                   commercial: [
+                       { id: 'tax_incentives', name: 'Incitations Fiscales', effect: '+25% revenus, -20% bonheur', cost: '20 or/min', active: false },
+                       { id: 'market_regulation', name: 'Régulation du Marché', effect: '+10% bonheur, -15% revenus', cost: '15 or/min', active: false }
+                   ],
+                   industrial: [
+                       { id: 'overtime_work', name: 'Heures Supplémentaires', effect: '+30% production, -15% bonheur', cost: '25 or/min', active: false },
+                       { id: 'green_technology', name: 'Technologies Vertes', effect: '-50% pollution, -20% production', cost: '40 or/min', active: false }
+                   ],
+                   cultural: [
+                       { id: 'festivals', name: 'Festivals Culturels', effect: '+20% bonheur, +10% tourisme', cost: '35 or/min', active: false },
+                       { id: 'education_focus', name: 'Focus Éducation', effect: '+15% efficacité globale', cost: '30 or/min', active: false }
+                   ]
+               };
+               
+               return policies[districtType] || [];
+           }
+           
+           function canAffordUpgrade(districtType, currentLevel) {
+               const baseCosts = {
+                   residential: { gold: 500, wood: 200, marble: 100 },
+                   commercial: { gold: 800, wood: 150, marble: 200 },
+                   industrial: { gold: 1000, wood: 300, sulfur: 150 },
+                   cultural: { gold: 1200, marble: 300, wine: 100 }
+               };
+               
+               const cost = baseCosts[districtType];
+               const multiplier = currentLevel + 1;
+               
+               return Object.entries(cost).every(([resource, amount]) => 
+                   gameState.resources[resource] >= (amount * multiplier)
+               );
+           }
+           
+           function upgradeDistrict(districtType) {
+               const currentIslandKey = `${gameState.currentIsland.x}-${gameState.currentIsland.y}`;
+               const islandData = gameState.islandDetails[currentIslandKey];
+               
+               if (!islandData || !islandData.districts) return;
+               
+               const district = islandData.districts[districtType];
+               const currentLevel = district.level;
+               
+               if (!canAffordUpgrade(districtType, currentLevel)) {
+                   showModal('Amélioration impossible', 'Ressources insuffisantes pour cette amélioration.');
+                   return;
+               }
+               
+               // Déduire les ressources
+               const baseCosts = {
+                   residential: { gold: 500, wood: 200, marble: 100 },
+                   commercial: { gold: 800, wood: 150, marble: 200 },
+                   industrial: { gold: 1000, wood: 300, sulfur: 150 },
+                   cultural: { gold: 1200, marble: 300, wine: 100 }
+               };
+               
+               const cost = baseCosts[districtType];
+               const multiplier = currentLevel + 1;
+               
+               Object.entries(cost).forEach(([resource, amount]) => {
+                   gameState.resources[resource] -= amount * multiplier;
+               });
+               
+               // Améliorer le district
+               district.level++;
+               
+               // Effets de l'amélioration
+               switch (districtType) {
+                   case 'residential':
+                       islandData.population += 200;
+                       break;
+                   case 'commercial':
+                       // Augmentation des revenus (géré automatiquement)
+                       break;
+                   case 'industrial':
+                       // Augmentation de la pollution
+                       break;
+                   case 'cultural':
+                       islandData.happiness = Math.min(100, islandData.happiness + 5);
+                       break;
+               }
+               
+               logEvent(`🏗️ District ${getDistrictInfo(districtType).name} amélioré au niveau ${district.level}`);
+               addXP(50);
+               
+               // Mettre à jour l'affichage
+               updateDistrictIndicators();
+               showDistrictDetails(districtType);
+               updateAllUI();
+               saveState();
+           }
+           
+           function toggleDistrictPolicy(districtType, policyId) {
+               // Implémentation des politiques de district
+               showModal('Politique', 'Système de politiques en développement. Cette fonctionnalité sera bientôt disponible !');
+           }
+           
+           function openCityPolicies() {
+               showModal('Politiques Urbaines', `
+                   <div class="city-policies">
+                       <h4>🏛️ Politiques Générales</h4>
+                       <div class="policy-grid">
+                           <div class="policy-card" onclick="toggleCityPolicy('taxation')">
+                               <h5>💰 Politique Fiscale</h5>
+                               <p>Ajuster les taux d'imposition</p>
+                               <div class="policy-status">Taux normal (15%)</div>
+                           </div>
+                           <div class="policy-card" onclick="toggleCityPolicy('environment')">
+                               <h5>🌱 Politique Environnementale</h5>
+                               <p>Réguler la pollution industrielle</p>
+                               <div class="policy-status">Réglementation standard</div>
+                           </div>
+                           <div class="policy-card" onclick="toggleCityPolicy('security')">
+                               <h5>🛡️ Sécurité Publique</h5>
+                               <p>Maintenir l'ordre dans la ville</p>
+                               <div class="policy-status">Patrouilles normales</div>
+                           </div>
+                           <div class="policy-card" onclick="toggleCityPolicy('education')">
+                               <h5>📚 Éducation</h5>
+                               <p>Investir dans l'éducation publique</p>
+                               <div class="policy-status">Financement de base</div>
+                           </div>
+                       </div>
+                   </div>
+               `);
+           }
+           
+           function openInfrastructure() {
+               showModal('Infrastructure', `
+                   <div class="infrastructure-panel">
+                       <h4>🛤️ Projets d'Infrastructure</h4>
+                       <div class="infrastructure-projects">
+                           <div class="project-card">
+                               <h5>🚇 Système de Transport</h5>
+                               <p>Améliore l'efficacité de tous les districts</p>
+                               <div class="project-cost">Coût: 2000 or, 500 bois, 300 marbre</div>
+                               <button class="project-btn" onclick="startInfrastructureProject('transport')">Construire</button>
+                           </div>
+                           <div class="project-card">
+                               <h5>💧 Système d'Eau</h5>
+                               <p>Réduit la pollution et augmente le bonheur</p>
+                               <div class="project-cost">Coût: 1500 or, 400 marbre</div>
+                               <button class="project-btn" onclick="startInfrastructureProject('water')">Construire</button>
+                           </div>
+                           <div class="project-card">
+                               <h5>⚡ Réseau Électrique</h5>
+                               <p>Booste la production industrielle</p>
+                               <div class="project-cost">Coût: 2500 or, 600 bois, 200 soufre</div>
+                               <button class="project-btn" onclick="startInfrastructureProject('electricity')">Construire</button>
+                           </div>
+                       </div>
+                   </div>
+               `);
+           }
+           
+           function openCityEvents() {
+               const recentEvents = gameState.eventHistory.slice(-5).reverse();
+               const eventsHtml = recentEvents.length > 0 
+                   ? recentEvents.map(event => `
+                       <div class="event-item">
+                           <div class="event-title">${event.title}</div>
+                           <div class="event-description">${event.description}</div>
+                           <div class="event-time">${new Date(event.timestamp).toLocaleString()}</div>
+                       </div>
+                   `).join('')
+                   : '<p>Aucun événement récent dans la ville.</p>';
+               
+               showModal('Événements Locaux', `
+                   <div class="city-events">
+                       <h4>📰 Événements Récents</h4>
+                       <div class="events-list">
+                           ${eventsHtml}
+                       </div>
+                       <button class="action-btn" onclick="generateCityEvent()">
+                           🎲 Générer un Événement
+                       </button>
+                   </div>
+               `);
+           }
+           
+           function closeCityDetails() {
+               document.getElementById('details-title').textContent = 'Aperçu de la Ville';
+               document.getElementById('details-content').innerHTML = `
+                   <div class="city-overview">
+                       <h4>🏛️ Gestion Urbaine</h4>
+                       <div class="management-actions">
+                           <button class="management-btn" onclick="openCityPolicies()">
+                               📋 Politiques Urbaines
+                           </button>
+                           <button class="management-btn" onclick="openInfrastructure()">
+                               🛤️ Infrastructure
+                           </button>
+                           <button class="management-btn" onclick="openCityEvents()">
+                               📰 Événements Locaux
+                           </button>
+                       </div>
+                       
+                       <h4>📊 Statistiques Détaillées</h4>
+                       <div class="detailed-stats">
+                           <div class="stat-row">
+                               <span>Croissance démographique:</span>
+                               <span id="population-growth-rate">+2.5%/jour</span>
+                           </div>
+                           <div class="stat-row">
+                               <span>Revenus fiscaux:</span>
+                               <span id="tax-income">+45 or/min</span>
+                           </div>
+                           <div class="stat-row">
+                               <span>Coûts d'entretien:</span>
+                               <span id="maintenance-cost">-20 or/min</span>
+                           </div>
+                           <div class="stat-row">
+                               <span>Bilan net:</span>
+                               <span id="net-income" class="positive">+25 or/min</span>
+                           </div>
+                       </div>
+                   </div>
+               `;
+               
+               // Retirer le focus des districts
+               document.querySelectorAll('.district-card').forEach(card => {
+                   card.classList.remove('focused');
+               });
            }
            
            function generateCityRoads() {
@@ -3688,90 +4919,4 @@
                                        <span>${progress.current}/${progress.required}</span>
                                    </div>
                                    <div style="background: var(--color-panel); border-radius: 0.25rem; height: 8px; overflow: hidden;">
-                                       <div style="background: var(--color-primary); height: 100%; width: ${progressPercent}%; transition: width 0.3s;"></div>
-                                   </div>
-                               </div>
-                               
-                               <div style="display: flex; justify-content: space-between; align-items: center;">
-                                   <div style="font-size: 0.9rem;">
-                                       <strong>Récompenses:</strong> ${formatQuestRewards(quest.rewards)}
-                                   </div>
-                                   ${progressPercent >= 100 ? 
-                                       `<button onclick="completeQuest(${index})" class="action-btn" style="background: var(--color-success);">Terminer</button>` :
-                                       `<button onclick="abandonQuest(${index})" class="action-btn" style="background: var(--color-danger); font-size: 0.8rem;">Abandonner</button>`
-                                   }
-                               </div>
-                           </div>
-                       `;
-                   });
-                   
-                   html += `
-                           </div>
-                       </div>
-                   `;
-               }
-               
-               // Nouvelles quêtes disponibles
-               const availableQuests = generateAvailableQuests();
-               if (availableQuests.length > 0) {
-                   html += `
-                       <div class="card" style="grid-column: 1 / -1;">
-                           <h3>📜 Nouvelles Missions Disponibles</h3>
-                           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1rem;">
-                   `;
-                   
-                   availableQuests.forEach((quest, index) => {
-                       html += `
-                           <div style="background: var(--color-panel-light); padding: 1rem; border-radius: 0.5rem; border: 2px solid var(--color-border);">
-                               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                                   <h4 style="margin: 0;">${quest.icon} ${quest.title}</h4>
-                                   <span style="font-size: 0.8rem; color: var(--color-warning);">${quest.difficulty}</span>
-                               </div>
-                               <p style="margin: 0.5rem 0; font-size: 0.9rem;">${quest.description}</p>
-                               <div style="margin: 0.5rem 0; font-size: 0.8rem; color: var(--color-text-muted);">
-                                   Objectif: ${quest.objective}<br>
-                                   ${quest.timeLimit ? `Temps limite: ${quest.timeLimit} minutes` : 'Pas de limite de temps'}
-                               </div>
-                               <div style="margin: 0.5rem 0; font-size: 0.9rem;">
-                                   <strong>Récompenses:</strong> ${formatQuestRewards(quest.rewards)}
-                               </div>
-                               <button onclick="acceptQuest(${index})" class="action-btn" ${canAcceptQuest(quest) ? '' : 'disabled'}>
-                                   Accepter la mission
-                               </button>
-                           </div>
-                       `;
-                   });
-                   
-                   html += `
-                           </div>
-                       </div>
-                   `;
-               }
-               
-               // Événements mondiaux actifs
-               const activeEvents = getActiveWorldEvents();
-               if (activeEvents.length > 0) {
-                   html += `
-                       <div class="card" style="grid-column: 1 / -1;">
-                           <h3>🌟 Événements Spéciaux</h3>
-                           <div style="margin-top: 1rem;">
-                   `;
-                   
-                   activeEvents.forEach(event => {
-                       const timeLeft = Math.max(0, event.endTime - Date.now());
-                       const hoursLeft = Math.floor(timeLeft / 3600000);
-                       const minutesLeft = Math.floor((timeLeft % 3600000) / 60000);
-                       
-                       html += `
-                           <div style="background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; color: white;">
-                               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                                   <h4 style="margin: 0;">${event.icon} ${event.title}</h4>
-                                   <div style="font-size: 0.9rem;">⏰ ${hoursLeft}h ${minutesLeft}m restantes</div>
-                               </div>
-                               <p style="margin: 0.5rem 0; opacity: 0.9;">${event.description}</p>
-                               <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
-                                   ${event.actions.map(action => 
-                                       `<button onclick="participateInEvent('${event.id}', '${action.id}')" class="action-btn" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
-                                           ${action.name}
-                                       </button>`
-               
+            
