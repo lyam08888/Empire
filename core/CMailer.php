@@ -15,16 +15,16 @@ class CMailer {
 	
 	function sendActivate($email,$username,$pass,$act) {
 		
-		$subject = "Welcome to ".NETWORK_NAME;
-		
-		$message = "Hello ".$username."</br></br>";
-		$message .= "Thank you for your registration.</br></br>";
-		$message .= "----------------------------</br>";
-		$message .= "Name:: ".$username."</br>";
-		$message .= "Password: ".$pass."</br>";
-		$message .= "Activation code:: ".$act."</br>";
-		$message .= "----------------------------</br></br>";
-		$message .= "Click the following link in order to activate your account:</br></br>";
+                $subject = "Bienvenue sur ".NETWORK_NAME;
+
+                $message = "Bonjour ".$username."</br></br>";
+                $message .= "Merci pour votre inscription.</br></br>";
+                $message .= "----------------------------</br>";
+                $message .= "Nom : ".$username."</br>";
+                $message .= "Mot de passe : ".$pass."</br>";
+                $message .= "Code d'activation : ".$act."</br>";
+                $message .= "----------------------------</br></br>";
+                $message .= "Cliquez sur le lien suivant pour activer votre compte :</br></br>";
 		$message .= "http://".$_SERVER['SERVER_NAME']."/activate.php?un=".$username."&act=".$act;
 		if(!SUBDOMAIN) {
 			$message .= SERVER_NAME."/";
