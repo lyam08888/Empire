@@ -279,6 +279,8 @@
                    <li><a data-view="military" title="Armez-vous, ça va piquer">⚔️ <span>Militaire</span></a></li>
                    <li><a data-view="diplomacy" title="Serrer des mains virtuelles">🤝 <span>Diplomatie</span></a></li>
                    <li><a data-view="achievements" title="Vos exploits héroïques">🏆 <span>Achievements</span></a></li>
+                   <li><a data-view="quests" title="Missions et événements">📋 <span>Quêtes</span></a></li>
+                   <li><a data-view="trade" title="Commerce et échanges">💱 <span>Commerce</span></a></li>
 
                </ul>
            </nav>
@@ -293,6 +295,8 @@
                <section id="view-battle" class="main-view hidden"><h2>Bataille</h2><div id="battle-grid" class="management-grid"></div></section>
                <section id="view-diplomacy" class="main-view hidden"><h2>Diplomatie</h2><div id="diplomacy-grid" class="management-grid"></div></section>
                <section id="view-achievements" class="main-view hidden"><h2>Achievements & Statistiques</h2><div id="achievements-grid" class="management-grid"></div></section>
+               <section id="view-quests" class="main-view hidden"><h2>Quêtes & Événements</h2><div id="quests-grid" class="management-grid"></div></section>
+               <section id="view-trade" class="main-view hidden"><h2>Commerce & Échanges</h2><div id="trade-grid" class="management-grid"></div></section>
            </div>
            
            <!-- PANNEAU DROIT (Desktop) -->
@@ -331,6 +335,8 @@
            <a href="#" data-view="military" title="Prêt pour l'assaut miniature">⚔️</a>
            <a href="#" data-view="diplomacy" title="Diplomatie de poche">🤝</a>
            <a href="#" data-view="achievements" title="Vos trophées">🏆</a>
+           <a href="#" data-view="quests" title="Missions">📋</a>
+           <a href="#" data-view="trade" title="Commerce">💱</a>
 
        </nav>
    </div>
@@ -469,6 +475,10 @@
                colonizedIslands: [],
                playerStats: { level: 1, xp: 0, totalBuildings: 2, totalUnits: 0 },
                achievements: [],
+               activeQuests: [],
+               completedQuests: [],
+               eventHistory: [],
+               lastEventTime: 0,
                lastUpdate: Date.now()
            };
 
@@ -504,6 +514,10 @@
                if (!gameState.colonizedIslands) gameState.colonizedIslands = [];
                if (!gameState.playerStats) gameState.playerStats = { level: 1, xp: 0, totalBuildings: 2, totalUnits: 0 };
                if (!gameState.achievements) gameState.achievements = [];
+               if (!gameState.activeQuests) gameState.activeQuests = [];
+               if (!gameState.completedQuests) gameState.completedQuests = [];
+               if (!gameState.eventHistory) gameState.eventHistory = [];
+               if (!gameState.lastEventTime) gameState.lastEventTime = 0;
                
               const offlineTime = (Date.now() - gameState.lastUpdate) / 1000;
               produceResources(offlineTime);
@@ -548,6 +562,8 @@
                renderBattle();
                renderDiplomacy();
                renderAchievements();
+               renderQuests();
+               renderTrade();
                updateAllUI();
            }
 
@@ -557,6 +573,8 @@
                    processQueues();
                    updateAllUI();
                    checkAchievements();
+                   processQuests();
+                   checkRandomEvents();
                    
                    // Sauvegarde automatique toutes les 30 secondes
                    if (!gameLoop.lastSave || Date.now() - gameLoop.lastSave > 30000) {
@@ -1141,6 +1159,296 @@
                
                achievementsGrid.innerHTML = html;
            }
+           
+           function renderQuests() {
+               const questsGrid = document.getElementById('quests-grid');
+               if (!questsGrid) return;
+               
+               let html = `
+                   <div class="card" style="grid-column: 1 / -1;">
+                       <h3>📋 Quêtes Actives (${gameState.activeQuests.length})</h3>
+                       <div style="margin-top: 1rem;">
+               `;
+               
+               if (gameState.activeQuests.length === 0) {
+                   html += '<p style="color: var(--color-text-muted); font-style: italic;">Aucune quête active pour le moment.</p>';
+               } else {
+                   gameState.activeQuests.forEach(quest => {
+                       const progress = quest.condition() ? '✅ Prêt à terminer' : '⏳ En cours';
+                       const rewardText = Object.entries(quest.reward)
+                           .map(([res, amt]) => `${res}: ${amt}`)
+                           .join(', ');
+                       
+                       html += `
+                           <div style="background: var(--color-panel-light); padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.5rem; border-left: 4px solid var(--color-primary);">
+                               <h4 style="margin: 0 0 0.5rem 0; color: var(--color-primary);">${quest.title}</h4>
+                               <p style="margin: 0 0 0.5rem 0;">${quest.description}</p>
+                               <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+                                   <span style="color: var(--color-text-muted);">Récompenses: ${rewardText}</span>
+                                   <span style="font-weight: bold; color: ${quest.condition() ? 'var(--color-success)' : 'var(--color-warning)'};">${progress}</span>
+                               </div>
+                           </div>
+                       `;
+                   });
+               }
+               
+               html += `
+                       </div>
+                   </div>
+                   
+                   <div class="card" style="grid-column: 1 / -1;">
+                       <h3>✅ Quêtes Terminées (${gameState.completedQuests.length})</h3>
+                       <div style="margin-top: 1rem;">
+               `;
+               
+               if (gameState.completedQuests.length === 0) {
+                   html += '<p style="color: var(--color-text-muted); font-style: italic;">Aucune quête terminée.</p>';
+               } else {
+                   const completedQuestDetails = gameState.completedQuests.map(questId => 
+                       QUEST_TEMPLATES.find(template => template.id === questId)
+                   ).filter(Boolean);
+                   
+                   completedQuestDetails.forEach(quest => {
+                       html += `
+                           <div style="background: var(--color-success); color: white; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem; opacity: 0.8;">
+                               <h4 style="margin: 0 0 0.25rem 0;">${quest.title}</h4>
+                               <p style="margin: 0; font-size: 0.9rem;">${quest.description}</p>
+                           </div>
+                       `;
+                   });
+               }
+               
+               html += `
+                       </div>
+                   </div>
+                   
+                   <div class="card" style="grid-column: 1 / -1;">
+                       <h3>🎲 Événements Récents (${gameState.eventHistory.length})</h3>
+                       <div style="margin-top: 1rem; max-height: 300px; overflow-y: auto;">
+               `;
+               
+               if (gameState.eventHistory.length === 0) {
+                   html += '<p style="color: var(--color-text-muted); font-style: italic;">Aucun événement récent.</p>';
+               } else {
+                   // Afficher les événements du plus récent au plus ancien
+                   const sortedEvents = [...gameState.eventHistory].reverse();
+                   sortedEvents.forEach(event => {
+                       const timeAgo = Math.floor((Date.now() - event.timestamp) / 60000);
+                       const timeText = timeAgo < 1 ? 'À l\'instant' : `Il y a ${timeAgo} min`;
+                       
+                       html += `
+                           <div style="background: var(--color-panel-light); padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem; border-left: 4px solid #8b5cf6;">
+                               <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.25rem;">
+                                   <h4 style="margin: 0; color: #8b5cf6;">${event.title}</h4>
+                                   <span style="font-size: 0.8rem; color: var(--color-text-muted);">${timeText}</span>
+                               </div>
+                               <p style="margin: 0 0 0.25rem 0; font-size: 0.9rem;">${event.description}</p>
+                               <p style="margin: 0; font-size: 0.9rem; font-weight: bold; color: var(--color-primary);">${event.result}</p>
+                           </div>
+                       `;
+                   });
+               }
+               
+               html += `
+                       </div>
+                   </div>
+               `;
+               
+               questsGrid.innerHTML = html;
+           }
+           
+           function renderTrade() {
+               const tradeGrid = document.getElementById('trade-grid');
+               if (!tradeGrid) return;
+               
+               // Taux de change dynamiques basés sur les ressources du joueur
+               const exchangeRates = {
+                   wood: { gold: 2, wine: 0.5, marble: 0.8, crystal: 0.3, sulfur: 0.4 },
+                   wine: { gold: 8, wood: 2, marble: 1.5, crystal: 0.8, sulfur: 1 },
+                   marble: { gold: 5, wood: 1.2, wine: 0.7, crystal: 0.6, sulfur: 0.8 },
+                   crystal: { gold: 15, wood: 3, wine: 1.2, marble: 1.8, sulfur: 2 },
+                   sulfur: { gold: 12, wood: 2.5, wine: 1, marble: 1.2, crystal: 0.5 },
+                   gold: { wood: 0.4, wine: 0.1, marble: 0.15, crystal: 0.05, sulfur: 0.07 }
+               };
+               
+               let html = `
+                   <div class="card" style="grid-column: 1 / -1;">
+                       <h3>💱 Marché des Ressources</h3>
+                       <p>Échangez vos ressources selon les taux du marché. Les prix fluctuent selon l'offre et la demande.</p>
+                   </div>
+               `;
+               
+               // Créer les cartes d'échange pour chaque ressource
+               Object.keys(exchangeRates).forEach(fromResource => {
+                   if (fromResource === 'research') return; // Pas d'échange pour la recherche
+                   
+                   const playerAmount = Math.floor(gameState.resources[fromResource] || 0);
+                   const resourceIcon = {
+                       wood: '🌲', wine: '🍇', marble: '🏛️', 
+                       crystal: '💎', sulfur: '🔥', gold: '💰'
+                   }[fromResource];
+                   
+                   html += `
+                       <div class="card">
+                           <h4>${resourceIcon} ${fromResource.charAt(0).toUpperCase() + fromResource.slice(1)}</h4>
+                           <p>Disponible: <strong>${playerAmount}</strong></p>
+                           <div style="margin-top: 1rem;">
+                   `;
+                   
+                   Object.entries(exchangeRates[fromResource]).forEach(([toResource, rate]) => {
+                       const toIcon = {
+                           wood: '🌲', wine: '🍇', marble: '🏛️', 
+                           crystal: '💎', sulfur: '🔥', gold: '💰'
+                       }[toResource];
+                       
+                       html += `
+                           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; padding: 0.5rem; background: var(--color-panel-light); border-radius: 0.25rem;">
+                               <span>1 → ${rate} ${toIcon}</span>
+                               <div>
+                                   <input type="number" id="trade-${fromResource}-${toResource}" min="1" max="${playerAmount}" value="1" style="width: 60px; margin-right: 0.5rem;">
+                                   <button onclick="executeTrade('${fromResource}', '${toResource}', ${rate})" class="action-btn" style="font-size: 0.8rem; padding: 0.25rem 0.5rem;" ${playerAmount < 1 ? 'disabled' : ''}>
+                                       Échanger
+                                   </button>
+                               </div>
+                           </div>
+                       `;
+                   });
+                   
+                   html += `
+                           </div>
+                       </div>
+                   `;
+               });
+               
+               // Ajouter une section pour les offres spéciales
+               html += `
+                   <div class="card" style="grid-column: 1 / -1;">
+                       <h3>🎯 Offres Spéciales du Jour</h3>
+                       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
+               `;
+               
+               const specialOffers = [
+                   {
+                       name: "Pack du Constructeur",
+                       description: "Parfait pour vos projets de construction",
+                       cost: { gold: 1000 },
+                       reward: { wood: 500, marble: 200, crystal: 100 },
+                       available: gameState.resources.gold >= 1000
+                   },
+                   {
+                       name: "Pack du Chercheur",
+                       description: "Accélérez vos recherches",
+                       cost: { gold: 1500, wine: 100 },
+                       reward: { research: 800, crystal: 300 },
+                       available: gameState.resources.gold >= 1500 && gameState.resources.wine >= 100
+                   },
+                   {
+                       name: "Pack Militaire",
+                       description: "Équipez votre armée",
+                       cost: { gold: 800, wood: 200 },
+                       reward: { sulfur: 400, crystal: 150 },
+                       available: gameState.resources.gold >= 800 && gameState.resources.wood >= 200
+                   }
+               ];
+               
+               specialOffers.forEach((offer, index) => {
+                   const costText = Object.entries(offer.cost).map(([res, amt]) => `${amt} ${res}`).join(', ');
+                   const rewardText = Object.entries(offer.reward).map(([res, amt]) => `${amt} ${res}`).join(', ');
+                   
+                   html += `
+                       <div style="background: ${offer.available ? 'var(--color-panel-light)' : 'var(--color-panel)'}; padding: 1rem; border-radius: 0.5rem; border: 2px solid ${offer.available ? 'var(--color-success)' : 'var(--color-border)'}; opacity: ${offer.available ? '1' : '0.6'};">
+                           <h4 style="margin: 0 0 0.5rem 0; color: ${offer.available ? 'var(--color-success)' : 'var(--color-text-muted)'};">${offer.name}</h4>
+                           <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">${offer.description}</p>
+                           <div style="margin-bottom: 0.5rem;">
+                               <div><strong>Coût:</strong> ${costText}</div>
+                               <div><strong>Contenu:</strong> ${rewardText}</div>
+                           </div>
+                           <button onclick="buySpecialOffer(${index})" class="action-btn" style="width: 100%;" ${!offer.available ? 'disabled' : ''}>
+                               ${offer.available ? 'Acheter' : 'Indisponible'}
+                           </button>
+                       </div>
+                   `;
+               });
+               
+               html += `
+                       </div>
+                   </div>
+               `;
+               
+               tradeGrid.innerHTML = html;
+           }
+           
+           function executeTrade(fromResource, toResource, rate) {
+               const inputId = `trade-${fromResource}-${toResource}`;
+               const amount = parseInt(document.getElementById(inputId)?.value || 1);
+               
+               if (amount <= 0 || gameState.resources[fromResource] < amount) {
+                   logEvent('❌ Ressources insuffisantes pour cet échange');
+                   return;
+               }
+               
+               const received = Math.floor(amount * rate);
+               gameState.resources[fromResource] -= amount;
+               gameState.resources[toResource] = (gameState.resources[toResource] || 0) + received;
+               
+               animateResourceGain(toResource);
+               logEvent(`💱 Échange réussi : ${amount} ${fromResource} → ${received} ${toResource}`);
+               addXP(Math.floor(amount / 10));
+               
+               renderTrade();
+               updateAllUI();
+               saveState();
+           }
+           
+           function buySpecialOffer(offerIndex) {
+               const specialOffers = [
+                   {
+                       name: "Pack du Constructeur",
+                       cost: { gold: 1000 },
+                       reward: { wood: 500, marble: 200, crystal: 100 }
+                   },
+                   {
+                       name: "Pack du Chercheur",
+                       cost: { gold: 1500, wine: 100 },
+                       reward: { research: 800, crystal: 300 }
+                   },
+                   {
+                       name: "Pack Militaire",
+                       cost: { gold: 800, wood: 200 },
+                       reward: { sulfur: 400, crystal: 150 }
+                   }
+               ];
+               
+               const offer = specialOffers[offerIndex];
+               if (!offer) return;
+               
+               // Vérifier si le joueur a assez de ressources
+               for (const [resource, cost] of Object.entries(offer.cost)) {
+                   if (gameState.resources[resource] < cost) {
+                       logEvent(`❌ Ressources insuffisantes pour ${offer.name}`);
+                       return;
+                   }
+               }
+               
+               // Déduire le coût
+               Object.entries(offer.cost).forEach(([resource, cost]) => {
+                   gameState.resources[resource] -= cost;
+               });
+               
+               // Donner les récompenses
+               Object.entries(offer.reward).forEach(([resource, reward]) => {
+                   gameState.resources[resource] = (gameState.resources[resource] || 0) + reward;
+                   animateResourceGain(resource);
+               });
+               
+               const rewardText = Object.entries(offer.reward).map(([res, amt]) => `${amt} ${res}`).join(', ');
+               logEvent(`🎯 ${offer.name} acheté ! Reçu : ${rewardText}`);
+               addXP(50);
+               
+               renderTrade();
+               updateAllUI();
+               saveState();
+           }
            function updateQueueUI() {
                if (window.innerWidth <= 900) { dom.queueList.innerHTML = ''; return; } // Pas de liste sur mobile
                dom.queueList.innerHTML = '';
@@ -1212,6 +1520,241 @@
            });
            dom.modalConfirmBtn.addEventListener('click', () => { if (currentAction) currentAction(); dom.modal.style.display = 'none'; });
            dom.modalCancelBtn.addEventListener('click', () => { dom.modal.style.display = 'none'; });
+
+           // --- SYSTÈME DE QUÊTES ---
+           const QUEST_TEMPLATES = [
+               {
+                   id: 'first_building',
+                   title: 'Premier Bâtiment',
+                   description: 'Construisez votre premier bâtiment de production',
+                   condition: () => Object.values(gameState.buildings).filter(b => b.type && b.type !== 'Hôtel de Ville' && b.type !== 'Académie' && b.type !== 'Caserne').length >= 1,
+                   reward: { gold: 500, xp: 50 },
+                   autoStart: true
+               },
+               {
+                   id: 'reach_level_3',
+                   title: 'Montée en Puissance',
+                   description: 'Atteignez le niveau 3',
+                   condition: () => gameState.playerStats.level >= 3,
+                   reward: { gold: 1000, wood: 200, xp: 100 },
+                   autoStart: true
+               },
+               {
+                   id: 'build_5_buildings',
+                   title: 'Expansion Urbaine',
+                   description: 'Construisez 5 bâtiments au total',
+                   condition: () => gameState.playerStats.totalBuildings >= 5,
+                   reward: { gold: 1500, marble: 100, xp: 150 },
+                   autoStart: true
+               },
+               {
+                   id: 'first_research',
+                   title: 'Première Découverte',
+                   description: 'Terminez votre première recherche',
+                   condition: () => gameState.researchCompleted.length >= 1,
+                   reward: { research: 200, crystal: 50, xp: 100 },
+                   autoStart: true
+               },
+               {
+                   id: 'recruit_army',
+                   title: 'Lever une Armée',
+                   description: 'Recrutez 10 unités militaires',
+                   condition: () => gameState.playerStats.totalUnits >= 10,
+                   reward: { gold: 800, sulfur: 100, xp: 120 },
+                   autoStart: true
+               },
+               {
+                   id: 'explore_islands',
+                   title: 'Grand Explorateur',
+                   description: 'Explorez 5 îles différentes',
+                   condition: () => gameState.exploredIslands.length >= 5,
+                   reward: { gold: 2000, wine: 150, xp: 200 },
+                   autoStart: true
+               }
+           ];
+
+           function processQuests() {
+               // Démarrer automatiquement les nouvelles quêtes
+               QUEST_TEMPLATES.forEach(template => {
+                   if (template.autoStart && 
+                       !gameState.activeQuests.find(q => q.id === template.id) &&
+                       !gameState.completedQuests.includes(template.id)) {
+                       gameState.activeQuests.push({
+                           ...template,
+                           startTime: Date.now()
+                       });
+                       logEvent(`📋 Nouvelle quête : ${template.title}`);
+                   }
+               });
+
+               // Vérifier les quêtes actives
+               gameState.activeQuests.forEach((quest, index) => {
+                   if (quest.condition()) {
+                       completeQuest(quest, index);
+                   }
+               });
+           }
+
+           function completeQuest(quest, index) {
+               gameState.activeQuests.splice(index, 1);
+               gameState.completedQuests.push(quest.id);
+               
+               // Donner les récompenses
+               Object.entries(quest.reward).forEach(([resource, amount]) => {
+                   if (resource === 'xp') {
+                       addXP(amount);
+                   } else {
+                       gameState.resources[resource] = (gameState.resources[resource] || 0) + amount;
+                       animateResourceGain(resource);
+                   }
+               });
+
+               const rewardText = Object.entries(quest.reward)
+                   .map(([res, amt]) => `${res}: +${amt}`)
+                   .join(', ');
+               
+               logEvent(`✅ Quête terminée : ${quest.title} | Récompenses : ${rewardText}`);
+               
+               // Notification visuelle
+               showQuestCompleteNotification(quest);
+           }
+
+           function showQuestCompleteNotification(quest) {
+               const notification = document.createElement('div');
+               notification.className = 'achievement-notification';
+               notification.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+               notification.innerHTML = `
+                   <div style="font-weight: bold;">📋 Quête Terminée !</div>
+                   <div>${quest.title}</div>
+                   <div style="font-size: 0.8rem; opacity: 0.9;">Récompenses obtenues</div>
+               `;
+               document.body.appendChild(notification);
+               
+               setTimeout(() => {
+                   notification.remove();
+               }, 4000);
+           }
+
+           // --- SYSTÈME D'ÉVÉNEMENTS ALÉATOIRES ---
+           const RANDOM_EVENTS = [
+               {
+                   id: 'merchant_visit',
+                   title: 'Visite de Marchands',
+                   description: 'Des marchands proposent un échange avantageux',
+                   probability: 0.02,
+                   minLevel: 2,
+                   effect: () => {
+                       const bonus = Math.floor(gameState.resources.gold * 0.15);
+                       gameState.resources.gold += bonus;
+                       return `Vous gagnez ${bonus} or supplémentaire !`;
+                   }
+               },
+               {
+                   id: 'good_harvest',
+                   title: 'Bonne Récolte',
+                   description: 'Vos fermiers rapportent une récolte exceptionnelle',
+                   probability: 0.015,
+                   minLevel: 1,
+                   effect: () => {
+                       const woodBonus = Math.floor(Math.random() * 200) + 100;
+                       const wineBonus = Math.floor(Math.random() * 50) + 25;
+                       gameState.resources.wood += woodBonus;
+                       gameState.resources.wine += wineBonus;
+                       animateResourceGain('wood');
+                       animateResourceGain('wine');
+                       return `+${woodBonus} bois, +${wineBonus} vin`;
+                   }
+               },
+               {
+                   id: 'discovery',
+                   title: 'Découverte Archéologique',
+                   description: 'Vos ouvriers découvrent des artefacts anciens',
+                   probability: 0.01,
+                   minLevel: 3,
+                   effect: () => {
+                       const crystalBonus = Math.floor(Math.random() * 100) + 50;
+                       const researchBonus = Math.floor(Math.random() * 150) + 75;
+                       gameState.resources.crystal += crystalBonus;
+                       gameState.resources.research += researchBonus;
+                       animateResourceGain('crystal');
+                       animateResourceGain('research');
+                       return `+${crystalBonus} cristal, +${researchBonus} recherche`;
+                   }
+               },
+               {
+                   id: 'festival',
+                   title: 'Festival Populaire',
+                   description: 'Votre peuple organise une grande fête',
+                   probability: 0.008,
+                   minLevel: 4,
+                   effect: () => {
+                       const xpBonus = Math.floor(Math.random() * 100) + 50;
+                       addXP(xpBonus);
+                       return `+${xpBonus} XP pour votre leadership !`;
+                   }
+               },
+               {
+                   id: 'storm',
+                   title: 'Tempête',
+                   description: 'Une tempête endommage vos structures',
+                   probability: 0.005,
+                   minLevel: 2,
+                   effect: () => {
+                       const woodLoss = Math.floor(gameState.resources.wood * 0.1);
+                       const goldLoss = Math.floor(gameState.resources.gold * 0.05);
+                       gameState.resources.wood = Math.max(0, gameState.resources.wood - woodLoss);
+                       gameState.resources.gold = Math.max(0, gameState.resources.gold - goldLoss);
+                       return `Vous perdez ${woodLoss} bois et ${goldLoss} or`;
+                   }
+               }
+           ];
+
+           function checkRandomEvents() {
+               const now = Date.now();
+               // Vérifier un événement maximum toutes les 2 minutes
+               if (now - gameState.lastEventTime < 120000) return;
+
+               RANDOM_EVENTS.forEach(event => {
+                   if (gameState.playerStats.level >= event.minLevel && Math.random() < event.probability) {
+                       triggerRandomEvent(event);
+                       gameState.lastEventTime = now;
+                   }
+               });
+           }
+
+           function triggerRandomEvent(event) {
+               const result = event.effect();
+               logEvent(`🎲 ${event.title} : ${result}`);
+               
+               gameState.eventHistory.push({
+                   ...event,
+                   timestamp: Date.now(),
+                   result: result
+               });
+
+               // Garder seulement les 20 derniers événements
+               if (gameState.eventHistory.length > 20) {
+                   gameState.eventHistory = gameState.eventHistory.slice(-20);
+               }
+
+               showEventNotification(event, result);
+           }
+
+           function showEventNotification(event, result) {
+               const notification = document.createElement('div');
+               notification.className = 'achievement-notification';
+               notification.style.background = 'linear-gradient(135deg, #8b5cf6, #7c3aed)';
+               notification.innerHTML = `
+                   <div style="font-weight: bold;">🎲 ${event.title}</div>
+                   <div style="font-size: 0.9rem; margin: 0.25rem 0;">${event.description}</div>
+                   <div style="font-size: 0.8rem; opacity: 0.9;">${result}</div>
+               `;
+               document.body.appendChild(notification);
+               
+               setTimeout(() => {
+                   notification.remove();
+               }, 5000);
+           }
 
            // --- SYSTÈME DE TUTORIEL ---
            function showTutorial() {
