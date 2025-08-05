@@ -851,8 +851,8 @@
                });
            }
 
-          function renderWorldMap() {
-              dom.worldGrid.innerHTML = '';
+         function renderWorldMap() {
+             dom.worldMapGrid.innerHTML = '';
               
               let html = `
                   <div class="card" style="grid-column: 1 / -1;">
@@ -1026,6 +1026,7 @@
                   `;
               }
               
+
                if(dom.worldMapGrid) {
                    dom.worldMapGrid.innerHTML = html;
                }
