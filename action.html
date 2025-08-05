@@ -1,469 +1,665 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Empire - Jeu Complet Simulé</title>
-    <meta name="description" content="Prototype complet et persistant du jeu de stratégie Empire, simulant une architecture multi-écrans.">
-    <meta name="author" content="Empire Game Studio">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%231e3a8a'/><text x='16' y='20' text-anchor='middle' fill='white' font-family='Arial' font-size='18' font-weight='bold'>E</text></svg>" type="image/svg+xml">
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Empire - Jeu Complet Simulé</title>
+   <meta name="description" content="Prototype complet et persistant du jeu de stratégie Empire, simulant une architecture multi-écrans avec une interface mobile.">
+   <meta name="author" content="Empire Game Studio">
+   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%231e3a8a'/><text x='16' y='20' text-anchor='middle' fill='white' font-family='Arial' font-size='18' font-weight='bold'>E</text></svg>" type="image/svg+xml">
 
-    <style>
-        :root {
-            --color-primary: #fbbf24; /* Or */
-            --color-secondary: #3b82f6; /* Bleu */
-            --color-dark-1: #0a192f; /* Fond principal */
-            --color-dark-2: #1e3a8a; /* Dégradé fond */
-            --color-panel: rgba(15, 23, 42, 0.8); /* Panneaux */
-            --color-panel-light: rgba(30, 41, 59, 0.8);
-            --color-text: #e2e8f0;
-            --color-text-muted: #94a3b8;
-            --color-border: rgba(148, 163, 184, 0.2);
-        }
+   <style>
+       :root {
+           --color-primary: #fbbf24; /* Or */
+           --color-secondary: #3b82f6; /* Bleu */
+           --color-danger: #ef4444; /* Rouge */
+           --color-success: #22c55e; /* Vert */
+           --color-dark-1: #0a192f; /* Fond principal */
+           --color-dark-2: #1e3a8a; /* Dégradé fond */
+           --color-panel: rgba(15, 23, 42, 0.8); /* Panneaux */
+           --color-panel-light: rgba(30, 41, 59, 0.8);
+           --color-text: #e2e8f0;
+           --color-text-muted: #94a3b8;
+           --color-border: rgba(148, 163, 184, 0.2);
+       }
 
-        /* Styles de base et reset */
-        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, var(--color-dark-1), var(--color-dark-2));
-            color: var(--color-text);
-            height: 100vh;
-            overflow: hidden;
-        }
-        .hidden { display: none !important; }
+       /* Styles de base et reset */
+       * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+       html, body { height: 100%; }
+       body {
+           font-family: 'Arial', sans-serif;
+           background: linear-gradient(135deg, var(--color-dark-1), var(--color-dark-2));
+           color: var(--color-text);
+           overflow: hidden;
+       }
+       .hidden { display: none !important; }
 
-        /* --- LAYOUT GLOBAL --- */
-        .game-ui { display: flex; flex-direction: column; height: 100%; }
-        .game-header, .game-footer { flex-shrink: 0; z-index: 100; }
-        .game-body { display: flex; flex-grow: 1; overflow: hidden; padding: 1rem; gap: 1rem; }
+       /* --- LAYOUT GLOBAL --- */
+       .game-ui { display: flex; flex-direction: column; height: 100%; }
+       .game-header, .game-footer { flex-shrink: 0; z-index: 100; }
+       .game-body { display: flex; flex-grow: 1; overflow: hidden; padding: 1rem; gap: 1rem; }
 
-        /* --- HEADER --- */
-        .game-header { padding: 0.5rem 1rem; background: var(--color-panel); backdrop-filter: blur(5px); border-bottom: 1px solid var(--color-border); }
-        .header-content { display: flex; justify-content: space-between; align-items: center; max-width: 1600px; margin: 0 auto; }
-        .resources { display: flex; flex-wrap: wrap; gap: 1rem; background: var(--color-panel-light); padding: 0.5rem 1rem; border-radius: 0.5rem; }
-        .resource-item { display: flex; align-items: center; gap: 0.5rem; font-weight: bold; }
-        .resource-item span { color: var(--color-primary); min-width: 50px; }
-        .player-info a { color: var(--color-text-muted); text-decoration: none; transition: color 0.3s; }
-        .player-info a:hover { color: var(--color-primary); }
+       /* --- HEADER --- */
+       .game-header { padding: 0.5rem 1rem; background: var(--color-panel); backdrop-filter: blur(5px); border-bottom: 1px solid var(--color-border); }
+       .header-content { display: flex; justify-content: space-between; align-items: center; max-width: 1600px; margin: 0 auto; }
+       .resources { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; background: var(--color-panel-light); padding: 0.5rem 1rem; border-radius: 0.5rem; }
+       .resource-item { display: flex; align-items: center; gap: 0.5rem; font-weight: bold; }
+       .resource-item span { color: var(--color-primary); min-width: 40px; }
+       .player-info a { color: var(--color-text-muted); text-decoration: none; transition: color 0.3s; }
+       .player-info a:hover { color: var(--color-primary); }
 
-        /* --- BARRE DE NAVIGATION GAUCHE --- */
-        .left-sidebar { width: 200px; flex-shrink: 0; background: var(--color-panel); padding: 1rem; border-radius: 1rem; overflow-y: auto; }
-        .main-nav ul { list-style: none; }
-        .main-nav li a { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; margin-bottom: 0.5rem; color: var(--color-text); text-decoration: none; border-radius: 0.5rem; transition: all 0.3s; cursor: pointer; }
-        .main-nav li a:hover, .main-nav li a.active { background: rgba(251, 191, 36, 0.1); color: var(--color-primary); transform: translateX(5px); }
+       /* --- BARRE DE NAVIGATION GAUCHE (Desktop) --- */
+       .left-sidebar { width: 200px; flex-shrink: 0; background: var(--color-panel); padding: 1rem; border-radius: 1rem; overflow-y: auto; }
+       .main-nav ul { list-style: none; }
+       .main-nav li a { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; margin-bottom: 0.5rem; color: var(--color-text); text-decoration: none; border-radius: 0.5rem; transition: all 0.3s; cursor: pointer; }
+       .main-nav li a:hover, .main-nav li a.active { background: rgba(251, 191, 36, 0.1); color: var(--color-primary); transform: translateX(5px); }
+       .main-nav li a span { display: inline; }
 
-        /* --- VUE CENTRALE (Conteneur) --- */
-        .main-view-container { flex-grow: 1; position: relative; }
-        .main-view {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://www.transparenttextures.com/patterns/dark-matter.png'), linear-gradient(135deg, #1c2a4b, #111827);
-            border-radius: 1rem;
-            overflow: auto;
-            padding: 1.5rem;
-            animation: fadeIn 0.5s;
-        }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .main-view h2 { color: var(--color-primary); margin-bottom: 1rem; font-size: 1.8rem; }
-        
-        /* --- VUE VILLE --- */
-        .city-view-content { position: relative; width: 100%; height: 100%; }
-        .building-plot {
-            position: absolute; background: rgba(30, 64, 175, 0.3); border: 2px dashed rgba(59, 130, 246, 0.5);
-            border-radius: 0.5rem; cursor: pointer; transition: all 0.3s; display: flex; justify-content: center;
-            align-items: center; font-size: 2rem; color: rgba(255, 255, 255, 0.5);
-        }
-        .building-plot:hover, .building-plot.selected { background: rgba(251, 191, 36, 0.3); border-color: var(--color-primary); }
-        .building-plot.constructing::after { content: '⏳'; position: absolute; top: 5px; right: 5px; font-size: 1rem; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .building-plot .level { position: absolute; bottom: 2px; right: 5px; font-size: 0.8rem; font-weight: bold; color: white; background: rgba(0,0,0,0.5); padding: 0 4px; border-radius: 3px; }
+       /* --- VUE CENTRALE (Conteneur) --- */
+       .main-view-container { flex-grow: 1; position: relative; }
+       .main-view {
+           position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+           background: url('https://www.transparenttextures.com/patterns/dark-matter.png'), linear-gradient(135deg, #1c2a4b, #111827);
+           border-radius: 1rem;
+           overflow: auto;
+           padding: 1.5rem;
+           animation: fadeIn 0.5s;
+       }
+       @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+       .main-view h2 { color: var(--color-primary); margin-bottom: 1rem; font-size: 1.8rem; }
+       
+       /* --- VUE VILLE --- */
+       .city-view-content { position: relative; width: 100%; height: 100%; min-height: 400px; }
+       .building-plot {
+           position: absolute; background: rgba(30, 64, 175, 0.3); border: 2px dashed rgba(59, 130, 246, 0.5);
+           border-radius: 0.5rem; cursor: pointer; transition: all 0.3s; display: flex; justify-content: center;
+           align-items: center; font-size: 2rem; color: rgba(255, 255, 255, 0.5);
+       }
+       .building-plot:hover, .building-plot.selected { background: rgba(251, 191, 36, 0.3); border-color: var(--color-primary); }
+       .building-plot.constructing::after { content: '⏳'; position: absolute; top: 5px; right: 5px; font-size: 1rem; animation: pulse 1.5s infinite; }
+       @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+       .building-plot .level { position: absolute; bottom: 2px; right: 5px; font-size: 0.8rem; font-weight: bold; color: white; background: rgba(0,0,0,0.5); padding: 0 4px; border-radius: 3px; }
 
-        /* --- VUE ÎLE, MONDE, DIPLOMATIE --- */
-        .map-grid, .management-grid { display: grid; gap: 1rem; }
-        .island-view-content { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
-        .card { background: var(--color-panel-light); border: 1px solid var(--color-border); border-radius: 0.5rem; padding: 1rem; transition: all 0.3s; }
-        .card:hover { border-color: var(--color-primary); transform: translateY(-5px); }
-        .card h4 { color: var(--color-primary); margin-bottom: 0.5rem; }
-        .card p { color: var(--color-text-muted); font-size: 0.9rem; margin-bottom: 1rem; }
-        .card .cost { font-size: 0.8rem; margin-bottom: 1rem; }
-        .action-btn { width: 100%; background: var(--color-primary); color: var(--color-dark-1); border: none; padding: 0.75rem; border-radius: 0.5rem; font-weight: bold; font-size: 1rem; cursor: pointer; transition: all 0.3s; }
-        .action-btn:hover { transform: scale(1.05); }
-        .action-btn:disabled { background: #6b7280; cursor: not-allowed; transform: none; }
+       /* --- GRILLES DE CARTE (Monde & Île) --- */
+       .map-grid-container {
+           display: grid;
+           width: 100%;
+           aspect-ratio: 1 / 1;
+           max-width: 800px;
+           margin: auto;
+           gap: 4px;
+       }
+       .map-tile {
+           border-radius: 4px;
+           transition: all 0.2s ease-in-out;
+           cursor: pointer;
+           position: relative;
+           display: flex;
+           justify-content: center;
+           align-items: center;
+           font-size: 2rem;
+       }
+       .map-tile .tooltip {
+           visibility: hidden; position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%);
+           background-color: var(--color-dark-1); color: white; padding: 5px 10px; border-radius: 6px;
+           white-space: nowrap; z-index: 20; font-size: 0.8rem;
+       }
+       .map-tile:hover {
+           transform: scale(1.1);
+           z-index: 10;
+       }
+       .map-tile:hover .tooltip { visibility: visible; }
 
-        /* --- PANNEAU CONTEXTUEL DROIT --- */
-        .right-sidebar { width: 280px; flex-shrink: 0; background: var(--color-panel); padding: 1rem; border-radius: 1rem; display: flex; flex-direction: column; }
-        #context-panel { flex-shrink: 0; } /* Empêche le panneau d'info de rétrécir */
-        #context-panel h3 { color: var(--color-primary); border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem; margin-bottom: 1rem; }
-        #context-panel p { color: var(--color-text-muted); line-height: 1.5; }
-        .queue-container { list-style: none; margin-top: auto; padding-top: 1rem; }
-        .queue-container h3 { color: var(--color-primary); border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem; margin-bottom: 1rem; }
-        .queue-item { background: var(--color-panel-light); padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem; }
-        .queue-item .name { font-weight: bold; }
-        .queue-item .timer { color: var(--color-primary); }
+       /* --- VUE MONDE --- */
+       #world-map-grid { grid-template-columns: repeat(15, 1fr); }
+       .world-tile { background-color: var(--color-secondary); opacity: 0.3; }
+       .world-tile.island { background-color: var(--color-secondary); opacity: 0.8; }
+       .world-tile.player { background-color: var(--color-primary); opacity: 1; }
+       .world-tile.ally { background-color: var(--color-success); opacity: 1; }
+       .world-tile.enemy { background-color: var(--color-danger); opacity: 1; }
 
-        /* --- FOOTER --- */
-        .game-footer { padding: 0.5rem 1rem; background: var(--color-panel); border-top: 1px solid var(--color-border); }
-        .footer-content { max-width: 1600px; margin: 0 auto; color: var(--color-text-muted); text-align: center; }
+       /* --- VUE ÎLE --- */
+       #island-grid { grid-template-columns: repeat(7, 1fr); background: #0c4a6e; border-radius: 1rem; padding: 1rem; }
+       .island-tile { background-color: #0891b2; }
+       .island-tile.playerCity { background-color: var(--color-primary); }
+       .island-tile.otherCity { background-color: var(--color-danger); }
+       .island-tile.resource { background-color: #a16207; }
+       .island-tile.wonder { background-color: #be185d; }
 
-        /* --- MODAL --- */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000; animation: fadeIn 0.3s; }
-        .modal-content { background: var(--color-dark-1); border: 1px solid var(--color-primary); padding: 2rem; border-radius: 1rem; text-align: center; width: 90%; max-width: 400px; }
-        .modal-content h4 { font-size: 1.5rem; color: var(--color-primary); margin-bottom: 1rem; }
-        #modal-cost { color: var(--color-text-muted); margin-bottom: 1rem; }
-        .modal-actions { display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem; }
-        .modal-btn { border: none; padding: 0.75rem 1.5rem; border-radius: 0.5rem; cursor: pointer; font-weight: bold; transition: opacity 0.3s; }
-        .modal-btn.confirm { background: var(--color-primary); color: var(--color-dark-1); }
-        .modal-btn.cancel { background: var(--color-panel-light); color: var(--color-text); }
-        .modal-btn:hover { opacity: 0.8; }
-    </style>
+       /* --- VUE RECHERCHE, ETC. --- */
+       .management-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));}
+       .card { background: var(--color-panel-light); border: 1px solid var(--color-border); border-radius: 0.5rem; padding: 1rem; transition: all 0.3s; }
+       .card:hover { border-color: var(--color-primary); transform: translateY(-5px); }
+       .card h4 { color: var(--color-primary); margin-bottom: 0.5rem; }
+       .card p { color: var(--color-text-muted); font-size: 0.9rem; margin-bottom: 1rem; }
+       .card .cost { font-size: 0.8rem; margin-bottom: 1rem; }
+       .action-btn { width: 100%; background: var(--color-primary); color: var(--color-dark-1); border: none; padding: 0.75rem; border-radius: 0.5rem; font-weight: bold; font-size: 1rem; cursor: pointer; transition: all 0.3s; }
+       .action-btn:hover { transform: scale(1.05); }
+       .action-btn:disabled { background: #6b7280; cursor: not-allowed; transform: none; }
+
+       /* --- PANNEAU CONTEXTUEL DROIT --- */
+       .right-sidebar { width: 280px; flex-shrink: 0; background: var(--color-panel); padding: 1rem; border-radius: 1rem; display: flex; flex-direction: column; }
+       #context-panel { flex-shrink: 0; }
+       #context-panel h3 { color: var(--color-primary); border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+       #context-panel p { color: var(--color-text-muted); line-height: 1.5; }
+       .queue-container { list-style: none; margin-top: auto; padding-top: 1rem; }
+       .queue-container h3 { color: var(--color-primary); border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+       .queue-item { background: var(--color-panel-light); padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem; }
+       .queue-item .name { font-weight: bold; }
+       .queue-item .timer { color: var(--color-primary); }
+
+       /* --- FOOTER --- */
+       .game-footer { padding: 0.5rem 1rem; background: var(--color-panel); border-top: 1px solid var(--color-border); }
+       .footer-content { max-width: 1600px; margin: 0 auto; color: var(--color-text-muted); text-align: center; }
+
+       /* --- MODAL --- */
+       .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000; animation: fadeIn 0.3s; }
+       .modal-content { background: var(--color-dark-1); border: 1px solid var(--color-primary); padding: 2rem; border-radius: 1rem; text-align: center; width: 90%; max-width: 400px; }
+       .modal-content h4 { font-size: 1.5rem; color: var(--color-primary); margin-bottom: 1rem; }
+       #modal-cost { color: var(--color-text-muted); margin-bottom: 1rem; }
+       .modal-actions { display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem; }
+       .modal-btn { border: none; padding: 0.75rem 1.5rem; border-radius: 0.5rem; cursor: pointer; font-weight: bold; transition: opacity 0.3s; }
+       .modal-btn.confirm { background: var(--color-primary); color: var(--color-dark-1); }
+       .modal-btn.cancel { background: var(--color-panel-light); color: var(--color-text); }
+       .modal-btn:hover { opacity: 0.8; }
+
+       /* --- NAVIGATION MOBILE --- */
+       .mobile-nav { display: none; }
+
+       /* --- RESPONSIVE DESIGN --- */
+       @media (max-width: 900px) {
+           .left-sidebar, .right-sidebar { display: none; }
+           .game-body { padding: 0.5rem; }
+           .main-view { padding: 1rem; }
+           .player-info { font-size: 0.9rem; }
+           .resources { gap: 0.5rem; padding: 0.5rem; }
+           .resource-item { font-size: 0.9rem; }
+           .resource-item span { min-width: 30px; }
+           
+           .game-ui { padding-bottom: 60px; /* Espace pour la nav mobile */ }
+           .mobile-nav {
+               display: flex;
+               position: fixed;
+               bottom: 0; left: 0; right: 0;
+               background: var(--color-panel);
+               backdrop-filter: blur(5px);
+               border-top: 1px solid var(--color-border);
+               justify-content: space-around;
+               padding: 0.5rem 0;
+               z-index: 200;
+           }
+           .mobile-nav a {
+               flex-grow: 1;
+               text-align: center;
+               color: var(--color-text-muted);
+               text-decoration: none;
+               padding: 0.25rem 0;
+               font-size: 1.5rem; /* Icon size */
+               position: relative;
+           }
+           .mobile-nav a.active {
+               color: var(--color-primary);
+           }
+            .mobile-nav a.active::after {
+               content: '';
+               position: absolute;
+               bottom: -5px;
+               left: 50%;
+               transform: translateX(-50%);
+               width: 8px;
+               height: 8px;
+               background: var(--color-primary);
+               border-radius: 50%;
+           }
+       }
+   </style>
 </head>
 <body>
-    <div class="game-ui">
-        <!-- HEADER -->
-        <header class="game-header">
-            <div class="header-content">
-                <div class="player-info"><a href="#">Joueur_01</a></div>
-                <div class="resources">
-                    <div class="resource-item" title="Bois">🌲 <span id="resWood">0</span></div>
-                    <div class="resource-item" title="Vin">🍇 <span id="resWine">0</span></div>
-                    <div class="resource-item" title="Marbre">🏛️ <span id="resMarble">0</span></div>
-                    <div class="resource-item" title="Cristal">💎 <span id="resCrystal">0</span></div>
-                    <div class="resource-item" title="Soufre">🔥 <span id="resSulfur">0</span></div>
-                    <div class="resource-item" title="Or">💰 <span id="resGold">0</span></div>
-                    <div class="resource-item" title="Points de Recherche">🔬 <span id="resResearch">0</span></div>
-                </div>
-                <div class="player-info"><a href="#">Déconnexion</a></div>
-            </div>
-        </header>
+   <div class="game-ui">
+       <!-- HEADER -->
+       <header class="game-header">
+           <div class="header-content">
+               <div class="player-info"><a href="#">Joueur_01</a></div>
+               <div class="resources">
+                   <div class="resource-item" title="Bois">🌲 <span id="resWood">0</span></div>
+                   <div class="resource-item" title="Vin">🍇 <span id="resWine">0</span></div>
+                   <div class="resource-item" title="Marbre">🏛️ <span id="resMarble">0</span></div>
+                   <div class="resource-item" title="Cristal">💎 <span id="resCrystal">0</span></div>
+                   <div class="resource-item" title="Soufre">🔥 <span id="resSulfur">0</span></div>
+                   <div class="resource-item" title="Or">💰 <span id="resGold">0</span></div>
+                   <div class="resource-item" title="Points de Recherche">🔬 <span id="resResearch">0</span></div>
+               </div>
+               <div class="player-info"><a href="#">Déconnexion</a></div>
+           </div>
+       </header>
 
-        <!-- CORPS PRINCIPAL -->
-        <main class="game-body">
-            <!-- MENU GAUCHE -->
-            <nav class="left-sidebar">
-                <div class="main-nav">
-                    <ul>
-                        <li><a data-view="city">🏛️ <span>Ville</span></a></li>
-                        <li><a data-view="island">🏝️ <span>Île</span></a></li>
-                        <li><a data-view="world">🌍 <span>Monde</span></a></li>
-                        <li><a data-view="research">🔬 <span>Recherche</span></a></li>
-                        <li><a data-view="military">⚔️ <span>Militaire</span></a></li>
-                        <li><a data-view="diplomacy">🤝 <span>Diplomatie</span></a></li>
-                    </ul>
-                </div>
-            </nav>
+       <!-- CORPS PRINCIPAL -->
+       <main class="game-body">
+           <!-- MENU GAUCHE (Desktop) -->
+           <nav class="left-sidebar main-nav">
+               <ul>
+                   <li><a data-view="city">🏛️ <span>Ville</span></a></li>
+                   <li><a data-view="island">🏝️ <span>Île</span></a></li>
+                   <li><a data-view="world">🌍 <span>Monde</span></a></li>
+                   <li><a data-view="research">🔬 <span>Recherche</span></a></li>
+                   <li><a data-view="military">⚔️ <span>Militaire</span></a></li>
+                   <li><a data-view="diplomacy">🤝 <span>Diplomatie</span></a></li>
+               </ul>
+           </nav>
 
-            <!-- VUE CENTRALE (Conteneur pour toutes les vues) -->
-            <div class="main-view-container">
-                <section id="view-city" class="main-view"><div class="city-view-content" id="city-grid"></div></section>
-                <section id="view-island" class="main-view hidden"><h2>Vue de l'Île</h2><div id="island-grid" class="map-grid island-view-content"></div></section>
-                <section id="view-world" class="main-view hidden"><h2>Carte du Monde</h2></section>
-                <section id="view-research" class="main-view hidden"><h2>Recherche</h2><div id="research-grid" class="management-grid"></div></section>
-                <section id="view-military" class="main-view hidden"><h2>Militaire</h2><div id="military-grid" class="management-grid"></div></section>
-                <section id="view-diplomacy" class="main-view hidden"><h2>Diplomatie</h2><div id="diplomacy-grid" class="management-grid"></div></section>
-            </div>
-            
-            <!-- PANNEAU DROIT -->
-            <aside class="right-sidebar">
-                <div id="context-panel">
-                    <!-- Contenu injecté par JavaScript -->
-                </div>
-                <div class="queue-container">
-                    <h3>Files d'attente</h3>
-                    <ul id="queueList"></ul>
-                </div>
-            </aside>
-        </main>
+           <!-- VUE CENTRALE (Conteneur pour toutes les vues) -->
+           <div class="main-view-container">
+               <section id="view-city" class="main-view"><div class="city-view-content" id="city-grid"></div></section>
+               <section id="view-island" class="main-view hidden"><h2>Vue de l'Île</h2><div id="island-grid" class="map-grid-container"></div></section>
+               <section id="view-world" class="main-view hidden"><h2>Carte du Monde</h2><div id="world-map-grid" class="map-grid-container"></div></section>
+               <section id="view-research" class="main-view hidden"><h2>Recherche</h2><div id="research-grid" class="management-grid"></div></section>
+               <section id="view-military" class="main-view hidden"><h2>Militaire</h2><div id="military-grid" class="management-grid"></div></section>
+               <section id="view-diplomacy" class="main-view hidden"><h2>Diplomatie</h2><div id="diplomacy-grid" class="management-grid"></div></section>
+           </div>
+           
+           <!-- PANNEAU DROIT (Desktop) -->
+           <aside class="right-sidebar">
+               <div id="context-panel">
+                   <!-- Contenu injecté par JavaScript -->
+               </div>
+               <div class="queue-container">
+                   <h3>Files d'attente</h3>
+                   <ul id="queueList"></ul>
+               </div>
+           </aside>
+       </main>
 
-        <!-- FOOTER -->
-        <footer class="game-footer"><div class="footer-content" id="event-log">Bienvenue dans Empire !</div></footer>
-    </div>
-    
-    <!-- MODAL -->
-    <div class="modal-overlay" id="actionModal"><div class="modal-content"><h4 id="modalTitle"></h4><p id="modalMessage"></p><div id="modal-cost"></div><div class="modal-actions"><button class="modal-btn cancel" id="modalCancelBtn">Annuler</button><button class="modal-btn confirm" id="modalConfirmBtn">Confirmer</button></div></div></div>
+       <!-- FOOTER -->
+       <footer class="game-footer"><div class="footer-content" id="event-log">Bienvenue dans Empire !</div></footer>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // --- CONFIGURATION DU JEU ---
-            const config = {
-                buildings: {
-                    "Hôtel de Ville": { description: "Augmente la population et le revenu en or.", icon: "🏛️", levels: [ { cost: { wood: 150 }, buildTime: 10 }, { cost: { wood: 350 }, buildTime: 25 } ] },
-                    "Caserne": { description: "Permet de recruter des unités.", icon: "⚔️", levels: [ { cost: { wood: 200, gold: 50 }, buildTime: 15 }, { cost: { wood: 450, gold: 120 }, buildTime: 35 } ] },
-                    "Entrepôt": { description: "Augmente le stockage.", icon: "🧱", levels: [ { cost: { wood: 250 }, buildTime: 12 }, { cost: { wood: 500 }, buildTime: 30 } ] },
-                    "Académie": { description: "Produit des points de recherche.", icon: "🔬", levels: [ { cost: { wood: 300, crystal: 100 }, buildTime: 20 }, { cost: { wood: 600, crystal: 250 }, buildTime: 45 } ] }
-                },
-                research: {
-                    economy: { name: "Économie", icon: "💰", techs: { "Expansion": { description: "Permet de fonder une nouvelle colonie.", cost: { research: 500 }, time: 60 } } },
-                    military: { name: "Militaire", icon: "⚔️", techs: { "Balistique": { description: "Améliore la précision des catapultes.", cost: { research: 300 }, time: 45 } } }
-                },
-                units: {
-                    "Hoplite": { description: "Unité de base solide.", icon: "🛡️", cost: { wood: 50, sulfur: 30, gold: 10 }, time: 5 },
-                    "Archer": { description: "Attaque à distance.", icon: "🏹", cost: { wood: 40, gold: 15 }, time: 4 }
-                },
-                diplomacy: {
-                    alliances: { "Les Spartiates": { tag: "SPQR", members: 15, points: 12000 } },
-                    treaties: { "Traité Culturel": { description: "Augmente le bonheur de vos villes.", cost: { gold: 1000 } } }
-                },
-                cityLayout: [
-                    { id: "townHall", top: "40%", left: "45%", width: "120px", height: "120px" }, { id: "plot1", top: "35%", left: "25%", width: "90px", height: "90px" },
-                    { id: "plot2", top: "55%", left: "30%", width: "90px", height: "90px" }, { id: "plot3", top: "50%", left: "60%", width: "90px", height: "90px" },
-                    { id: "academy", top: "20%", left: "60%", width: "90px", height: "90px" }
-                ],
-                islandLayout: {
-                    "Scierie": { level: 5, type: "resource" }, "Mine de Marbre": { level: 3, type: "resource" },
-                    "Ville de Joueur_02": { points: 1250, type: "player" }, "Votre Ville": { points: 800, type: "player" }
-                }
-            };
+       <!-- NAVIGATION MOBILE -->
+       <nav class="mobile-nav main-nav">
+           <a data-view="city">🏛️</a>
+           <a data-view="island">🏝️</a>
+           <a data-view="world">🌍</a>
+           <a data-view="research">🔬</a>
+           <a data-view="military">⚔️</a>
+           <a data-view="diplomacy">🤝</a>
+       </nav>
+   </div>
+   
+   <!-- MODAL -->
+   <div class="modal-overlay" id="actionModal"><div class="modal-content"><h4 id="modalTitle"></h4><p id="modalMessage"></p><div id="modal-cost"></div><div class="modal-actions"><button class="modal-btn cancel" id="modalCancelBtn">Annuler</button><button class="modal-btn confirm" id="modalConfirmBtn">Confirmer</button></div></div></div>
 
-            // --- ÉTAT DU JEU ---
-            let gameState;
-            const defaultGameState = {
-                resources: { wood: 1000, wine: 100, marble: 100, crystal: 100, sulfur: 100, gold: 5000, research: 0 },
-                buildings: { "townHall": { type: "Hôtel de Ville", level: 1 }, "plot1": { type: "Caserne", level: 1 }, "plot2": { type: null, level: 0 }, "plot3": { type: null, level: 0 }, "academy": { type: "Académie", level: 1 } },
-                researchCompleted: [],
-                queues: { build: [], research: [], military: [] },
-                lastUpdate: Date.now()
-            };
+   <script>
+       document.addEventListener('DOMContentLoaded', function() {
+           // --- CONFIGURATION DU JEU ---
+           const config = {
+               buildings: {
+                   "Hôtel de Ville": { description: "Augmente la population et le revenu en or.", icon: "🏛️", levels: [ { cost: { wood: 150 }, buildTime: 10 }, { cost: { wood: 350 }, buildTime: 25 } ] },
+                   "Caserne": { description: "Permet de recruter des unités.", icon: "⚔️", levels: [ { cost: { wood: 200, gold: 50 }, buildTime: 15 }, { cost: { wood: 450, gold: 120 }, buildTime: 35 } ] },
+                   "Entrepôt": { description: "Augmente le stockage.", icon: "🧱", levels: [ { cost: { wood: 250 }, buildTime: 12 }, { cost: { wood: 500 }, buildTime: 30 } ] },
+                   "Académie": { description: "Produit des points de recherche.", icon: "🔬", levels: [ { cost: { wood: 300, crystal: 100 }, buildTime: 20 }, { cost: { wood: 600, crystal: 250 }, buildTime: 45 } ] }
+               },
+               research: {
+                   economy: { name: "Économie", icon: "💰", techs: { "Expansion": { description: "Permet de fonder une nouvelle colonie.", cost: { research: 500 }, time: 60 } } },
+                   military: { name: "Militaire", icon: "⚔️", techs: { "Balistique": { description: "Améliore la précision des catapultes.", cost: { research: 300 }, time: 45 } } }
+               },
+               units: {
+                   "Hoplite": { description: "Unité de base solide.", icon: "🛡️", cost: { wood: 50, sulfur: 30, gold: 10 }, time: 5 },
+                   "Archer": { description: "Attaque à distance.", icon: "🏹", cost: { wood: 40, gold: 15 }, time: 4 }
+               },
+               diplomacy: {
+                   alliances: { "Les Spartiates": { tag: "SPQR", members: 15, points: 12000 } },
+                   treaties: { "Traité Culturel": { description: "Augmente le bonheur de vos villes.", cost: { gold: 1000 } } }
+               },
+               cityLayout: [
+                   { id: "townHall", top: "40%", left: "45%", width: "120px", height: "120px" }, { id: "plot1", top: "35%", left: "25%", width: "90px", height: "90px" },
+                   { id: "plot2", top: "55%", left: "30%", width: "90px", height: "90px" }, { id: "plot3", top: "50%", left: "60%", width: "90px", height: "90px" },
+                   { id: "academy", top: "20%", left: "60%", width: "90px", height: "90px" }
+               ],
+               islandLayout: {
+                   size: 7,
+                   plots: [
+                       { x: 3, y: 3, type: 'playerCity', name: 'Votre Ville', icon: '🏛️' },
+                       { x: 2, y: 5, type: 'otherCity', name: 'Ville de Joueur_02', icon: '🏘️' },
+                       { x: 1, y: 2, type: 'resource', name: 'Scierie (Bois)', icon: '🌲' },
+                       { x: 5, y: 4, type: 'resource', name: 'Mine de Marbre', icon: '💎' },
+                       { x: 4, y: 1, type: 'wonder', name: 'Merveille Antique', icon: '🌟' }
+                   ]
+               },
+               worldMap: {
+                   size: 15,
+                   islands: [
+                       { x: 7, y: 7, type: 'player', name: 'Votre Capitale' },
+                       { x: 8, y: 9, type: 'ally', name: 'Allié_01' },
+                       { x: 5, y: 6, type: 'enemy', name: 'Ennemi_Alpha' },
+                       { x: 10, y: 11, type: 'island', name: 'Île aux merveilles' },
+                       { x: 3, y: 4, type: 'island', name: 'Île sauvage' },
+                       { x: 12, y: 5, type: 'island', name: 'Île abandonnée' }
+                   ]
+               }
+           };
 
-            // --- DOM ELEMENTS ---
-            const dom = {
-                res: Object.keys(defaultGameState.resources).reduce((acc, key) => ({ ...acc, [key]: document.getElementById(`res${key.charAt(0).toUpperCase() + key.slice(1)}`) }), {}),
-                cityGrid: document.getElementById('city-grid'), islandGrid: document.getElementById('island-grid'),
-                contextPanel: document.getElementById('context-panel'), queueList: document.getElementById('queueList'),
-                eventLog: document.getElementById('event-log'), modal: document.getElementById('actionModal'),
-                modalTitle: document.getElementById('modalTitle'), modalMessage: document.getElementById('modalMessage'),
-                modalCost: document.getElementById('modal-cost'), modalConfirmBtn: document.getElementById('modalConfirmBtn'),
-                modalCancelBtn: document.getElementById('modalCancelBtn'), navLinks: document.querySelectorAll('.main-nav a'),
-                mainViews: document.querySelectorAll('.main-view'), researchGrid: document.getElementById('research-grid'),
-                militaryGrid: document.getElementById('military-grid'), diplomacyGrid: document.getElementById('diplomacy-grid'),
-            };
+           // --- ÉTAT DU JEU ---
+           let gameState;
+           const defaultGameState = {
+               resources: { wood: 1000, wine: 100, marble: 100, crystal: 100, sulfur: 100, gold: 5000, research: 0 },
+               buildings: { "townHall": { type: "Hôtel de Ville", level: 1 }, "plot1": { type: "Caserne", level: 1 }, "plot2": { type: null, level: 0 }, "plot3": { type: null, level: 0 }, "academy": { type: "Académie", level: 1 } },
+               researchCompleted: [],
+               queues: { build: [], research: [], military: [] },
+               lastUpdate: Date.now()
+           };
 
-            let selectedPlotId = null;
-            let currentAction = null;
+           // --- DOM ELEMENTS ---
+           const dom = {
+               res: Object.keys(defaultGameState.resources).reduce((acc, key) => ({ ...acc, [key]: document.getElementById(`res${key.charAt(0).toUpperCase() + key.slice(1)}`) }), {}),
+               cityGrid: document.getElementById('city-grid'), islandGrid: document.getElementById('island-grid'),
+               worldMapGrid: document.getElementById('world-map-grid'),
+               contextPanel: document.getElementById('context-panel'), queueList: document.getElementById('queueList'),
+               eventLog: document.getElementById('event-log'), modal: document.getElementById('actionModal'),
+               modalTitle: document.getElementById('modalTitle'), modalMessage: document.getElementById('modalMessage'),
+               modalCost: document.getElementById('modal-cost'), modalConfirmBtn: document.getElementById('modalConfirmBtn'),
+               modalCancelBtn: document.getElementById('modalCancelBtn'), navLinks: document.querySelectorAll('.main-nav a'),
+               mainViews: document.querySelectorAll('.main-view'), researchGrid: document.getElementById('research-grid'),
+               militaryGrid: document.getElementById('military-grid'), diplomacyGrid: document.getElementById('diplomacy-grid'),
+           };
 
-            // --- PERSISTANCE DES DONNÉES ---
-            function saveState() { localStorage.setItem('empireGameState', JSON.stringify(gameState)); }
-            function loadState() {
-                const savedState = localStorage.getItem('empireGameState');
-                gameState = savedState ? JSON.parse(savedState) : JSON.parse(JSON.stringify(defaultGameState));
-                const offlineTime = (Date.now() - gameState.lastUpdate) / 1000;
-                produceResources(offlineTime);
-                gameState.lastUpdate = Date.now();
-            }
+           let selectedPlotId = null;
+           let currentAction = null;
 
-            // --- NAVIGATION & VUES ---
-            function switchView(viewId) {
-                dom.mainViews.forEach(view => view.classList.add('hidden'));
-                document.getElementById(`view-${viewId}`).classList.remove('hidden');
-                dom.navLinks.forEach(link => link.classList.toggle('active', link.dataset.view === viewId));
-                updateContextPanel();
-            }
+           // --- PERSISTANCE DES DONNÉES ---
+           function saveState() { localStorage.setItem('empireGameState', JSON.stringify(gameState)); }
+           function loadState() {
+               const savedState = localStorage.getItem('empireGameState');
+               gameState = savedState ? JSON.parse(savedState) : JSON.parse(JSON.stringify(defaultGameState));
+               const offlineTime = (Date.now() - gameState.lastUpdate) / 1000;
+               produceResources(offlineTime);
+               gameState.lastUpdate = Date.now();
+           }
 
-            // --- LOGIQUE DE JEU PRINCIPALE ---
-            function init() {
-                loadState();
-                renderAll();
-                switchView('city');
-                setInterval(gameLoop, 1000);
-                dom.navLinks.forEach(link => link.addEventListener('click', (e) => switchView(link.dataset.view)));
-            }
-            
-            function renderAll() {
-                renderCityLayout();
-                renderIslandLayout();
-                renderResearchTree();
-                renderMilitaryUnits();
-                renderDiplomacy();
-                updateAllUI();
-            }
+           // --- NAVIGATION & VUES ---
+           function switchView(viewId) {
+               dom.mainViews.forEach(view => view.classList.add('hidden'));
+               document.getElementById(`view-${viewId}`).classList.remove('hidden');
+               dom.navLinks.forEach(link => {
+                   link.classList.toggle('active', link.dataset.view === viewId);
+               });
+               updateContextPanel(); // Clear context panel on view switch
+           }
 
-            function gameLoop() {
-                produceResources(1);
-                processQueues();
-                updateAllUI();
-                saveState();
-            }
+           // --- LOGIQUE DE JEU PRINCIPALE ---
+           function init() {
+               loadState();
+               renderAll();
+               switchView('city'); // Start on city view
+               setInterval(gameLoop, 1000);
+               dom.navLinks.forEach(link => {
+                   link.addEventListener('click', (e) => {
+                       e.preventDefault();
+                       switchView(link.dataset.view)
+                   });
+               });
+           }
+           
+           function renderAll() {
+               renderCityLayout();
+               renderIslandView();
+               renderWorldMap();
+               renderResearchTree();
+               renderMilitaryUnits();
+               renderDiplomacy();
+               updateAllUI();
+           }
 
-            function produceResources(seconds) {
-                const townHallLevel = gameState.buildings.townHall.level;
-                gameState.resources.gold += townHallLevel * 2 * seconds / 3600;
-                gameState.resources.wood += 5 * seconds / 3600;
-                const academyLevel = gameState.buildings.academy?.level || 0;
-                if (academyLevel > 0) gameState.resources.research += academyLevel * 2 * seconds / 3600;
-                gameState.lastUpdate = Date.now();
-            }
+           function gameLoop() {
+               produceResources(1);
+               processQueues();
+               updateAllUI();
+               saveState();
+           }
 
-            function processQueues() {
-                const now = Date.now();
-                let stateChanged = false;
-                ['build', 'research', 'military'].forEach(qType => {
-                    const finished = [];
-                    gameState.queues[qType].forEach((item, index) => {
-                        if (now >= item.endTime) {
-                            finished.push(index);
-                            logEvent(`${item.name} terminé.`);
-                            if (qType === 'build') {
-                                if (item.level === 1) gameState.buildings[item.id].type = item.name;
-                                gameState.buildings[item.id].level = item.level;
-                            } else if (qType === 'research') {
-                                gameState.researchCompleted.push(item.name);
-                            }
-                        }
-                    });
-                    if (finished.length > 0) {
-                        gameState.queues[qType] = gameState.queues[qType].filter((_, index) => !finished.includes(index));
-                        stateChanged = true;
-                    }
-                });
-                if (stateChanged) {
-                    renderAll();
-                    if (selectedPlotId) updateContextPanel(selectedPlotId);
-                }
-            }
-            
-            function startAction(type, id, name, level) {
-                const queue = gameState.queues[type];
-                let spec, cost, time;
-                if (type === 'build') { spec = config.buildings[name].levels[level - 1]; }
-                else if (type === 'research') { const branch = Object.keys(config.research).find(br => config.research[br].techs[name]); spec = config.research[branch].techs[name]; }
-                else if (type === 'military') { spec = config.units[name]; }
-                cost = spec.cost; time = spec.buildTime || spec.time;
-                for(const res in cost) { if (gameState.resources[res] < cost[res]) { showModal("Action impossible", "Ressources insuffisantes."); return; } }
-                for(const res in cost) gameState.resources[res] -= cost[res];
-                const endTime = Date.now() + time * 1000;
-                queue.push({ id, name, level, endTime });
-                logEvent(`Lancement: ${name}.`);
-                updateAllUI();
-                if (selectedPlotId) updateContextPanel(selectedPlotId);
-            }
+           function produceResources(seconds) {
+               const townHallLevel = gameState.buildings.townHall.level;
+               gameState.resources.gold += townHallLevel * 2 * seconds / 3600;
+               gameState.resources.wood += 5 * seconds / 3600;
+               const academyLevel = gameState.buildings.academy?.level || 0;
+               if (academyLevel > 0) gameState.resources.research += academyLevel * 2 * seconds / 3600;
+               gameState.lastUpdate = Date.now();
+           }
 
-            // --- FONCTIONS D'AFFICHAGE ---
-            function updateAllUI() { updateResourceUI(); updateQueueUI(); }
-            function updateResourceUI() { for (const res in dom.res) { if(dom.res[res]) dom.res[res].textContent = Math.floor(gameState.resources[res]); } }
-            function renderCityLayout() {
-                dom.cityGrid.innerHTML = '';
-                config.cityLayout.forEach(plot => {
-                    const el = document.createElement('div'); el.className = 'building-plot'; el.dataset.plotId = plot.id;
-                    el.style.cssText = `top:${plot.top}; left:${plot.left}; width:${plot.width}; height:${plot.height};`;
-                    const building = gameState.buildings[plot.id];
-                    if (building && building.type) { el.innerHTML = `${config.buildings[building.type].icon}<div class="level">Niv. ${building.level}</div>`; } else { el.innerHTML = '➕'; }
-                    if (gameState.queues.build.some(item => item.id === plot.id)) el.classList.add('constructing');
-                    el.addEventListener('click', () => {
-                        selectedPlotId = plot.id;
-                        document.querySelectorAll('.building-plot.selected').forEach(p => p.classList.remove('selected'));
-                        el.classList.add('selected');
-                        updateContextPanel(plot.id);
-                    });
-                    dom.cityGrid.appendChild(el);
-                });
-            }
-            function updateContextPanel(plotId) {
-                let html = '';
-                if (!plotId) {
-                    html = '<h3>Informations</h3><p>Sélectionnez un élément pour voir ses détails.</p>';
-                } else {
-                    const building = gameState.buildings[plotId];
-                    if (building && building.type) {
-                        const { type, level } = building; const spec = config.buildings[type]; const nextLevel = level < spec.levels.length ? level + 1 : null;
-                        html = `<h3>${type} (Niv ${level})</h3><p>${spec.description}</p>`;
-                        if (gameState.queues.build.some(item => item.id === plotId)) { html += `<p style="color: var(--color-primary); margin-top: 1rem;">Amélioration en cours...</p>`; }
-                        else if (nextLevel) { html += `<button class="action-btn" data-action="build" data-id="${plotId}" data-name="${type}" data-level="${nextLevel}">Améliorer</button>`; }
-                        else { html += `<p style="color: var(--color-primary); margin-top: 1rem;">Niveau maximum</p>`; }
+           function processQueues() {
+               const now = Date.now();
+               let stateChanged = false;
+               ['build', 'research', 'military'].forEach(qType => {
+                   const finished = [];
+                   gameState.queues[qType].forEach((item, index) => {
+                       if (now >= item.endTime) {
+                           finished.push(index);
+                           logEvent(`${item.name} terminé.`);
+                           if (qType === 'build') {
+                               if (item.level === 1) gameState.buildings[item.id].type = item.name;
+                               gameState.buildings[item.id].level = item.level;
+                           } else if (qType === 'research') {
+                               gameState.researchCompleted.push(item.name);
+                           }
+                           stateChanged = true;
+                       }
+                   });
+                   if (finished.length > 0) {
+                       gameState.queues[qType] = gameState.queues[qType].filter((_, index) => !finished.includes(index));
+                   }
+               });
+               if (stateChanged) {
+                   renderAll();
+                   if (selectedPlotId) updateContextPanel(selectedPlotId);
+               }
+           }
+           
+           function startAction(type, id, name, level) {
+               const queue = gameState.queues[type];
+               let spec, cost, time;
+               if (type === 'build') { spec = config.buildings[name].levels[level - 1]; }
+               else if (type === 'research') { const branch = Object.keys(config.research).find(br => config.research[br].techs[name]); spec = config.research[branch].techs[name]; }
+               else if (type === 'military') { spec = config.units[name]; }
+               cost = spec.cost; time = spec.buildTime || spec.time;
+               for(const res in cost) { if (gameState.resources[res] < cost[res]) { showModal("Action impossible", "Ressources insuffisantes."); return; } }
+               for(const res in cost) gameState.resources[res] -= cost[res];
+               const endTime = Date.now() + time * 1000;
+               queue.push({ id, name, level, endTime });
+               logEvent(`Lancement: ${name}.`);
+               updateAllUI();
+               if (selectedPlotId) updateContextPanel(selectedPlotId);
+           }
+
+           // --- FONCTIONS D'AFFICHAGE ---
+           function updateAllUI() { updateResourceUI(); updateQueueUI(); }
+           function updateResourceUI() { for (const res in dom.res) { if(dom.res[res]) dom.res[res].textContent = Math.floor(gameState.resources[res]); } }
+           
+           function renderCityLayout() {
+               dom.cityGrid.innerHTML = '';
+               config.cityLayout.forEach(plot => {
+                   const el = document.createElement('div'); el.className = 'building-plot'; el.dataset.plotId = plot.id;
+                   el.style.cssText = `top:${plot.top}; left:${plot.left}; width:${plot.width}; height:${plot.height};`;
+                   const building = gameState.buildings[plot.id];
+                   if (building && building.type) { el.innerHTML = `${config.buildings[building.type].icon}<div class="level">Niv. ${building.level}</div>`; } else { el.innerHTML = '➕'; }
+                   if (gameState.queues.build.some(item => item.id === plot.id)) el.classList.add('constructing');
+                   el.addEventListener('click', () => {
+                       selectedPlotId = plot.id;
+                       document.querySelectorAll('.building-plot.selected').forEach(p => p.classList.remove('selected'));
+                       el.classList.add('selected');
+                       if (window.innerWidth > 900) updateContextPanel(plot.id);
+                       else showContextModalForBuilding(plot.id);
+                   });
+                   dom.cityGrid.appendChild(el);
+               });
+           }
+
+           function renderWorldMap() {
+               dom.worldMapGrid.innerHTML = '';
+               const mapSize = config.worldMap.size;
+               const islands = config.worldMap.islands;
+               for (let i = 0; i < mapSize * mapSize; i++) {
+                   const tile = document.createElement('div');
+                   tile.className = 'map-tile world-tile';
+                   const x = i % mapSize;
+                   const y = Math.floor(i / mapSize);
+                   const island = islands.find(isl => isl.x === x && isl.y === y);
+                   if (island) {
+                       tile.classList.add(island.type);
+                       tile.innerHTML = `<span class="tooltip">${island.name} [${x},${y}]</span>`;
+                   }
+                   dom.worldMapGrid.appendChild(tile);
+               }
+           }
+           
+           function renderIslandView() {
+               dom.islandGrid.innerHTML = '';
+               const mapSize = config.islandLayout.size;
+               const plots = config.islandLayout.plots;
+               for (let i = 0; i < mapSize * mapSize; i++) {
+                   const tile = document.createElement('div');
+                   tile.className = 'map-tile island-tile';
+                   const x = i % mapSize;
+                   const y = Math.floor(i / mapSize);
+                   const plot = plots.find(p => p.x === x && p.y === y);
+                   if (plot) {
+                       tile.classList.add(plot.type);
+                       tile.innerHTML = `${plot.icon}<span class="tooltip">${plot.name}</span>`;
+                       tile.addEventListener('click', () => {
+                           showModal(`Information: ${plot.name}`, `Type: ${plot.type}. Des actions (espionner, attaquer) pourraient être ajoutées ici.`);
+                       });
+                   }
+                   dom.islandGrid.appendChild(tile);
+               }
+           }
+
+           function updateContextPanel(plotId) {
+               if (window.innerWidth <= 900) return; // Ne pas utiliser sur mobile
+               let html = '';
+               if (!plotId) {
+                   html = '<h3>Informations</h3><p>Sélectionnez un élément pour voir ses détails.</p>';
+               } else {
+                   const building = gameState.buildings[plotId];
+                   if (building && building.type) {
+                       const { type, level } = building; const spec = config.buildings[type]; const nextLevel = level < spec.levels.length ? level + 1 : null;
+                       html = `<h3>${type} (Niv ${level})</h3><p>${spec.description}</p>`;
+                       if (gameState.queues.build.some(item => item.id === plotId)) { html += `<p style="color: var(--color-primary); margin-top: 1rem;">Amélioration en cours...</p>`; }
+                       else if (nextLevel) { html += `<button class="action-btn" data-action="build" data-id="${plotId}" data-name="${type}" data-level="${nextLevel}">Améliorer</button>`; }
+                       else { html += `<p style="color: var(--color-primary); margin-top: 1rem;">Niveau maximum</p>`; }
+                   } else {
+                       html = `<h3>Emplacement Vide</h3><p>Cliquez pour construire :</p><div style="display:flex; flex-direction:column; gap:0.5rem;">`;
+                       for (const type in config.buildings) { html += `<button class="action-btn" data-action="build" data-id="${plotId}" data-name="${type}" data-level="1">${config.buildings[type].icon} ${type}</button>`; }
+                       html += `</div>`;
+                   }
+               }
+               dom.contextPanel.innerHTML = html;
+           }
+
+           function showContextModalForBuilding(plotId) {
+               const building = gameState.buildings[plotId];
+               if (building && building.type) {
+                    const { type, level } = building;
+                    const spec = config.buildings[type];
+                    const nextLevel = level < spec.levels.length ? level + 1 : null;
+                    if(nextLevel && !gameState.queues.build.some(item => item.id === plotId)) {
+                       showModal('build', plotId, type, nextLevel);
                     } else {
-                        html = `<h3>Emplacement Vide</h3><p>Cliquez pour construire :</p><div>`;
-                        for (const type in config.buildings) { html += `<button class="action-btn" data-action="build" data-id="${plotId}" data-name="${type}" data-level="1">${config.buildings[type].icon} ${type}</button>`; }
-                        html += `</div>`;
+                       showModal(type, `Niveau ${level}. ${spec.description}`);
                     }
-                }
-                dom.contextPanel.innerHTML = html;
-            }
-            function renderIslandLayout() {
-                dom.islandGrid.innerHTML = '';
-                for(const name in config.islandLayout) {
-                    const tile = config.islandLayout[name];
-                    const el = document.createElement('div'); el.className = 'card';
-                    el.innerHTML = `<h4>${name}</h4><p>${tile.type === 'resource' ? `Niveau ${tile.level}` : `Points: ${tile.points}`}</p>`;
-                    dom.islandGrid.appendChild(el);
-                }
-            }
-            function renderResearchTree() {
-                dom.researchGrid.innerHTML = '';
-                for (const branchKey in config.research) {
-                    const branch = config.research[branchKey]; let branchHtml = `<div><h3>${branch.name}</h3>`;
-                    for (const techKey in branch.techs) {
-                        const tech = branch.techs[techKey]; const isCompleted = gameState.researchCompleted.includes(techKey);
-                        const isResearching = gameState.queues.research.some(t => t.name === techKey);
-                        branchHtml += `<div class="card"><h4>${techKey}</h4><p>${tech.description}</p><p class="cost">Coût: 🔬${tech.cost.research}</p>`;
-                        if (isCompleted) { branchHtml += `<button class="action-btn" disabled>Terminé</button>`; }
-                        else if (isResearching) { branchHtml += `<button class="action-btn" disabled>En cours...</button>`; }
-                        else { branchHtml += `<button class="action-btn" data-action="research" data-name="${techKey}" data-level="1">Rechercher</button>`; }
-                        branchHtml += `</div>`;
-                    }
-                    branchHtml += `</div>`; dom.researchGrid.innerHTML += branchHtml;
-                }
-            }
-            function renderMilitaryUnits() {
-                dom.militaryGrid.innerHTML = '';
-                for (const unitKey in config.units) {
-                    const unit = config.units[unitKey]; const isRecruiting = gameState.queues.military.some(u => u.name === unitKey);
-                    let html = `<div class="card"><h4>${unitKey} ${unit.icon}</h4><p>${unit.description}</p><p class="cost">Coût: 🌲${unit.cost.wood || 0} 🔥${unit.cost.sulfur || 0} 💰${unit.cost.gold || 0}</p>`;
-                    if (isRecruiting) { html += `<button class="action-btn" disabled>En formation...</button>`; }
-                    else { html += `<button class="action-btn" data-action="military" data-name="${unitKey}" data-level="1">Recruter</button>`; }
-                    html += `</div>`; dom.militaryGrid.innerHTML += html;
-                }
-            }
-            function renderDiplomacy() {
-                dom.diplomacyGrid.innerHTML = '';
-                let html = '<div><h3>Alliances</h3>';
-                for(const name in config.diplomacy.alliances) {
-                    const ally = config.diplomacy.alliances[name];
-                    html += `<div class="card"><h4>${name} [${ally.tag}]</h4><p>Membres: ${ally.members} | Points: ${ally.points}</p><button class="action-btn">Voir</button></div>`;
-                }
-                html += '</div><div><h3>Traités</h3>';
-                for(const name in config.diplomacy.treaties) {
-                    const treaty = config.diplomacy.treaties[name];
-                    html += `<div class="card"><h4>${name}</h4><p>${treaty.description}</p><button class="action-btn" data-action="diplomacy" data-name="${name}">Signer</button></div>`;
-                }
-                html += '</div>'; dom.diplomacyGrid.innerHTML = html;
-            }
-            function updateQueueUI() {
-                dom.queueList.innerHTML = '';
-                ['build', 'research', 'military'].forEach(qType => {
-                    gameState.queues[qType].forEach(item => {
-                        const remainingTime = Math.max(0, Math.ceil((item.endTime - Date.now()) / 1000));
-                        const li = document.createElement('li'); li.className = 'queue-item';
-                        li.innerHTML = `<div class="name">${item.name} ${item.level ? `(Niv. ${item.level})` : ''}</div><div class="timer">${new Date(remainingTime * 1000).toISOString().substr(14, 5)}</div>`;
-                        dom.queueList.appendChild(li);
-                    });
-                });
-            }
-            function showModal(action, id, name, level) {
-                let spec, cost, time, title, message;
-                if (action === 'build') { spec = config.buildings[name].levels[level - 1]; title = `${level > 1 ? 'Améliorer' : 'Construire'} ${name}`; }
-                else if (action === 'research') { const branch = Object.keys(config.research).find(br => config.research[br].techs[name]); spec = config.research[branch].techs[name]; title = `Rechercher ${name}`; }
-                else if (action === 'military') { spec = config.units[name]; title = `Recruter ${name}`; }
-                else { showModal("Action inconnue", "Cette action n'est pas encore implémentée."); return; }
-                
-                message = `Voulez-vous vraiment lancer cette action ?`;
-                cost = spec.cost; time = spec.buildTime || spec.time;
-                currentAction = () => startAction(action, id, name, level);
-                dom.modalTitle.textContent = title; dom.modalMessage.textContent = message;
-                dom.modalCost.innerHTML = `Coût: ${Object.entries(cost || {}).map(([res, val]) => `${res}: ${val}`).join(', ')} - Temps: ${time}s`;
-                dom.modal.style.display = 'flex';
-            }
-            function logEvent(message) { dom.eventLog.textContent = message; }
+               } else {
+                   logEvent("Sélectionnez un bâtiment à construire.");
+               }
+           }
 
-            // --- EVENT LISTENERS ---
-            document.body.addEventListener('click', e => {
-                const target = e.target.closest('button[data-action]');
-                if (!target) return;
-                const { action, id, name, level } = target.dataset;
-                showModal(action, id, name, parseInt(level));
-            });
-            dom.modalConfirmBtn.addEventListener('click', () => { if (currentAction) currentAction(); dom.modal.style.display = 'none'; currentAction = null; });
-            dom.modalCancelBtn.addEventListener('click', () => { dom.modal.style.display = 'none'; currentAction = null; });
+           function renderResearchTree() {
+               dom.researchGrid.innerHTML = '';
+               for (const branchKey in config.research) {
+                   const branch = config.research[branchKey]; let branchHtml = `<div class="card"><h3>${branch.name}</h3>`;
+                   for (const techKey in branch.techs) {
+                       const tech = branch.techs[techKey]; const isCompleted = gameState.researchCompleted.includes(techKey);
+                       const isResearching = gameState.queues.research.some(t => t.name === techKey);
+                       branchHtml += `<div class="card"><h4>${techKey}</h4><p>${tech.description}</p><p class="cost">Coût: 🔬${tech.cost.research}</p>`;
+                       if (isCompleted) { branchHtml += `<button class="action-btn" disabled>Terminé</button>`; }
+                       else if (isResearching) { branchHtml += `<button class="action-btn" disabled>En cours...</button>`; }
+                       else { branchHtml += `<button class="action-btn" data-action="research" data-name="${techKey}" data-level="1">Rechercher</button>`; }
+                       branchHtml += `</div>`;
+                   }
+                   branchHtml += `</div>`; dom.researchGrid.innerHTML += branchHtml;
+               }
+           }
+           function renderMilitaryUnits() {
+               dom.militaryGrid.innerHTML = '';
+               for (const unitKey in config.units) {
+                   const unit = config.units[unitKey]; const isRecruiting = gameState.queues.military.some(u => u.name === unitKey);
+                   let html = `<div class="card"><h4>${unitKey} ${unit.icon}</h4><p>${unit.description}</p><p class="cost">Coût: 🌲${unit.cost.wood || 0} 🔥${unit.cost.sulfur || 0} 💰${unit.cost.gold || 0}</p>`;
+                   if (isRecruiting) { html += `<button class="action-btn" disabled>En formation...</button>`; }
+                   else { html += `<button class="action-btn" data-action="military" data-name="${unitKey}" data-level="1">Recruter</button>`; }
+                   html += `</div>`; dom.militaryGrid.innerHTML += html;
+               }
+           }
+           function renderDiplomacy() {
+               dom.diplomacyGrid.innerHTML = '';
+               let html = '<div><h3>Alliances</h3>';
+               for(const name in config.diplomacy.alliances) {
+                   const ally = config.diplomacy.alliances[name];
+                   html += `<div class="card"><h4>${name} [${ally.tag}]</h4><p>Membres: ${ally.members} | Points: ${ally.points}</p><button class="action-btn">Voir</button></div>`;
+               }
+               html += '</div><div><h3>Traités</h3>';
+               for(const name in config.diplomacy.treaties) {
+                   const treaty = config.diplomacy.treaties[name];
+                   html += `<div class="card"><h4>${name}</h4><p>${treaty.description}</p><button class="action-btn" data-action="diplomacy" data-name="${name}">Signer</button></div>`;
+               }
+               html += '</div>'; dom.diplomacyGrid.innerHTML += html;
+           }
+           function updateQueueUI() {
+               if (window.innerWidth <= 900) { dom.queueList.innerHTML = ''; return; } // Pas de liste sur mobile
+               dom.queueList.innerHTML = '';
+               ['build', 'research', 'military'].forEach(qType => {
+                   gameState.queues[qType].forEach(item => {
+                       const remainingTime = Math.max(0, Math.ceil((item.endTime - Date.now()) / 1000));
+                       const li = document.createElement('li'); li.className = 'queue-item';
+                       li.innerHTML = `<div class="name">${item.name} ${item.level ? `(Niv. ${item.level})` : ''}</div><div class="timer">${new Date(remainingTime * 1000).toISOString().substr(14, 5)}</div>`;
+                       dom.queueList.appendChild(li);
+                   });
+               });
+           }
+           function showModal(action, id, name, level) {
+               let spec, cost, time, title, message;
+               if (action === 'build') { spec = config.buildings[name].levels[level - 1]; title = `${level > 1 ? 'Améliorer' : 'Construire'} ${name}`; }
+               else if (action === 'research') { const branch = Object.keys(config.research).find(br => config.research[br].techs[name]); spec = config.research[branch].techs[name]; title = `Rechercher ${name}`; }
+               else if (action === 'military') { spec = config.units[name]; title = `Recruter ${name}`; }
+               else if (typeof action === 'string') { // For simple messages
+                   dom.modalTitle.textContent = action;
+                   dom.modalMessage.textContent = id || '';
+                   dom.modalCost.innerHTML = '';
+                   currentAction = null;
+                   dom.modalConfirmBtn.style.display = 'none';
+                   dom.modalCancelBtn.textContent = 'Fermer';
+                   dom.modal.style.display = 'flex';
+                   return;
+               }
+               else { showModal("Action inconnue", "Cette action n'est pas encore implémentée."); return; }
+               
+               message = `Voulez-vous vraiment lancer cette action ?`;
+               cost = spec.cost; time = spec.buildTime || spec.time;
+               currentAction = () => startAction(action, id, name, level);
+               dom.modalTitle.textContent = title; dom.modalMessage.textContent = message;
+               dom.modalCost.innerHTML = `Coût: ${Object.entries(cost || {}).map(([res, val]) => `${res}: ${val}`).join(', ')} - Temps: ${time}s`;
+               dom.modalConfirmBtn.style.display = 'inline-block';
+               dom.modalCancelBtn.textContent = 'Annuler';
+               dom.modal.style.display = 'flex';
+           }
+           function logEvent(message) { dom.eventLog.textContent = message; }
 
-            // --- INITIALISATION ---
-            init();
-        });
-    </script>
+           // --- EVENT LISTENERS ---
+           document.body.addEventListener('click', e => {
+               const target = e.target.closest('button[data-action]');
+               if (!target) return;
+               const { action, id, name, level } = target.dataset;
+               showModal(action, id, name, parseInt(level));
+           });
+           dom.modalConfirmBtn.addEventListener('click', () => { if (currentAction) currentAction(); dom.modal.style.display = 'none'; });
+           dom.modalCancelBtn.addEventListener('click', () => { dom.modal.style.display = 'none'; });
+
+           // --- INITIALISATION ---
+           init();
+       });
+   </script>
 </body>
 </html>
