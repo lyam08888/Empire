@@ -8,10 +8,10 @@ include("core/CAccount.php");
 //var_dump(headers_list());
 
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />               
+<meta charset="utf-8" />
 <meta name="language" content="ar">
 <meta name="author" content="prince 3">
 <meta name="publisher" content="prince 3">
@@ -26,22 +26,19 @@ include("core/CAccount.php");
 <meta name="Revisit" content="After 14 days"> 
 <title>ikariama - لعبة المتصفح المجانية</title>
 <link href="css/istyle.css" rel="stylesheet" type="text/css" media="screen">
-<script src="common.js" type="text/javascript"></script>
+<script src="common.js" defer></script>
+<script src="login.js" defer></script>
 </head>
-
-<body dir="rtl">
+<body>
 <div id="headback">
-<div id="headlogo"></div>
-<!--Main div-->
-<div id="main">
-<div>
- <div id="links">
- <a href="index.php" title="الى تسجيل الدخول">تسجيل الدخول</a> 
- <a href="register.php" title="سجل هنا !">سجل هنا</a> 
- <a href="tour_step1.php" title="جولة بسيطة على ikariama">جولة في اللعبة</a> 
- <a href="/board" target="_blank" title="الى المنتديات">المنتدى</a> </div>
-</div>
-<div id="text">
+<header id="headlogo"></header>
+<main id="main">
+<nav id="links">
+ <a href="index.php" title="الى تسجيل الدخول">تسجيل الدخول</a>
+ <a href="register.php" title="سجل هنا !">سجل هنا</a>
+ <a href="tour_step1.php" title="جولة بسيطة على ikariama">جولة في اللعبة</a>
+ <a href="/board" target="_blank" title="الى المنتديات">المنتدى</a> </nav>
+<section id="text">
  <img class="bild1" src="img/bild1.jpg" height="85" width="173">
  <img class="bild2" src="img/bild2.jpg" height="85" width="173">
  <h1>عش فى العالم القديم !</h1>
@@ -54,7 +51,7 @@ include("core/CAccount.php");
 ikariama</p>
  <div class="joinbutton">
  <a href="register.php" title="تسجيل">العب الان مجانا !</a> </div>
- <form id="loginForm" name="loginForm" action="#" onsubmit="changeAction('login');" method="post"> 
+ <form id="loginForm" name="loginForm" action="#" method="post">
  <input type="hidden" name="ft" value="a4" />
  <table id="logindata" cellpadding="0" cellspacing="0">
  <tbody><tr>
@@ -80,13 +77,11 @@ ikariama</p>
  <tr style="height: 15px;">
  <td colspan="3"></td>
  </tr>
- </tbody></table>
- </form>
-</div><br/>
-</div>
-<!--Main div ends-->
-<div id="footer"></div>
+</tbody></table>
+</form>
+</section>
+</main>
+<footer id="footer"></footer>
 </div>
 </body>
 </html>
-<?php ?>
