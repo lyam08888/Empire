@@ -1202,8 +1202,40 @@
            dom.modalConfirmBtn.addEventListener('click', () => { if (currentAction) currentAction(); dom.modal.style.display = 'none'; });
            dom.modalCancelBtn.addEventListener('click', () => { dom.modal.style.display = 'none'; });
 
+           // --- SYSTÈME DE TUTORIEL ---
+           function showTutorial() {
+               if (gameState.playerStats.level === 1 && gameState.playerStats.totalBuildings <= 2) {
+                   setTimeout(() => {
+                       showModal('🎓 Bienvenue dans Empire !', 
+                           `Bienvenue, noble dirigeant ! Voici quelques conseils pour débuter :
+                           
+                           • Cliquez sur les emplacements vides (➕) pour construire des bâtiments
+                           • Surveillez vos ressources en haut de l'écran
+                           • Explorez les différentes vues : Ville, Île, Monde, Recherche...
+                           • Construisez des bâtiments de production pour générer plus de ressources
+                           • Recherchez de nouvelles technologies pour débloquer du contenu
+                           
+                           Bonne chance dans votre conquête !`);
+                   }, 2000);
+               }
+           }
+           
+           // --- SYSTÈME D'AIDE CONTEXTUELLE ---
+           function showHelp(topic) {
+               const helpTopics = {
+                   buildings: 'Les bâtiments sont la base de votre empire. Chaque type a des effets spécifiques : production de ressources, défense, recherche, etc.',
+                   resources: 'Gérez 7 types de ressources : Bois, Vin, Marbre, Cristal, Soufre, Or et Points de Recherche. Chacune a ses utilisations spécifiques.',
+                   research: 'La recherche débloque de nouvelles technologies et améliorations. Construisez une Académie pour générer des points de recherche.',
+                   military: 'Recrutez différents types d\'unités pour défendre votre empire et attaquer vos ennemis. Chaque unité a ses forces et faiblesses.',
+                   world: 'Explorez le monde pour découvrir de nouvelles îles, ressources et opportunités de colonisation.'
+               };
+               
+               showModal(`💡 Aide : ${topic}`, helpTopics[topic] || 'Sujet d\'aide non trouvé.');
+           }
+
            // --- INITIALISATION ---
            init();
+           showTutorial();
        });
    </script>
 </body>
