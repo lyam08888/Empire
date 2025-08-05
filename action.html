@@ -553,7 +553,15 @@
                if (!gameState.diplomacy) gameState.diplomacy = { relations: {}, treaties: [], reputation: 50 };
                if (!gameState.playerStats) gameState.playerStats = { level: 1, xp: 0, totalBuildings: 2, totalUnits: 0 };
                if (!gameState.achievements) gameState.achievements = [];
-               if (!gameState.activeQuests) gameState.activeQuests = [];
+               if (!gameState.activeQuests) {
+                   gameState.activeQuests = [];
+               } else {
+                   // Reconnect quest condition functions that were lost during JSON serialization
+                   gameState.activeQuests = gameState.activeQuests.map(q => {
+                       const template = QUEST_TEMPLATES.find(t => t.id === q.id);
+                       return template ? { ...template, ...q, condition: template.condition } : q;
+                   });
+               }
                if (!gameState.completedQuests) gameState.completedQuests = [];
                if (!gameState.eventHistory) gameState.eventHistory = [];
                if (!gameState.lastEventTime) gameState.lastEventTime = 0;
