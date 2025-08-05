@@ -1026,7 +1026,9 @@
                   `;
               }
               
-              dom.worldGrid.innerHTML = html;
+               if(dom.worldMapGrid) {
+                   dom.worldMapGrid.innerHTML = html;
+               }
            }
 
            function handleWorldTileClick(x, y, island, explored) {
