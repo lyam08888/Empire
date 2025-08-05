@@ -3418,6 +3418,591 @@
                saveState();
            }
 
+           // --- SYSTÈME DE COMMERCE AVANCÉ ---
+           function renderTradeView() {
+               let html = `
+                   <div class="card" style="grid-column: 1 / -1;">
+                       <div style="display: flex; justify-content: space-between; align-items: center;">
+                           <h3>💱 Centre Commercial</h3>
+                           <div style="display: flex; gap: 1rem;">
+                               <div>Routes actives: ${gameState.tradeRoutes.length}</div>
+                               <div>Profit total: ${calculateTotalTradeProfit()} or/min</div>
+                               <div>Réputation: ${gameState.tradeReputation || 50}/100</div>
+                           </div>
+                       </div>
+                   </div>
+               `;
+               
+               // Marché mondial des ressources
+               html += `
+                   <div class="card" style="grid-column: 1 / -1;">
+                       <h3>📈 Marché Mondial des Ressources</h3>
+                       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+               `;
+               
+               const marketPrices = getMarketPrices();
+               const resources = ['wood', 'wine', 'marble', 'crystal', 'sulfur'];
+               
+               resources.forEach(resource => {
+                   const price = marketPrices[resource];
+                   const trend = getMarketTrend(resource);
+                   const trendIcon = trend > 0 ? '📈' : trend < 0 ? '📉' : '➡️';
+                   const trendColor = trend > 0 ? 'var(--color-success)' : trend < 0 ? 'var(--color-danger)' : 'var(--color-warning)';
+                   const playerStock = gameState.resources[resource] || 0;
+                   
+                   html += `
+                       <div style="background: var(--color-panel-light); padding: 1rem; border-radius: 0.5rem; text-align: center;">
+                           <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">${getResourceIcon(resource)}</div>
+                           <h4 style="margin: 0.25rem 0; text-transform: capitalize;">${resource}</h4>
+                           <div style="font-size: 1.2rem; font-weight: bold; color: var(--color-primary); margin: 0.5rem 0;">
+                               ${price.toFixed(2)} or
+                           </div>
+                           <div style="color: ${trendColor}; font-size: 0.9rem; margin-bottom: 0.5rem;">
+                               ${trendIcon} ${Math.abs(trend).toFixed(1)}%
+                           </div>
+                           <div style="font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.5rem;">
+                               Stock: ${playerStock.toLocaleString()}
+                           </div>
+                           <div style="display: flex; gap: 0.25rem;">
+                               <button onclick="quickTrade('sell', '${resource}', 100)" class="action-btn" style="font-size: 0.7rem; padding: 0.25rem;" ${playerStock >= 100 ? '' : 'disabled'}>
+                                   Vendre 100
+                               </button>
+                               <button onclick="quickTrade('buy', '${resource}', 100)" class="action-btn" style="font-size: 0.7rem; padding: 0.25rem;" ${gameState.resources.gold >= price * 100 ? '' : 'disabled'}>
+                                   Acheter 100
+                               </button>
+                           </div>
+                       </div>
+                   `;
+               });
+               
+               html += `
+                       </div>
+                   </div>
+               `;
+               
+               // Contrats commerciaux disponibles
+               const availableContracts = generateTradeContracts();
+               if (availableContracts.length > 0) {
+                   html += `
+                       <div class="card" style="grid-column: 1 / -1;">
+                           <h3>📋 Contrats Commerciaux Disponibles</h3>
+                           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                   `;
+                   
+                   availableContracts.forEach((contract, index) => {
+                       const profitability = calculateContractProfitability(contract);
+                       const profitColor = profitability > 20 ? 'var(--color-success)' : profitability > 0 ? 'var(--color-warning)' : 'var(--color-danger)';
+                       
+                       html += `
+                           <div style="background: var(--color-panel-light); padding: 1rem; border-radius: 0.5rem; border-left: 4px solid ${profitColor};">
+                               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                   <h4 style="margin: 0;">${contract.icon} ${contract.client}</h4>
+                                   <span style="font-size: 0.8rem; color: ${profitColor};">
+                                       ${profitability > 0 ? '+' : ''}${profitability.toFixed(1)}% profit
+                                   </span>
+                               </div>
+                               <p style="margin: 0.5rem 0; font-size: 0.9rem;">${contract.description}</p>
+                               <div style="margin: 0.5rem 0; font-size: 0.9rem;">
+                                   <strong>Demande:</strong> ${contract.demand.amount} ${contract.demand.resource}<br>
+                                   <strong>Offre:</strong> ${contract.payment.amount} ${contract.payment.resource}<br>
+                                   <strong>Délai:</strong> ${contract.deadline} jours
+                               </div>
+                               <div style="display: flex; justify-content: space-between; align-items: center;">
+                                   <div style="font-size: 0.8rem; color: var(--color-text-muted);">
+                                       Réputation requise: ${contract.reputationRequired}
+                                   </div>
+                                   <button onclick="acceptContract(${index})" class="action-btn" ${canAcceptContract(contract) ? '' : 'disabled'}>
+                                       Accepter
+                                   </button>
+                               </div>
+                           </div>
+                       `;
+                   });
+                   
+                   html += `
+                           </div>
+                       </div>
+                   `;
+               }
+               
+               // Contrats actifs
+               if (gameState.activeContracts && gameState.activeContracts.length > 0) {
+                   html += `
+                       <div class="card" style="grid-column: 1 / -1;">
+                           <h3>⏳ Contrats en Cours</h3>
+                           <div style="margin-top: 1rem;">
+                   `;
+                   
+                   gameState.activeContracts.forEach((contract, index) => {
+                       const timeLeft = contract.deadline - Date.now();
+                       const daysLeft = Math.max(0, Math.ceil(timeLeft / (24 * 60 * 60 * 1000)));
+                       const canComplete = gameState.resources[contract.demand.resource] >= contract.demand.amount;
+                       
+                       html += `
+                           <div style="background: var(--color-panel-light); padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.5rem; border-left: 4px solid var(--color-primary);">
+                               <div style="display: flex; justify-content: space-between; align-items: center;">
+                                   <div>
+                                       <strong>${contract.icon} ${contract.client}</strong><br>
+                                       <span style="font-size: 0.9rem;">
+                                           Livrer ${contract.demand.amount} ${contract.demand.resource} 
+                                           pour ${contract.payment.amount} ${contract.payment.resource}
+                                       </span>
+                                   </div>
+                                   <div style="text-align: right;">
+                                       <div style="color: ${daysLeft <= 1 ? 'var(--color-danger)' : 'var(--color-warning)'};">
+                                           ⏰ ${daysLeft} jour${daysLeft > 1 ? 's' : ''}
+                                       </div>
+                                       <div style="margin-top: 0.5rem;">
+                                           ${canComplete ? 
+                                               `<button onclick="completeContract(${index})" class="action-btn" style="background: var(--color-success);">Livrer</button>` :
+                                               `<button onclick="cancelContract(${index})" class="action-btn" style="background: var(--color-danger);">Annuler</button>`
+                                           }
+                                       </div>
+                                   </div>
+                               </div>
+                           </div>
+                       `;
+                   });
+                   
+                   html += `
+                           </div>
+                       </div>
+                   `;
+               }
+               
+               // Négociateur de ressources
+               html += `
+                   <div class="card" style="grid-column: 1 / -1;">
+                       <h3>🤝 Négociateur de Ressources</h3>
+                       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1rem;">
+                           <div>
+                               <h4>Vous Offrez</h4>
+                               <select id="offer-resource" style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem;">
+                                   ${resources.map(r => `<option value="${r}">${r.charAt(0).toUpperCase() + r.slice(1)}</option>`).join('')}
+                               </select>
+                               <input type="number" id="offer-amount" placeholder="Quantité" min="1" style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem;">
+                               <div id="offer-value" style="font-size: 0.9rem; color: var(--color-text-muted);">Valeur: 0 or</div>
+                           </div>
+                           <div>
+                               <h4>Vous Demandez</h4>
+                               <select id="request-resource" style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem;">
+                                   ${resources.map(r => `<option value="${r}">${r.charAt(0).toUpperCase() + r.slice(1)}</option>`).join('')}
+                               </select>
+                               <input type="number" id="request-amount" placeholder="Quantité" min="1" style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem;">
+                               <div id="request-value" style="font-size: 0.9rem; color: var(--color-text-muted);">Valeur: 0 or</div>
+                           </div>
+                       </div>
+                       <div style="text-align: center; margin-top: 1rem;">
+                           <div id="trade-fairness" style="margin-bottom: 1rem; font-weight: bold;"></div>
+                           <button onclick="proposeResourceTrade()" class="action-btn">Proposer l'Échange</button>
+                       </div>
+                   </div>
+               `;
+               
+               // Historique des transactions
+               if (gameState.tradeHistory && gameState.tradeHistory.length > 0) {
+                   html += `
+                       <div class="card" style="grid-column: 1 / -1;">
+                           <h3>📊 Historique des Transactions</h3>
+                           <div style="max-height: 300px; overflow-y: auto; margin-top: 1rem;">
+                   `;
+                   
+                   gameState.tradeHistory.slice(-20).reverse().forEach(trade => {
+                       const timeAgo = Math.floor((Date.now() - trade.timestamp) / 60000);
+                       const timeText = timeAgo < 1 ? 'À l\'instant' : `Il y a ${timeAgo} min`;
+                       
+                       html += `
+                           <div style="background: var(--color-panel-light); padding: 0.5rem; border-radius: 0.25rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                               <div>
+                                   <strong>${trade.type === 'buy' ? '📈 Achat' : '📉 Vente'}</strong>
+                                   ${trade.amount} ${trade.resource} 
+                                   ${trade.type === 'buy' ? 'pour' : 'à'} ${trade.totalPrice} or
+                               </div>
+                               <span style="font-size: 0.8rem; color: var(--color-text-muted);">${timeText}</span>
+                           </div>
+                       `;
+                   });
+                   
+                   html += `
+                           </div>
+                       </div>
+                   `;
+               }
+               
+               dom.tradeGrid.innerHTML = html;
+               
+               // Ajouter les event listeners pour le négociateur
+               setTimeout(() => {
+                   const offerResource = document.getElementById('offer-resource');
+                   const offerAmount = document.getElementById('offer-amount');
+                   const requestResource = document.getElementById('request-resource');
+                   const requestAmount = document.getElementById('request-amount');
+                   
+                   if (offerResource && offerAmount && requestResource && requestAmount) {
+                       [offerResource, offerAmount, requestResource, requestAmount].forEach(element => {
+                           element.addEventListener('input', updateTradeCalculation);
+                       });
+                   }
+               }, 100);
+           }
+           
+           function getResourceIcon(resource) {
+               const icons = {
+                   wood: '🌲', wine: '🍇', marble: '🏛️', 
+                   crystal: '💎', sulfur: '🔥', gold: '💰'
+               };
+               return icons[resource] || '📦';
+           }
+           
+           function getMarketPrices() {
+               const now = Date.now();
+               const baseDay = Math.floor(now / (24 * 60 * 60 * 1000));
+               
+               // Prix de base avec fluctuations basées sur le jour
+               const basePrices = {
+                   wood: 2.5,
+                   wine: 4.0,
+                   marble: 6.0,
+                   crystal: 8.5,
+                   sulfur: 7.0
+               };
+               
+               const prices = {};
+               Object.entries(basePrices).forEach(([resource, basePrice]) => {
+                   // Utiliser le jour et la ressource pour créer une fluctuation pseudo-aléatoire
+                   const seed = baseDay * resource.length + resource.charCodeAt(0);
+                   const fluctuation = (Math.sin(seed) * 0.3) + (Math.cos(seed * 1.5) * 0.2);
+                   prices[resource] = Math.max(0.5, basePrice * (1 + fluctuation));
+               });
+               
+               return prices;
+           }
+           
+           function getMarketTrend(resource) {
+               const now = Date.now();
+               const currentDay = Math.floor(now / (24 * 60 * 60 * 1000));
+               const previousDay = currentDay - 1;
+               
+               const currentPrice = getMarketPrices()[resource];
+               
+               // Calculer le prix d'hier
+               const seed = previousDay * resource.length + resource.charCodeAt(0);
+               const basePrices = { wood: 2.5, wine: 4.0, marble: 6.0, crystal: 8.5, sulfur: 7.0 };
+               const fluctuation = (Math.sin(seed) * 0.3) + (Math.cos(seed * 1.5) * 0.2);
+               const previousPrice = Math.max(0.5, basePrices[resource] * (1 + fluctuation));
+               
+               return ((currentPrice - previousPrice) / previousPrice) * 100;
+           }
+           
+           function calculateTotalTradeProfit() {
+               return gameState.tradeRoutes.reduce((total, route) => {
+                   return total + calculateTradeRouteProfit(route);
+               }, 0);
+           }
+           
+           function quickTrade(type, resource, amount) {
+               const prices = getMarketPrices();
+               const price = prices[resource];
+               const totalCost = price * amount;
+               
+               if (type === 'buy') {
+                   if (gameState.resources.gold < totalCost) {
+                       logEvent('❌ Pas assez d\'or pour cet achat');
+                       return;
+                   }
+                   
+                   gameState.resources.gold -= totalCost;
+                   gameState.resources[resource] = (gameState.resources[resource] || 0) + amount;
+                   
+                   logEvent(`📈 Acheté ${amount} ${resource} pour ${totalCost.toFixed(2)} or`);
+               } else {
+                   if ((gameState.resources[resource] || 0) < amount) {
+                       logEvent('❌ Pas assez de ressources pour cette vente');
+                       return;
+                   }
+                   
+                   gameState.resources[resource] -= amount;
+                   gameState.resources.gold += totalCost;
+                   
+                   logEvent(`📉 Vendu ${amount} ${resource} pour ${totalCost.toFixed(2)} or`);
+               }
+               
+               // Ajouter à l'historique
+               if (!gameState.tradeHistory) gameState.tradeHistory = [];
+               gameState.tradeHistory.push({
+                   type: type,
+                   resource: resource,
+                   amount: amount,
+                   price: price,
+                   totalPrice: totalCost.toFixed(2),
+                   timestamp: Date.now()
+               });
+               
+               // Améliorer légèrement la réputation commerciale
+               gameState.tradeReputation = Math.min(100, (gameState.tradeReputation || 50) + 0.1);
+               
+               renderTradeView();
+               updateAllUI();
+               saveState();
+           }
+           
+           function generateTradeContracts() {
+               const contractTemplates = [
+                   {
+                       client: 'Marchands Atlantes',
+                       icon: '🔱',
+                       description: 'Les Atlantes ont besoin de bois pour leurs constructions navales.',
+                       demand: { resource: 'wood', amount: 500 },
+                       payment: { resource: 'gold', amount: 1500 },
+                       deadline: 7,
+                       reputationRequired: 20
+                   },
+                   {
+                       client: 'Nobles du Désert',
+                       icon: '🐪',
+                       description: 'Les nobles recherchent du vin fin pour leurs banquets.',
+                       demand: { resource: 'wine', amount: 300 },
+                       payment: { resource: 'gold', amount: 1800 },
+                       deadline: 5,
+                       reputationRequired: 30
+                   },
+                   {
+                       client: 'Architectes Royaux',
+                       icon: '🏛️',
+                       description: 'Un grand projet architectural nécessite du marbre de qualité.',
+                       demand: { resource: 'marble', amount: 200 },
+                       payment: { resource: 'gold', amount: 1600 },
+                       deadline: 10,
+                       reputationRequired: 40
+                   },
+                   {
+                       client: 'Mages de Cristal',
+                       icon: '🔮',
+                       description: 'Les mages ont besoin de cristaux pour leurs rituels.',
+                       demand: { resource: 'crystal', amount: 150 },
+                       payment: { resource: 'gold', amount: 2000 },
+                       deadline: 3,
+                       reputationRequired: 50
+                   },
+                   {
+                       client: 'Alchimistes Militaires',
+                       icon: '⚗️',
+                       description: 'Production d\'armes alchimiques pour l\'armée.',
+                       demand: { resource: 'sulfur', amount: 250 },
+                       payment: { resource: 'gold', amount: 2200 },
+                       deadline: 4,
+                       reputationRequired: 35
+                   }
+               ];
+               
+               // Générer des contrats aléatoires basés sur le niveau et la réputation
+               const playerLevel = gameState.playerStats.level;
+               const reputation = gameState.tradeReputation || 50;
+               
+               return contractTemplates
+                   .filter(contract => contract.reputationRequired <= reputation)
+                   .filter(() => Math.random() < 0.6) // 60% de chance d'apparaître
+                   .slice(0, 4); // Maximum 4 contrats
+           }
+           
+           function calculateContractProfitability(contract) {
+               const marketPrices = getMarketPrices();
+               const demandValue = marketPrices[contract.demand.resource] * contract.demand.amount;
+               const paymentValue = contract.payment.resource === 'gold' ? 
+                   contract.payment.amount : 
+                   marketPrices[contract.payment.resource] * contract.payment.amount;
+               
+               return ((paymentValue - demandValue) / demandValue) * 100;
+           }
+           
+           function canAcceptContract(contract) {
+               const reputation = gameState.tradeReputation || 50;
+               const activeContracts = gameState.activeContracts || [];
+               
+               return reputation >= contract.reputationRequired && activeContracts.length < 3;
+           }
+           
+           function acceptContract(contractIndex) {
+               const availableContracts = generateTradeContracts();
+               const contract = availableContracts[contractIndex];
+               
+               if (!contract || !canAcceptContract(contract)) {
+                   logEvent('❌ Impossible d\'accepter ce contrat');
+                   return;
+               }
+               
+               if (!gameState.activeContracts) gameState.activeContracts = [];
+               
+               const activeContract = {
+                   ...contract,
+                   acceptedAt: Date.now(),
+                   deadline: Date.now() + (contract.deadline * 24 * 60 * 60 * 1000)
+               };
+               
+               gameState.activeContracts.push(activeContract);
+               logEvent(`📋 Contrat accepté: ${contract.client}`);
+               
+               renderTradeView();
+               saveState();
+           }
+           
+           function completeContract(contractIndex) {
+               const contract = gameState.activeContracts[contractIndex];
+               if (!contract) return;
+               
+               // Vérifier les ressources
+               if (gameState.resources[contract.demand.resource] < contract.demand.amount) {
+                   logEvent('❌ Ressources insuffisantes pour terminer le contrat');
+                   return;
+               }
+               
+               // Effectuer l'échange
+               gameState.resources[contract.demand.resource] -= contract.demand.amount;
+               
+               if (contract.payment.resource === 'gold') {
+                   gameState.resources.gold += contract.payment.amount;
+               } else {
+                   gameState.resources[contract.payment.resource] = 
+                       (gameState.resources[contract.payment.resource] || 0) + contract.payment.amount;
+               }
+               
+               // Améliorer la réputation
+               gameState.tradeReputation = Math.min(100, (gameState.tradeReputation || 50) + 5);
+               
+               // Supprimer le contrat
+               gameState.activeContracts.splice(contractIndex, 1);
+               
+               logEvent(`✅ Contrat terminé avec ${contract.client}`);
+               addXP(50);
+               
+               renderTradeView();
+               updateAllUI();
+               saveState();
+           }
+           
+           function cancelContract(contractIndex) {
+               const contract = gameState.activeContracts[contractIndex];
+               if (!contract) return;
+               
+               // Pénalité de réputation
+               gameState.tradeReputation = Math.max(0, (gameState.tradeReputation || 50) - 10);
+               
+               gameState.activeContracts.splice(contractIndex, 1);
+               logEvent(`❌ Contrat annulé avec ${contract.client} (réputation -10)`);
+               
+               renderTradeView();
+               saveState();
+           }
+           
+           function updateTradeCalculation() {
+               const offerResource = document.getElementById('offer-resource')?.value;
+               const offerAmount = parseInt(document.getElementById('offer-amount')?.value) || 0;
+               const requestResource = document.getElementById('request-resource')?.value;
+               const requestAmount = parseInt(document.getElementById('request-amount')?.value) || 0;
+               
+               if (!offerResource || !requestResource) return;
+               
+               const prices = getMarketPrices();
+               const offerValue = prices[offerResource] * offerAmount;
+               const requestValue = prices[requestResource] * requestAmount;
+               
+               const offerValueEl = document.getElementById('offer-value');
+               const requestValueEl = document.getElementById('request-value');
+               const fairnessEl = document.getElementById('trade-fairness');
+               
+               if (offerValueEl) offerValueEl.textContent = `Valeur: ${offerValue.toFixed(2)} or`;
+               if (requestValueEl) requestValueEl.textContent = `Valeur: ${requestValue.toFixed(2)} or`;
+               
+               if (fairnessEl && offerAmount > 0 && requestAmount > 0) {
+                   const fairness = (offerValue / requestValue) * 100;
+                   let fairnessText = '';
+                   let fairnessColor = '';
+                   
+                   if (fairness > 120) {
+                       fairnessText = 'Très favorable pour vous';
+                       fairnessColor = 'var(--color-success)';
+                   } else if (fairness > 105) {
+                       fairnessText = 'Favorable pour vous';
+                       fairnessColor = 'var(--color-success)';
+                   } else if (fairness > 95) {
+                       fairnessText = 'Échange équitable';
+                       fairnessColor = 'var(--color-warning)';
+                   } else if (fairness > 80) {
+                       fairnessText = 'Légèrement défavorable';
+                       fairnessColor = 'var(--color-warning)';
+                   } else {
+                       fairnessText = 'Très défavorable pour vous';
+                       fairnessColor = 'var(--color-danger)';
+                   }
+                   
+                   fairnessEl.textContent = fairnessText;
+                   fairnessEl.style.color = fairnessColor;
+               }
+           }
+           
+           function proposeResourceTrade() {
+               const offerResource = document.getElementById('offer-resource')?.value;
+               const offerAmount = parseInt(document.getElementById('offer-amount')?.value) || 0;
+               const requestResource = document.getElementById('request-resource')?.value;
+               const requestAmount = parseInt(document.getElementById('request-amount')?.value) || 0;
+               
+               if (!offerResource || !requestResource || offerAmount <= 0 || requestAmount <= 0) {
+                   logEvent('❌ Veuillez remplir tous les champs correctement');
+                   return;
+               }
+               
+               if (gameState.resources[offerResource] < offerAmount) {
+                   logEvent('❌ Vous n\'avez pas assez de ressources à offrir');
+                   return;
+               }
+               
+               // Calculer la probabilité d'acceptation basée sur l'équité
+               const prices = getMarketPrices();
+               const offerValue = prices[offerResource] * offerAmount;
+               const requestValue = prices[requestResource] * requestAmount;
+               const fairness = offerValue / requestValue;
+               
+               let acceptanceChance = 0;
+               if (fairness >= 1.2) acceptanceChance = 0.9;
+               else if (fairness >= 1.1) acceptanceChance = 0.7;
+               else if (fairness >= 1.0) acceptanceChance = 0.5;
+               else if (fairness >= 0.9) acceptanceChance = 0.3;
+               else acceptanceChance = 0.1;
+               
+               // Bonus de réputation
+               const reputationBonus = (gameState.tradeReputation || 50) / 200;
+               acceptanceChance = Math.min(0.95, acceptanceChance + reputationBonus);
+               
+               if (Math.random() < acceptanceChance) {
+                   // Échange accepté
+                   gameState.resources[offerResource] -= offerAmount;
+                   gameState.resources[requestResource] = (gameState.resources[requestResource] || 0) + requestAmount;
+                   
+                   gameState.tradeReputation = Math.min(100, (gameState.tradeReputation || 50) + 2);
+                   
+                   logEvent(`✅ Échange réussi ! ${offerAmount} ${offerResource} contre ${requestAmount} ${requestResource}`);
+                   showNotification('Échange accepté !', 'success');
+               } else {
+                   // Échange refusé
+                   logEvent(`❌ Échange refusé. Proposez des conditions plus équitables.`);
+                   showNotification('Échange refusé', 'error');
+               }
+               
+               // Ajouter à l'historique
+               if (!gameState.tradeHistory) gameState.tradeHistory = [];
+               gameState.tradeHistory.push({
+                   type: 'exchange',
+                   offered: `${offerAmount} ${offerResource}`,
+                   requested: `${requestAmount} ${requestResource}`,
+                   success: Math.random() < acceptanceChance,
+                   timestamp: Date.now()
+               });
+               
+               renderTradeView();
+               updateAllUI();
+               saveState();
+           }
+
            // --- SYSTÈME DE TUTORIEL ---
            function showTutorial() {
                if (gameState.playerStats.level === 1 && gameState.playerStats.totalBuildings <= 2) {
