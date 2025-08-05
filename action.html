@@ -503,8 +503,14 @@
                achievements: [],
                activeQuests: [],
                completedQuests: [],
+               questPoints: 0,
                eventHistory: [],
                lastEventTime: 0,
+               lastEventCheck: 0,
+               tradeReputation: 50,
+               tradeHistory: [],
+               activeContracts: [],
+               militaryUnits: [],
                lastUpdate: Date.now()
            };
 
@@ -520,7 +526,9 @@
                modalCancelBtn: document.getElementById('modalCancelBtn'), navLinks: document.querySelectorAll('.main-nav a'),
                mainViews: document.querySelectorAll('.main-view'), researchGrid: document.getElementById('research-grid'),
                militaryGrid: document.getElementById('military-grid'), battleGrid: document.getElementById('battle-grid'),
-               diplomacyGrid: document.getElementById('diplomacy-grid'),
+               diplomacyGrid: document.getElementById('diplomacy-grid'), questsGrid: document.getElementById('quests-grid'),
+               tradeGrid: document.getElementById('trade-grid'), achievementsGrid: document.getElementById('achievements-grid'),
+               worldGrid: document.getElementById('world-grid'),
            };
 
            let selectedPlotId = null;
