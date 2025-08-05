@@ -224,7 +224,7 @@
        <!-- HEADER -->
        <header class="game-header">
            <div class="header-content">
-               <div class="player-info"><a href="#">Joueur_01</a></div>
+               <div class="player-info"><a href="#" title="Voir le profil du champion">Joueur_01</a></div>
                <div class="resources">
                    <div class="resource-item" title="Bois">🌲 <span id="resWood">0</span></div>
                    <div class="resource-item" title="Vin">🍇 <span id="resWine">0</span></div>
@@ -234,7 +234,7 @@
                    <div class="resource-item" title="Or">💰 <span id="resGold">0</span></div>
                    <div class="resource-item" title="Points de Recherche">🔬 <span id="resResearch">0</span></div>
                </div>
-               <div class="player-info"><a href="#">Déconnexion</a></div>
+               <div class="player-info"><a href="#" title="Quitter la bataille en douce">Déconnexion</a></div>
            </div>
        </header>
 
@@ -243,13 +243,14 @@
            <!-- MENU GAUCHE (Desktop) -->
            <nav class="left-sidebar main-nav">
                <ul>
-                   <li><a data-view="city">🏛️ <span>Ville</span></a></li>
-                   <li><a data-view="island">🏝️ <span>Île</span></a></li>
-                   <li><a data-view="world">🌍 <span>Monde</span></a></li>
-                   <li><a data-view="research">🔬 <span>Recherche</span></a></li>
-                   <li><a data-view="military">⚔️ <span>Militaire</span></a></li>
-                   <li><a data-view="battle">🛡️ <span>Bataille</span></a></li>
-                   <li><a data-view="diplomacy">🤝 <span>Diplomatie</span></a></li>
+
+                   <li><a data-view="city" title="Visitez votre ville en pantoufles">🏛️ <span>Ville</span></a></li>
+                   <li><a data-view="island" title="Explorer les îles en tongs">🏝️ <span>Île</span></a></li>
+                   <li><a data-view="world" title="Observer le monde d'un coup d'œil">🌍 <span>Monde</span></a></li>
+                   <li><a data-view="research" title="Traquer les savants fous">🔬 <span>Recherche</span></a></li>
+                   <li><a data-view="military" title="Armez-vous, ça va piquer">⚔️ <span>Militaire</span></a></li>
+                   <li><a data-view="diplomacy" title="Serrer des mains virtuelles">🤝 <span>Diplomatie</span></a></li>
+
                </ul>
            </nav>
 
@@ -281,19 +282,21 @@
 
        <!-- NAVIGATION MOBILE -->
        <nav class="mobile-nav main-nav">
-           <a data-view="city">🏛️</a>
-           <a data-view="island">🏝️</a>
-           <a data-view="world">🌍</a>
-           <a data-view="research">🔬</a>
-           <a data-view="military">⚔️</a>
-           <a data-view="battle">🛡️</a>
-           <a data-view="diplomacy">🤝</a>
+²
+           <a href="#" data-view="city" title="Ville, version poche">🏛️</a>
+           <a href="#" data-view="island" title="Île au bout du doigt">🏝️</a>
+           <a href="#" data-view="world" title="Le monde tient dans ta main">🌍</a>
+           <a href="#" data-view="research" title="Science express">🔬</a>
+           <a href="#" data-view="military" title="Prêt pour l'assaut miniature">⚔️</a>
+           <a href="#" data-view="diplomacy" title="Diplomatie de poche">🤝</a>
+
        </nav>
    </div>
    
    <!-- MODAL -->
-   <div class="modal-overlay" id="actionModal"><div class="modal-content"><h4 id="modalTitle"></h4><p id="modalMessage"></p><div id="modal-cost"></div><div class="modal-actions"><button class="modal-btn cancel" id="modalCancelBtn">Annuler</button><button class="modal-btn confirm" id="modalConfirmBtn">Confirmer</button></div></div></div>
-   <div class="modal-overlay" id="buildSelectModal"><div class="modal-content"><h4>Choisir un bâtiment</h4><div id="buildSelectList" class="build-select-grid"></div><div class="modal-actions"><button class="modal-btn cancel" id="buildSelectCancel">Fermer</button></div></div></div>
+
+   <div class="modal-overlay" id="actionModal"><div class="modal-content"><h4 id="modalTitle"></h4><p id="modalMessage"></p><div id="modal-cost"></div><div class="modal-actions"><button class="modal-btn cancel" id="modalCancelBtn" title="Annule comme un ninja">Annuler</button><button class="modal-btn confirm" id="modalConfirmBtn" title="Confirme, brave héros">Confirmer</button></div></div></div>
+
    <script src="gameplay.js"></script>
    <script>
        document.addEventListener('DOMContentLoaded', function() {
