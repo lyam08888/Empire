@@ -10,7 +10,7 @@ if(isset($_GET['e']) && $_GET['e'] == 1) {
 <tr>
 <td><span>USER:</span></td><td><input name="suser" type="text" id="suser" value="root"></td></tr><tr>
 <td><span>PASS:</span></td><td><input type="text" name="spass" id="spass"></td></tr><tr>
-<td><span>DB:</span></td><td><input type="text" name="sdb" id="sdb" value="ikariam"></td></tr><tr>
+<td><span>DB:</span></td><td><input type="text" name="sdb" id="sdb" value="empire"></td></tr><tr>
 <td><span>PREFIX:</span></td><td><input type="text" name="prefix" id="prefix" value="db_"></td>
 </table>
 <input type="submit" class="button" name="Submit" id="Submit" value="Submit">

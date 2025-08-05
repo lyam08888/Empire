@@ -15,7 +15,7 @@ if(!$city->capital||($research->GetResearchStatus("R1")<3)||($city->getBuildingL
  <div id="container">
   <div id="container2">
    <div id="header">
-    <h1>إيكارياما ikariama</h1>
+    <h1>إيكارياما empire</h1>
     <h2>عش في العصور القديمة!</h2>
    </div>
    <div id="avatarNotes"></div>
