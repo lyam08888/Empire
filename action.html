@@ -1303,184 +1303,333 @@
            }
 
          function renderWorldMap() {
+             // Mettre à jour les statistiques mondiales
+             updateWorldStats();
+             
+             // Mettre à jour le système météorologique
+             updateWeatherSystem();
+             
+             // Nettoyer et reconstruire la grille du monde
              dom.worldMapGrid.innerHTML = '';
-              
-              let html = `
-                  <div class="card" style="grid-column: 1 / -1;">
-                      <div style="display: flex; justify-content: space-between; align-items: center;">
-                          <h3>🌍 Carte du Monde - Empire de ${gameState.playerStats.empireName || 'l\'Empereur'}</h3>
-                          <div style="display: flex; gap: 1rem;">
-                              <div>Îles explorées: ${gameState.exploredIslands.length}</div>
-                              <div>Colonies: ${gameState.colonizedIslands.length}</div>
-                              <div>Routes commerciales: ${gameState.tradeRoutes.length}</div>
-                          </div>
-                      </div>
-                  </div>
-                  
-                  <div class="card" style="grid-column: 1 / -1;">
-                      <div id="world-map-container" style="position: relative;">
-                          <div id="world-map-grid" style="display: grid; grid-template-columns: repeat(15, 1fr); gap: 1px; background: #1e40af; padding: 0.5rem; border-radius: 0.5rem;">
-              `;
-              
-              // Générer la carte du monde 15x15
-              for (let y = 0; y < 15; y++) {
-                  for (let x = 0; x < 15; x++) {
-                      const island = getIslandAtPosition(x, y);
-                      const isExplored = gameState.exploredIslands.some(exp => exp.x === x && exp.y === y);
-                      const isColonized = gameState.colonizedIslands.some(col => col.x === x && col.y === y);
-                      const isCurrentIsland = gameState.currentIsland.x === x && gameState.currentIsland.y === y;
-                      
-                      let tileClass = 'ocean';
-                      let tileIcon = '🌊';
-                      let tileTitle = 'Océan';
-                      
-                      if (island) {
-                          tileClass = island.type;
-                          tileIcon = getIslandTypeIcon(island.type);
-                          tileTitle = island.name || `Île [${x},${y}]`;
-                          
-                          if (!isExplored && island.type !== 'capital') {
-                              tileIcon = '❓';
-                              tileTitle = 'Territoire inexploré';
-                          }
-                      }
-                      
-                      html += `
-                          <div class="world-tile ${tileClass} ${isCurrentIsland ? 'current-island' : ''}" 
-                               onclick="selectWorldTile(${x}, ${y})" 
-                               title="${tileTitle}"
-                               style="aspect-ratio: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; border-radius: 0.25rem; position: relative; ${isCurrentIsland ? 'border: 2px solid var(--color-primary); box-shadow: 0 0 10px var(--color-primary);' : 'border: 1px solid rgba(255,255,255,0.2);'} ${isColonized ? 'background: var(--color-success);' : isExplored ? 'background: var(--color-warning);' : island ? 'background: var(--color-panel);' : 'background: #1e40af;'}">
-                              ${tileIcon}
-                              ${isColonized ? '<div style="position: absolute; top: -2px; right: -2px; background: var(--color-success); border-radius: 50%; width: 8px; height: 8px;"></div>' : ''}
-                              ${hasTradeRoute(x, y) ? '<div style="position: absolute; bottom: -2px; left: -2px; background: var(--color-warning); border-radius: 50%; width: 8px; height: 8px;"></div>' : ''}
-                          </div>
-                      `;
-                  }
-              }
-              
-              html += `
-                          </div>
-                          <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem; font-size: 0.9rem;">
-                              <div><span style="color: var(--color-primary);">🏛️</span> Votre capitale</div>
-                              <div><span style="color: var(--color-success);">🏝️</span> Vos colonies</div>
-                              <div><span style="color: var(--color-warning);">🗺️</span> Îles explorées</div>
-                              <div><span style="color: var(--color-danger);">⚔️</span> Territoires hostiles</div>
-                              <div><span style="color: var(--color-text-muted);">🤝</span> Alliés</div>
-                              <div><span style="color: var(--color-warning);">💰</span> Routes commerciales</div>
-                          </div>
-                      </div>
-                  </div>
-              `;
-              
-              // Civilisations connues
-              html += `
-                  <div class="card" style="grid-column: 1 / -1;">
-                      <h3>🏛️ Civilisations Connues</h3>
-                      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
-              `;
-              
-              const knownCivilizations = getKnownCivilizations();
-              knownCivilizations.forEach(civ => {
-                  const relation = gameState.diplomacy.relations[civ.id] || 0;
-                  const relationText = getRelationText(relation);
-                  const relationColor = getRelationColor(relation);
-                  
-                  html += `
-                      <div style="background: var(--color-panel-light); padding: 1rem; border-radius: 0.5rem; border-left: 4px solid ${relationColor};">
-                          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                              <h4 style="margin: 0; color: ${relationColor};">${civ.icon} ${civ.name}</h4>
-                              <span style="font-size: 0.8rem; color: ${relationColor};">${relationText}</span>
-                          </div>
-                          <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">${civ.description}</p>
-                          <div style="font-size: 0.8rem; color: var(--color-text-muted);">
-                              <div>Territoire: ${civ.territories} îles</div>
-                              <div>Puissance militaire: ${civ.militaryPower}</div>
-                              <div>Richesse: ${civ.wealth}</div>
-                          </div>
-                          <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
-                              <button onclick="openDiplomacy('${civ.id}')" class="action-btn" style="font-size: 0.8rem; padding: 0.25rem 0.5rem;">
-                                  Diplomatie
-                              </button>
-                              <button onclick="proposeTrade('${civ.id}')" class="action-btn" style="font-size: 0.8rem; padding: 0.25rem 0.5rem;">
-                                  Commerce
-                              </button>
-                          </div>
-                      </div>
-                  `;
-              });
-              
-              html += `
-                      </div>
-                  </div>
-              `;
-              
-              // Routes commerciales actives
-              if (gameState.tradeRoutes.length > 0) {
-                  html += `
-                      <div class="card" style="grid-column: 1 / -1;">
-                          <h3>🚢 Routes Commerciales Actives</h3>
-                          <div style="margin-top: 1rem;">
-                  `;
-                  
-                  gameState.tradeRoutes.forEach((route, index) => {
-                      const profit = calculateTradeRouteProfit(route);
-                      html += `
-                          <div style="background: var(--color-panel-light); padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
-                              <div>
-                                  <strong>${route.from.name} ↔ ${route.to.name}</strong><br>
-                                  <span style="font-size: 0.9rem; color: var(--color-text-muted);">
-                                      ${route.goods.join(', ')} | Distance: ${route.distance} cases
-                                  </span>
-                              </div>
-                              <div style="text-align: right;">
-                                  <div style="color: var(--color-success); font-weight: bold;">+${profit} or/min</div>
-                                  <button onclick="cancelTradeRoute(${index})" class="action-btn" style="font-size: 0.8rem; padding: 0.25rem 0.5rem; background: var(--color-danger);">
-                                      Annuler
-                                  </button>
-                              </div>
-                          </div>
-                      `;
-                  });
-                  
-                  html += `
-                          </div>
-                      </div>
-                  `;
-              }
-              
-              // Événements mondiaux récents
-              if (gameState.worldEvents.length > 0) {
-                  html += `
-                      <div class="card" style="grid-column: 1 / -1;">
-                          <h3>📰 Événements Mondiaux</h3>
-                          <div style="margin-top: 1rem; max-height: 200px; overflow-y: auto;">
-                  `;
-                  
-                  gameState.worldEvents.slice(-10).reverse().forEach(event => {
-                      const timeAgo = Math.floor((Date.now() - event.timestamp) / 60000);
-                      const timeText = timeAgo < 1 ? 'À l\'instant' : `Il y a ${timeAgo} min`;
-                      
-                      html += `
-                          <div style="background: var(--color-panel-light); padding: 0.5rem; border-radius: 0.25rem; margin-bottom: 0.5rem; border-left: 3px solid var(--color-primary);">
-                              <div style="display: flex; justify-content: space-between; align-items: center;">
-                                  <strong>${event.title}</strong>
-                                  <span style="font-size: 0.8rem; color: var(--color-text-muted);">${timeText}</span>
-                              </div>
-                              <p style="margin: 0.25rem 0 0 0; font-size: 0.9rem;">${event.description}</p>
-                          </div>
-                      `;
-                  });
-                  
-                  html += `
-                          </div>
-                      </div>
-                  `;
-              }
-              
-
-               if(dom.worldMapGrid) {
-                   dom.worldMapGrid.innerHTML = html;
-               }
+             
+             // Générer la carte du monde 20x20 avec océans et îles
+             for (let y = 0; y < 20; y++) {
+                 for (let x = 0; x < 20; x++) {
+                     const tile = document.createElement('div');
+                     tile.className = 'world-tile';
+                     tile.dataset.x = x;
+                     tile.dataset.y = y;
+                     
+                     const island = getIslandAtPosition(x, y);
+                     const isExplored = gameState.exploredIslands.some(exp => exp.x === x && exp.y === y);
+                     const isColonized = gameState.colonizedIslands.some(col => col.x === x && col.y === y);
+                     const hasTradeRoute = gameState.tradeRoutes.some(route => 
+                         (route.from.x === x && route.from.y === y) || (route.to.x === x && route.to.y === y)
+                     );
+                     
+                     // Déterminer le type de tuile
+                     if (!island) {
+                         tile.classList.add('ocean');
+                         tile.innerHTML = '🌊';
+                         tile.title = `Océan [${x},${y}]`;
+                     } else {
+                         if (isColonized || (x === 10 && y === 10)) { // Position de départ du joueur
+                             tile.classList.add('player');
+                             tile.innerHTML = '🏛️';
+                             tile.title = `${island.name} - Votre colonie`;
+                         } else if (island.type === 'ally') {
+                             tile.classList.add('ally');
+                             tile.innerHTML = '🤝';
+                             tile.title = `${island.name} - Allié`;
+                         } else if (island.type === 'enemy') {
+                             tile.classList.add('enemy');
+                             tile.innerHTML = '⚔️';
+                             tile.title = `${island.name} - Ennemi`;
+                         } else if (isExplored) {
+                             tile.classList.add('island');
+                             tile.innerHTML = '🏝️';
+                             tile.title = `${island.name} - Île explorée`;
+                         } else {
+                             tile.classList.add('unexplored');
+                             tile.innerHTML = '❓';
+                             tile.title = `Zone inexplorée [${x},${y}]`;
+                         }
+                     }
+                     
+                     // Marquer les routes commerciales
+                     if (hasTradeRoute) {
+                         tile.classList.add('trade-route');
+                     }
+                     
+                     // Ajouter les événements de clic
+                     tile.addEventListener('click', () => handleWorldTileClick(x, y, island, isExplored));
+                     
+                     dom.worldMapGrid.appendChild(tile);
+                 }
+             }
+             
+             // Mettre à jour les détails du monde
+             updateWorldDetails();
+         }
+         
+         function updateWorldStats() {
+             const islandsEl = document.getElementById('world-islands-count');
+             const routesEl = document.getElementById('world-routes-count');
+             const influenceEl = document.getElementById('world-influence');
+             
+             if (islandsEl) islandsEl.textContent = gameState.exploredIslands.length;
+             if (routesEl) routesEl.textContent = gameState.tradeRoutes.length;
+             if (influenceEl) influenceEl.textContent = gameState.diplomacy.reputation || 50;
+         }
+         
+         function updateWeatherSystem() {
+             const weatherEl = document.getElementById('weather-display');
+             if (!weatherEl) return;
+             
+             const weathers = [
+                 { icon: '☀️', name: 'Temps clair', effect: 'Production +10%' },
+                 { icon: '⛅', name: 'Nuageux', effect: 'Normal' },
+                 { icon: '🌧️', name: 'Pluie', effect: 'Agriculture +15%' },
+                 { icon: '⛈️', name: 'Orage', effect: 'Commerce -20%' },
+                 { icon: '🌪️', name: 'Tempête', effect: 'Navigation impossible' },
+                 { icon: '❄️', name: 'Neige', effect: 'Consommation +25%' }
+             ];
+             
+             // Changer le temps toutes les 5 minutes
+             const currentTime = Math.floor(Date.now() / (5 * 60 * 1000));
+             const weatherIndex = currentTime % weathers.length;
+             const currentWeather = weathers[weatherIndex];
+             
+             weatherEl.innerHTML = `${currentWeather.icon} ${currentWeather.name}`;
+             weatherEl.title = currentWeather.effect;
+         }
+         
+         function updateWorldDetails() {
+             const eventsEl = document.getElementById('world-events-list');
+             const diplomacyEl = document.getElementById('diplomacy-status');
+             const tradesEl = document.getElementById('trade-routes-list');
+             
+             // Événements mondiaux récents
+             if (eventsEl) {
+                 const recentEvents = gameState.worldEvents.slice(-3);
+                 if (recentEvents.length > 0) {
+                     eventsEl.innerHTML = recentEvents.map(event => 
+                         `<div style="margin-bottom: 0.5rem; padding: 0.25rem; background: rgba(255,255,255,0.1); border-radius: 0.25rem;">
+                             <strong>${event.title}</strong><br>
+                             <small>${event.description}</small>
+                         </div>`
+                     ).join('');
+                 } else {
+                     eventsEl.textContent = 'Aucun événement récent';
+                 }
+             }
+             
+             // Statut diplomatique
+             if (diplomacyEl) {
+                 const reputation = gameState.diplomacy.reputation || 50;
+                 let status = 'Neutre';
+                 if (reputation >= 80) status = 'Excellent';
+                 else if (reputation >= 60) status = 'Bon';
+                 else if (reputation >= 40) status = 'Moyen';
+                 else if (reputation >= 20) status = 'Mauvais';
+                 else status = 'Hostile';
+                 
+                 diplomacyEl.innerHTML = `
+                     <div>Réputation: ${reputation}/100</div>
+                     <div>Statut: ${status}</div>
+                 `;
+             }
+             
+             // Routes commerciales
+             if (tradesEl) {
+                 if (gameState.tradeRoutes.length > 0) {
+                     tradesEl.innerHTML = gameState.tradeRoutes.map((route, index) => 
+                         `<div style="margin-bottom: 0.5rem; padding: 0.25rem; background: rgba(255,255,255,0.1); border-radius: 0.25rem;">
+                             <strong>${route.from.name} ↔ ${route.to.name}</strong><br>
+                             <small>Distance: ${route.distance} | Biens: ${route.goods.join(', ')}</small>
+                             <button onclick="cancelTradeRoute(${index})" style="float: right; background: var(--color-danger); border: none; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.7rem;">❌</button>
+                         </div>`
+                     ).join('');
+                 } else {
+                     tradesEl.textContent = 'Aucune route active';
+                 }
+             }
+         }
+         
+         // Nouvelles fonctions pour les améliorations de l'île
+         function developIsland() {
+             const currentIslandKey = `${gameState.currentIsland.x}-${gameState.currentIsland.y}`;
+             const islandData = gameState.islandDetails[currentIslandKey];
+             
+             if (!islandData) return;
+             
+             const cost = {
+                 gold: islandData.development * 1000,
+                 wood: islandData.development * 500,
+                 marble: islandData.development * 200
+             };
+             
+             // Vérifier si le joueur a assez de ressources
+             for (const res in cost) {
+                 if (gameState.resources[res] < cost[res]) {
+                     showModal("Développement impossible", `Ressources insuffisantes. Coût: ${Object.entries(cost).map(([r, c]) => `${c} ${r}`).join(', ')}`);
+                     return;
+                 }
+             }
+             
+             // Déduire les ressources
+             for (const res in cost) {
+                 gameState.resources[res] -= cost[res];
+             }
+             
+             // Améliorer l'île
+             islandData.development++;
+             islandData.population += 200;
+             islandData.happiness = Math.min(100, islandData.happiness + 5);
+             
+             // Améliorer les districts
+             Object.values(islandData.districts).forEach(district => {
+                 if (Math.random() < 0.5) {
+                     district.level++;
+                 }
+             });
+             
+             logEvent(`🏗️ ${islandData.name} développée au niveau ${islandData.development}`);
+             addXP(100);
+             
+             renderIslandView();
+             updateAllUI();
+             saveState();
+         }
+         
+         function exploreIsland() {
+             const currentIslandKey = `${gameState.currentIsland.x}-${gameState.currentIsland.y}`;
+             const islandData = gameState.islandDetails[currentIslandKey];
+             
+             if (!islandData) return;
+             
+             const cost = { gold: 200, wood: 100 };
+             
+             // Vérifier si le joueur a assez de ressources
+             for (const res in cost) {
+                 if (gameState.resources[res] < cost[res]) {
+                     showModal("Exploration impossible", "Ressources insuffisantes pour l'exploration.");
+                     return;
+                 }
+             }
+             
+             // Déduire les ressources
+             for (const res in cost) {
+                 gameState.resources[res] -= cost[res];
+             }
+             
+             // Découvrir de nouvelles ressources ou caractéristiques
+             const discoveries = [
+                 { type: 'resource', name: 'Gisement de fer', bonus: 'iron' },
+                 { type: 'resource', name: 'Source d\'eau pure', bonus: 'happiness' },
+                 { type: 'terrain', name: 'Terres fertiles', bonus: 'agriculture' },
+                 { type: 'wonder', name: 'Ruines antiques', bonus: 'culture' },
+                 { type: 'danger', name: 'Créatures sauvages', bonus: 'military' }
+             ];
+             
+             const discovery = discoveries[Math.floor(Math.random() * discoveries.length)];
+             
+             // Ajouter la découverte aux ressources naturelles
+             if (!islandData.naturalResources.includes(discovery.name)) {
+                 islandData.naturalResources.push(discovery.name);
+             }
+             
+             // Appliquer les bonus
+             switch (discovery.bonus) {
+                 case 'happiness':
+                     islandData.happiness = Math.min(100, islandData.happiness + 10);
+                     break;
+                 case 'iron':
+                     gameState.resources.sulfur = (gameState.resources.sulfur || 0) + 50;
+                     break;
+                 case 'agriculture':
+                     gameState.resources.wine = (gameState.resources.wine || 0) + 30;
+                     break;
+             }
+             
+             logEvent(`🔍 Découverte sur ${islandData.name}: ${discovery.name}`);
+             addXP(50);
+             
+             renderIslandView();
+             updateAllUI();
+             saveState();
+         }
+         
+         function showBuildingOptions(x, y, terrain) {
+             const buildings = [
+                 { name: 'Avant-poste', icon: '🏕️', cost: { wood: 200, gold: 100 }, description: 'Étend votre influence' },
+                 { name: 'Mine', icon: '⛏️', cost: { wood: 300, gold: 200 }, description: 'Extrait des minerais' },
+                 { name: 'Ferme', icon: '🚜', cost: { wood: 250, gold: 150 }, description: 'Produit de la nourriture' },
+                 { name: 'Tour de Guet', icon: '🗼', cost: { wood: 400, gold: 300 }, description: 'Surveille les environs' }
+             ];
+             
+             let html = `
+                 <h4>Construire sur [${x},${y}]</h4>
+                 <p>Terrain: ${terrain.name}</p>
+                 <div class="build-select-grid">
+             `;
+             
+             buildings.forEach(building => {
+                 const canAfford = Object.entries(building.cost).every(([res, cost]) => gameState.resources[res] >= cost);
+                 html += `
+                     <div class="build-option ${canAfford ? '' : 'disabled'}" onclick="${canAfford ? `buildOnIsland(${x}, ${y}, '${building.name}')` : ''}">
+                         <div>${building.icon}</div>
+                         <div>${building.name}</div>
+                         <div class="cost">${Object.entries(building.cost).map(([r, c]) => `${c} ${r}`).join(', ')}</div>
+                     </div>
+                 `;
+             });
+             
+             html += '</div>';
+             showModal('Construction', html);
+         }
+         
+         function buildOnIsland(x, y, buildingName) {
+             const buildings = {
+                 'Avant-poste': { icon: '🏕️', cost: { wood: 200, gold: 100 }, effect: 'influence' },
+                 'Mine': { icon: '⛏️', cost: { wood: 300, gold: 200 }, effect: 'mining' },
+                 'Ferme': { icon: '🚜', cost: { wood: 250, gold: 150 }, effect: 'food' },
+                 'Tour de Guet': { icon: '🗼', cost: { wood: 400, gold: 300 }, effect: 'defense' }
+             };
+             
+             const building = buildings[buildingName];
+             if (!building) return;
+             
+             // Déduire les ressources
+             Object.entries(building.cost).forEach(([res, cost]) => {
+                 gameState.resources[res] -= cost;
+             });
+             
+             // Ajouter le bâtiment aux données de l'île
+             const currentIslandKey = `${gameState.currentIsland.x}-${gameState.currentIsland.y}`;
+             const islandData = gameState.islandDetails[currentIslandKey];
+             
+             if (!islandData.specialBuildings) {
+                 islandData.specialBuildings = [];
+             }
+             
+             islandData.specialBuildings.push({
+                 x: x,
+                 y: y,
+                 name: buildingName,
+                 icon: building.icon,
+                 effect: building.effect
+             });
+             
+             logEvent(`🏗️ ${buildingName} construite sur [${x},${y}]`);
+             addXP(25);
+             gameState.playerStats.totalBuildings++;
+             
+             dom.modal.style.display = 'none';
+             renderIslandView();
+             updateAllUI();
+             saveState();
+         }
            }
 
            function handleWorldTileClick(x, y, island, explored) {
@@ -3612,477 +3761,4 @@
                                        `<button onclick="participateInEvent('${event.id}', '${action.id}')" class="action-btn" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
                                            ${action.name}
                                        </button>`
-                                   ).join('')}
-                               </div>
-                           </div>
-                       `;
-                   });
-                   
-                   html += `
-                           </div>
-                       </div>
-                   `;
-               }
                
-               // Historique des quêtes terminées (dernières 10)
-               if (gameState.completedQuests.length > 0) {
-                   html += `
-                       <div class="card" style="grid-column: 1 / -1;">
-                           <h3>✅ Missions Récemment Terminées</h3>
-                           <div style="max-height: 300px; overflow-y: auto; margin-top: 1rem;">
-                   `;
-                   
-                   gameState.completedQuests.slice(-10).reverse().forEach(quest => {
-                       const timeAgo = Math.floor((Date.now() - quest.completedAt) / 60000);
-                       const timeText = timeAgo < 1 ? 'À l\'instant' : `Il y a ${timeAgo} min`;
-                       
-                       html += `
-                           <div style="background: var(--color-panel-light); padding: 0.75rem; border-radius: 0.25rem; margin-bottom: 0.5rem; border-left: 3px solid var(--color-success);">
-                               <div style="display: flex; justify-content: space-between; align-items: center;">
-                                   <div>
-                                       <strong>${quest.icon} ${quest.title}</strong>
-                                       <div style="font-size: 0.8rem; color: var(--color-text-muted); margin-top: 0.25rem;">
-                                           Récompenses reçues: ${formatQuestRewards(quest.rewards)}
-                                       </div>
-                                   </div>
-                                   <span style="font-size: 0.8rem; color: var(--color-text-muted);">${timeText}</span>
-                               </div>
-                           </div>
-                       `;
-                   });
-                   
-                   html += `
-                           </div>
-                       </div>
-                   `;
-               }
-               
-               dom.questsGrid.innerHTML = html;
-           }
-           
-           function generateAvailableQuests() {
-               const questTemplates = [
-                   {
-                       id: 'build_structures',
-                       icon: '🏗️',
-                       title: 'Expansion Urbaine',
-                       description: 'Votre ville a besoin de nouveaux bâtiments pour prospérer.',
-                       objective: 'Construire 3 bâtiments',
-                       difficulty: 'Facile',
-                       type: 'build',
-                       target: 3,
-                       rewards: { gold: 500, xp: 100, questPoints: 10 },
-                       requirements: { level: 1 }
-                   },
-                   {
-                       id: 'explore_islands',
-                       icon: '🗺️',
-                       title: 'Explorateur des Mers',
-                       description: 'Les océans regorgent d\'îles mystérieuses à découvrir.',
-                       objective: 'Explorer 5 nouvelles îles',
-                       difficulty: 'Moyen',
-                       type: 'explore',
-                       target: 5,
-                       rewards: { gold: 1000, wood: 500, xp: 200, questPoints: 25 },
-                       requirements: { level: 3, exploredIslands: 2 }
-                   },
-                   {
-                       id: 'establish_colonies',
-                       icon: '🏝️',
-                       title: 'Fondateur d\'Empire',
-                       description: 'Étendez votre influence en établissant de nouvelles colonies.',
-                       objective: 'Coloniser 2 îles',
-                       difficulty: 'Difficile',
-                       type: 'colonize',
-                       target: 2,
-                       rewards: { gold: 2000, research: 100, xp: 300, questPoints: 50 },
-                       requirements: { level: 5, colonizedIslands: 0 }
-                   },
-                   {
-                       id: 'trade_routes',
-                       icon: '🚢',
-                       title: 'Maître Marchand',
-                       description: 'Le commerce est la clé de la prospérité.',
-                       objective: 'Établir 3 routes commerciales',
-                       difficulty: 'Moyen',
-                       type: 'trade',
-                       target: 3,
-                       rewards: { gold: 1500, wine: 200, xp: 250, questPoints: 30 },
-                       requirements: { level: 4, colonizedIslands: 1 }
-                   },
-                   {
-                       id: 'research_tech',
-                       icon: '🔬',
-                       title: 'Savant Érudit',
-                       description: 'La connaissance est le pouvoir ultime.',
-                       objective: 'Rechercher 5 technologies',
-                       difficulty: 'Moyen',
-                       type: 'research',
-                       target: 5,
-                       rewards: { research: 500, crystal: 100, xp: 200, questPoints: 35 },
-                       requirements: { level: 3, researchCompleted: 2 }
-                   },
-                   {
-                       id: 'military_power',
-                       icon: '⚔️',
-                       title: 'Seigneur de Guerre',
-                       description: 'Une armée puissante protège votre empire.',
-                       objective: 'Entraîner 50 unités militaires',
-                       difficulty: 'Difficile',
-                       type: 'military',
-                       target: 50,
-                       rewards: { gold: 1000, sulfur: 200, xp: 300, questPoints: 40 },
-                       requirements: { level: 6, militaryUnits: 10 }
-                   },
-                   {
-                       id: 'resource_master',
-                       icon: '💎',
-                       title: 'Maître des Ressources',
-                       description: 'Accumulez des richesses pour votre empire.',
-                       objective: 'Posséder 10000 or et 5000 de chaque ressource',
-                       difficulty: 'Très Difficile',
-                       type: 'resources',
-                       target: { gold: 10000, wood: 5000, wine: 5000, marble: 5000, crystal: 5000, sulfur: 5000 },
-                       rewards: { gold: 5000, research: 200, xp: 500, questPoints: 100 },
-                       requirements: { level: 8 }
-                   }
-               ];
-               
-               // Filtrer les quêtes disponibles selon les prérequis
-               return questTemplates.filter(quest => {
-                   if (gameState.activeQuests.some(active => active.id === quest.id)) return false;
-                   if (gameState.completedQuests.some(completed => completed.id === quest.id)) return false;
-                   
-                   const reqs = quest.requirements;
-                   if (reqs.level && gameState.playerStats.level < reqs.level) return false;
-                   if (reqs.exploredIslands && gameState.exploredIslands.length < reqs.exploredIslands) return false;
-                   if (reqs.colonizedIslands && gameState.colonizedIslands.length < reqs.colonizedIslands) return false;
-                   if (reqs.researchCompleted && gameState.researchCompleted.length < reqs.researchCompleted) return false;
-                   if (reqs.militaryUnits && gameState.militaryUnits.length < reqs.militaryUnits) return false;
-                   
-                   return true;
-               }).slice(0, 6); // Limiter à 6 quêtes disponibles
-           }
-           
-           function calculateQuestProgress(quest) {
-               let current = 0;
-               const required = quest.target;
-               
-               switch (quest.type) {
-                   case 'build':
-                       current = gameState.playerStats.totalBuildings;
-                       break;
-                   case 'explore':
-                       current = gameState.exploredIslands.length;
-                       break;
-                   case 'colonize':
-                       current = gameState.colonizedIslands.length;
-                       break;
-                   case 'trade':
-                       current = gameState.tradeRoutes.length;
-                       break;
-                   case 'research':
-                       current = gameState.researchCompleted.length;
-                       break;
-                   case 'military':
-                       current = gameState.militaryUnits.length;
-                       break;
-                   case 'resources':
-                       // Pour les quêtes de ressources, vérifier si toutes les conditions sont remplies
-                       current = Object.entries(required).every(([resource, amount]) => 
-                           gameState.resources[resource] >= amount
-                       ) ? 1 : 0;
-                       return { current: current, required: 1 };
-               }
-               
-               return { current: Math.min(current, required), required: required };
-           }
-           
-           function formatQuestRewards(rewards) {
-               return Object.entries(rewards).map(([resource, amount]) => {
-                   const icons = {
-                       gold: '💰', wood: '🌲', wine: '🍇', marble: '🏛️',
-                       crystal: '💎', sulfur: '🔥', research: '🔬', xp: '⭐', questPoints: '🏆'
-                   };
-                   return `${amount} ${icons[resource] || resource}`;
-               }).join(', ');
-           }
-           
-           function canAcceptQuest(quest) {
-               return gameState.activeQuests.length < 5; // Limite de 5 quêtes actives
-           }
-           
-           function acceptQuest(questIndex) {
-               const availableQuests = generateAvailableQuests();
-               const quest = availableQuests[questIndex];
-               
-               if (!quest || !canAcceptQuest(quest)) {
-                   logEvent('❌ Impossible d\'accepter cette quête');
-                   return;
-               }
-               
-               const activeQuest = {
-                   ...quest,
-                   acceptedAt: Date.now(),
-                   deadline: quest.timeLimit ? Date.now() + (quest.timeLimit * 60000) : null
-               };
-               
-               gameState.activeQuests.push(activeQuest);
-               logEvent(`📋 Quête acceptée: ${quest.title}`);
-               
-               renderQuestsView();
-               saveState();
-           }
-           
-           function completeQuest(questIndex) {
-               const quest = gameState.activeQuests[questIndex];
-               if (!quest) return;
-               
-               const progress = calculateQuestProgress(quest);
-               if (progress.current < progress.required) {
-                   logEvent('❌ Quête pas encore terminée');
-                   return;
-               }
-               
-               // Donner les récompenses
-               Object.entries(quest.rewards).forEach(([resource, amount]) => {
-                   if (resource === 'xp') {
-                       addXP(amount);
-                   } else if (resource === 'questPoints') {
-                       gameState.questPoints = (gameState.questPoints || 0) + amount;
-                   } else {
-                       gameState.resources[resource] = (gameState.resources[resource] || 0) + amount;
-                   }
-               });
-               
-               // Marquer comme terminée
-               const completedQuest = {
-                   ...quest,
-                   completedAt: Date.now()
-               };
-               
-               gameState.completedQuests.push(completedQuest);
-               gameState.activeQuests.splice(questIndex, 1);
-               
-               logEvent(`✅ Quête terminée: ${quest.title}`);
-               showNotification(`Quête terminée ! Récompenses: ${formatQuestRewards(quest.rewards)}`, 'success');
-               
-               renderQuestsView();
-               updateAllUI();
-               saveState();
-           }
-           
-           function abandonQuest(questIndex) {
-               const quest = gameState.activeQuests[questIndex];
-               if (!quest) return;
-               
-               gameState.activeQuests.splice(questIndex, 1);
-               logEvent(`❌ Quête abandonnée: ${quest.title}`);
-               
-               renderQuestsView();
-               saveState();
-           }
-           
-           function getActiveWorldEvents() {
-               const now = Date.now();
-               
-               // Générer des événements dynamiques
-               const eventTemplates = [
-                   {
-                       id: 'pirate_raid',
-                       icon: '🏴‍☠️',
-                       title: 'Raid de Pirates',
-                       description: 'Des pirates menacent vos routes commerciales ! Défendez-vous ou négociez.',
-                       duration: 2 * 60 * 60 * 1000, // 2 heures
-                       actions: [
-                           { id: 'fight', name: 'Combattre', cost: { sulfur: 100 }, reward: { gold: 1000, xp: 150 } },
-                           { id: 'negotiate', name: 'Négocier', cost: { gold: 500 }, reward: { wine: 200, xp: 50 } }
-                       ]
-                   },
-                   {
-                       id: 'merchant_festival',
-                       icon: '🎪',
-                       title: 'Festival des Marchands',
-                       description: 'Un grand festival commercial offre des opportunités d\'échange exceptionnelles.',
-                       duration: 3 * 60 * 60 * 1000, // 3 heures
-                       actions: [
-                           { id: 'participate', name: 'Participer', cost: { gold: 200 }, reward: { wine: 300, marble: 150, xp: 100 } },
-                           { id: 'sponsor', name: 'Sponsoriser', cost: { gold: 1000 }, reward: { gold: 1500, crystal: 100, xp: 200 } }
-                       ]
-                   },
-                   {
-                       id: 'ancient_ruins',
-                       icon: '🏛️',
-                       title: 'Ruines Antiques Découvertes',
-                       description: 'Des ruines mystérieuses ont été découvertes. Explorez-les pour des trésors anciens.',
-                       duration: 4 * 60 * 60 * 1000, // 4 heures
-                       actions: [
-                           { id: 'explore', name: 'Explorer', cost: { wood: 200 }, reward: { research: 200, crystal: 100, xp: 250 } },
-                           { id: 'excavate', name: 'Excaver', cost: { gold: 800, marble: 100 }, reward: { gold: 2000, research: 300, xp: 400 } }
-                       ]
-                   }
-               ];
-               
-               // Vérifier s'il faut générer de nouveaux événements
-               if (!gameState.worldEvents) gameState.worldEvents = [];
-               
-               const activeEvents = gameState.worldEvents.filter(event => event.endTime > now);
-               
-               // Générer un nouvel événement si nécessaire (10% de chance toutes les 30 minutes)
-               const lastEventCheck = gameState.lastEventCheck || 0;
-               if (now - lastEventCheck > 30 * 60 * 1000) { // 30 minutes
-                   gameState.lastEventCheck = now;
-                   
-                   if (Math.random() < 0.1 && activeEvents.length < 2) { // 10% de chance, max 2 événements
-                       const template = eventTemplates[Math.floor(Math.random() * eventTemplates.length)];
-                       const newEvent = {
-                           ...template,
-                           startTime: now,
-                           endTime: now + template.duration
-                       };
-                       
-                       gameState.worldEvents.push(newEvent);
-                       activeEvents.push(newEvent);
-                       
-                       showNotification(`Nouvel événement: ${newEvent.title}`, 'info');
-                   }
-               }
-               
-               return activeEvents;
-           }
-           
-           function participateInEvent(eventId, actionId) {
-               const event = gameState.worldEvents.find(e => e.id === eventId);
-               if (!event || event.endTime < Date.now()) {
-                   logEvent('❌ Événement expiré ou introuvable');
-                   return;
-               }
-               
-               const action = event.actions.find(a => a.id === actionId);
-               if (!action) return;
-               
-               // Vérifier les coûts
-               for (const [resource, cost] of Object.entries(action.cost)) {
-                   if (gameState.resources[resource] < cost) {
-                       logEvent(`❌ Ressources insuffisantes pour ${action.name}`);
-                       return;
-                   }
-               }
-               
-               // Déduire les coûts
-               Object.entries(action.cost).forEach(([resource, cost]) => {
-                   gameState.resources[resource] -= cost;
-               });
-               
-               // Donner les récompenses
-               Object.entries(action.reward).forEach(([resource, amount]) => {
-                   if (resource === 'xp') {
-                       addXP(amount);
-                   } else {
-                       gameState.resources[resource] = (gameState.resources[resource] || 0) + amount;
-                   }
-               });
-               
-               logEvent(`🌟 Participation à l'événement: ${action.name}`);
-               showNotification(`Événement réussi ! Récompenses: ${formatQuestRewards(action.reward)}`, 'success');
-               
-               // Marquer l'événement comme terminé pour ce joueur
-               event.participated = true;
-               
-               renderQuestsView();
-               updateAllUI();
-               saveState();
-           }
-
-           // --- SYSTÈME DE COMMERCE AVANCÉ ---
-           function renderTradeView() {
-               let html = `
-                   <div class="card" style="grid-column: 1 / -1;">
-                       <div style="display: flex; justify-content: space-between; align-items: center;">
-                           <h3>💱 Centre Commercial</h3>
-                           <div style="display: flex; gap: 1rem;">
-                               <div>Routes actives: ${gameState.tradeRoutes.length}</div>
-                               <div>Profit total: ${calculateTotalTradeProfit()} or/min</div>
-                               <div>Réputation: ${gameState.tradeReputation || 50}/100</div>
-                           </div>
-                       </div>
-                   </div>
-               `;
-               
-               // Marché mondial des ressources
-               html += `
-                   <div class="card" style="grid-column: 1 / -1;">
-                       <h3>📈 Marché Mondial des Ressources</h3>
-                       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
-               `;
-               
-               const marketPrices = getMarketPrices();
-               const resources = ['wood', 'wine', 'marble', 'crystal', 'sulfur'];
-               
-               resources.forEach(resource => {
-                   const price = marketPrices[resource];
-                   const trend = getMarketTrend(resource);
-                   const trendIcon = trend > 0 ? '📈' : trend < 0 ? '📉' : '➡️';
-                   const trendColor = trend > 0 ? 'var(--color-success)' : trend < 0 ? 'var(--color-danger)' : 'var(--color-warning)';
-                   const playerStock = gameState.resources[resource] || 0;
-                   
-                   html += `
-                       <div style="background: var(--color-panel-light); padding: 1rem; border-radius: 0.5rem; text-align: center;">
-                           <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">${getResourceIcon(resource)}</div>
-                           <h4 style="margin: 0.25rem 0; text-transform: capitalize;">${resource}</h4>
-                           <div style="font-size: 1.2rem; font-weight: bold; color: var(--color-primary); margin: 0.5rem 0;">
-                               ${price.toFixed(2)} or
-                           </div>
-                           <div style="color: ${trendColor}; font-size: 0.9rem; margin-bottom: 0.5rem;">
-                               ${trendIcon} ${Math.abs(trend).toFixed(1)}%
-                           </div>
-                           <div style="font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.5rem;">
-                               Stock: ${playerStock.toLocaleString()}
-                           </div>
-                           <div style="display: flex; gap: 0.25rem;">
-                               <button onclick="quickTrade('sell', '${resource}', 100)" class="action-btn" style="font-size: 0.7rem; padding: 0.25rem;" ${playerStock >= 100 ? '' : 'disabled'}>
-                                   Vendre 100
-                               </button>
-                               <button onclick="quickTrade('buy', '${resource}', 100)" class="action-btn" style="font-size: 0.7rem; padding: 0.25rem;" ${gameState.resources.gold >= price * 100 ? '' : 'disabled'}>
-                                   Acheter 100
-                               </button>
-                           </div>
-                       </div>
-                   `;
-               });
-               
-               html += `
-                       </div>
-                   </div>
-               `;
-               
-               // Contrats commerciaux disponibles
-               const availableContracts = generateTradeContracts();
-               if (availableContracts.length > 0) {
-                   html += `
-                       <div class="card" style="grid-column: 1 / -1;">
-                           <h3>📋 Contrats Commerciaux Disponibles</h3>
-                           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1rem; margin-top: 1rem;">
-                   `;
-                   
-                   availableContracts.forEach((contract, index) => {
-                       const profitability = calculateContractProfitability(contract);
-                       const profitColor = profitability > 20 ? 'var(--color-success)' : profitability > 0 ? 'var(--color-warning)' : 'var(--color-danger)';
-                       
-                       html += `
-                           <div style="background: var(--color-panel-light); padding: 1rem; border-radius: 0.5rem; border-left: 4px solid ${profitColor};">
-                               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                                   <h4 style="margin: 0;">${contract.icon} ${contract.client}</h4>
-                                   <span style="font-size: 0.8rem; color: ${profitColor};">
-                                       ${profitability > 0 ? '+' : ''}${profitability.toFixed(1)}% profit
-                                   </span>
-                               </div>
-                               <p style="margin: 0.5rem 0; font-size: 0.9rem;">${contract.description}</p>
-                               <div style="margin: 0.5rem 0; font-size: 0.9rem;">
-                                   <strong>Demande:</strong> ${contract.demand.amount} ${contract.demand.resource}<br>
-                                   <strong>Offre:</strong> ${contract.payment.amount} ${contract.payment.resource}<br>
-                                   <strong>Délai:</strong> ${contract.deadline} jours
-                               </div>
-                               <div style="display: flex; justify-content: space-between; align-items: center;">
-                                   <div style="font-size: 0.8rem; color: var(--color-text-muted);">
-                         
