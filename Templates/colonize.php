@@ -1,11 +1,11 @@
 <?php
 if(!isset($_SESSION['sessid']))
-	header("Location: ../index.php");
+	header("Location: ../index.html");
 $session->changeChecker();
 if(!isset($_GET['islandId'])||!isset($_GET['position']))
- header("Location: index.php");
+ header("Location: index.html");
 if(!$city->capital||($research->GetResearchStatus("R1")<3)||($city->getBuildingLevel2(8)<1))
- header("Location: action.php?view=error");
+ header("Location: action.html?view=error");
 ?>
 <link href="css/common.css" rel="stylesheet" type="text/css" media="screen">
 <link href="css/colonize.css" rel="stylesheet" type="text/css" media="screen">

@@ -49,11 +49,11 @@ class CBuilding {
 		  case "build":
 		    if(!isset($get['building'])||
 			   !$this->canBuild())
-			 header("Location: action.php?view=error");
+			 header("Location: action.html?view=error");
 			
 			// Check town hall restriction
 			if($get['building'] == 0 && !$this->canBuildTownHall()) {
-				header("Location: action.php?view=error&message=town_hall_exists");
+				header("Location: action.html?view=error&message=town_hall_exists");
 				return;
 			}
 			
@@ -62,13 +62,13 @@ class CBuilding {
 		  case "upgradeBuilding":
 		    if(!isset($get['level']) || $get['level']>17||
 			   !$this->canBuild())
-			 header("Location: action.php?view=error");
+			 header("Location: action.html?view=error");
 			$this->upgradeBuilding($get['position'],$get['level']);
 		  break;
 		 }
 		}
 		else 
-			header("Location: action.php?view=error");
+			header("Location: action.html?view=error");
 	}
 	
 	private function GetBuildingNameFromPos($pos){
@@ -172,7 +172,7 @@ class CBuilding {
 		
 		// Check town hall restriction
 		if($bid == 0 && !$this->canBuildTownHall()) {
-			header("Location: action.php?view=error&message=town_hall_exists");
+			header("Location: action.html?view=error&message=town_hall_exists");
 			return;
 		}
 		
@@ -190,11 +190,11 @@ class CBuilding {
 					   $city->pop,0);
 		   $database->setBuildingsField($city->cid,"b".$pos,"-1");
 		   $database->setBuildingsField($city->cid,"b".$pos."t",$bid);
-		   header("Location: action.php?view=city&id=".$city->cid);
+		   header("Location: action.html?view=city&id=".$city->cid);
 		 }
 	   }
 	   else
-		header("Location: action.php?view=error");
+		header("Location: action.html?view=error");
 	}
 	
 	private function upgradeBuilding($pos,$level) {
@@ -218,11 +218,11 @@ class CBuilding {
 					   $this->GetBuildingReqSulfur($bid,$level+1),
 					   $city->pop,0);
 		   $database->setBuildingsField($city->cid,"b".$pos,"-1");
-		   header("Location: action.php?view=city&id=".$city->cid);
+		   header("Location: action.html?view=city&id=".$city->cid);
 		 }
 	   }
 	   else
-		header("Location: action.php?view=error");
+		header("Location: action.html?view=error");
 	}
 	
 	public function meetRequirement($bid) {

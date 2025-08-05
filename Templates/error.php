@@ -1,6 +1,6 @@
 ﻿<?php 
 if(!isset($_SESSION['sessid']))
-	header("Location: index.php");
+	header("Location: index.html");
 ?>
 <link href="css/common.css" rel="stylesheet" type="text/css" media="screen">
 <link href="css/error.css" rel="stylesheet" type="text/css" media="screen">

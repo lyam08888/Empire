@@ -185,15 +185,15 @@ class CResearch{
 	public function doResearch($get){
 	 if(!isset($get['type']) ||
 	    !isset($get['actionRequest']))
-		 header("Location: action.php?view=error");
+		 header("Location: action.html?view=error");
 	 global $database,$session,$city;
 	 if($get['actionRequest'] != $session->checker)
-	  header("Location: action.php?view=error");
+	  header("Location: action.html?view=error");
 	 $R = $get["type"];
 	 $Rlevel = $this->GetNextResearch($R);
 	 if($this->IsNoEnoughPoints($R,$Rlevel) ||
 	    $this->IsNoEnoughConds($R,$Rlevel))
-		 header("Location: action.php?view=error");
+		 header("Location: action.html?view=error");
 	 $rn = $database->getUserField($session->uid,"researches",0);
 	 $rn -= $this->GetResearchPoints($R,$Rlevel);
 	 $database->updateUserField($session->uid,"researches",$rn,1);
@@ -218,7 +218,7 @@ class CResearch{
 	  	$database->addExperiment($city->uid);
 	  }
 	 }
-	 header("Location: action.php?view=researchAdvisor&oldView=city&id=".$city->cid);
+	 header("Location: action.html?view=researchAdvisor&oldView=city&id=".$city->cid);
 	}
 	public function GetResearchStatus($R){
 	 return $this->userResearches["$R"];

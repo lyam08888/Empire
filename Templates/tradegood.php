@@ -1,11 +1,11 @@
 <?php
 if(!isset($_SESSION['sessid']))
-	header("Location: ../index.php");
+	header("Location: ../index.html");
 
 if(!isset($_GET['type']))
-	header("Location: action.php?view=error");
+	header("Location: action.html?view=error");
 if($_SESSION["iid"] != $city->iid)
- header("Location: action.php?view=error");
+ header("Location: action.html?view=error");
 ?>
 <link href="css/common.css" rel="stylesheet" type="text/css" media="screen">
 <link href="css/tradegood.css" rel="stylesheet" type="text/css" media="screen">

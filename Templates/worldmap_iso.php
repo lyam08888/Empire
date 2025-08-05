@@ -1,9 +1,9 @@
 <?php
 if(!isset($_SESSION['sessid']))
-	header("Location: index.php");
+	header("Location: index.html");
 //view=worldmap_iso&islandX=48&islandY=77
 if(!isset($_GET['islandX'])||!isset($_GET['islandY']))
- header("Location: ../index.php");
+ header("Location: ../index.html");
 ?>
 <link href="css/common.css" rel="stylesheet" type="text/css" media="screen">
 <link href="css/worldmap.css" rel="stylesheet" type="text/css" media="screen">

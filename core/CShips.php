@@ -76,9 +76,9 @@ class CShips {
 	 if(!isset($post['actionRequest']) ||
         !isset($post['position']) ||
         ($post['actionRequest'] != $session->checker))
-          header("Location: action.php?view=error");
+          header("Location: action.html?view=error");
 	 if($this->GetShipsBuildingListNbr()>2)
-	     header("Location: action.php?view=error");
+	     header("Location: action.html?view=error");
 	 $s210=0;$s211=0;$s212=0;$s213=0;$s214=0;$s215=0;$s216=0;
 	 //////
 	 $time = 0;
@@ -180,7 +180,7 @@ class CShips {
 					   $rwine,
 					   $rsulfur,
 					   $pop,0);
-	 header("Location: action.php?view=shipyard&id=".$city->cid."&position=".$post['position']);
+	 header("Location: action.html?view=shipyard&id=".$city->cid."&position=".$post['position']);
 	}
 	public function GetShipsNbr($ship){
 	 return $this->ships["s".$ship];
@@ -311,7 +311,7 @@ class CShips {
 		!isset($get['eid']) ||
 		!isset($get['type']) ||
         ($get['actionRequest'] != $session->checker))
-          header("Location: action.php?view=error");
+          header("Location: action.html?view=error");
 	  $sblist = $database->getShipsBList2($get['eid']);
 	  $pop = $city->pop;
 	  for($s=210; $s<217; $s++){
@@ -321,7 +321,7 @@ class CShips {
 	  $database->modifyResource($city->cid,0,0,0,0,0,$pop,1);
 	  $database->removeShipsBuilding($get['eid']);
 	  $this->shipsBList = $database->getShipsBList($city->cid);
-	  header("Location: action.php?view=shipyard&id=".$city->cid."&position=".$get['position']);
+	  header("Location: action.html?view=shipyard&id=".$city->cid."&position=".$get['position']);
 	}
 	public function CalcCityUpkeep($cid){
 	 global $database;
