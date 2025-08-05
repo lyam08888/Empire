@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Meta-tags pour le référencement et l'information -->
+    <title>Forum - Empire</title>
+    <meta name="description" content="Discutez avec la communauté du jeu Empire. Retrouvez les annonces, les discussions générales et l'aide.">
+    <meta name="keywords" content="forum, communauté, discussion, jeu de stratégie, empire">
+    <meta name="author" content="Empire Game Studio">
+    
+    <!-- Favicon local -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%231e3a8a'/><text x='16' y='20' text-anchor='middle' fill='white' font-family='Arial' font-size='18' font-weight='bold'>E</text></svg>" type="image/svg+xml">
+
+    <style>
+        /* Styles de base, reset et animations */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0a192f 0%, #1e3a8a 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
+        }
+
+        /* Header */
+        .header {
+            padding: 1rem 2rem;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #fbbf24;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            animation: slideIn 1s ease-out;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #fbbf24;
+        }
+
+        /* Contenu principal */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            animation: fadeIn 1s ease-out 0.5s both;
+        }
+
+        /* Style du Forum */
+        .forum-category {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .category-header {
+            background-color: rgba(30, 64, 175, 0.5);
+            padding: 1rem 1.5rem;
+            border-top-left-radius: 1rem;
+            border-top-right-radius: 1rem;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .category-header h2 {
+            font-size: 1.5rem;
+            color: #fbbf24;
+        }
+
+        .forum-list-header, .forum-row {
+            display: grid;
+            grid-template-columns: 50% 15% 15% 20%;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .forum-list-header {
+            color: #94a3b8;
+            font-weight: bold;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .forum-row {
+            transition: background-color 0.3s ease;
+        }
+        
+        .forum-row:last-child {
+            border-bottom: none;
+        }
+
+        .forum-row:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+
+        .forum-info .forum-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #e2e8f0;
+            text-decoration: none;
+        }
+        
+        .forum-info .forum-title:hover {
+            color: #fbbf24;
+            text-decoration: underline;
+        }
+
+        .forum-info .forum-description {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-top: 0.25rem;
+        }
+
+        .forum-stats, .forum-last-post {
+            text-align: center;
+            font-size: 0.95rem;
+            color: #cbd5e1;
+        }
+        
+        .forum-last-post {
+            text-align: left;
+            font-size: 0.9rem;
+        }
+        
+        .forum-last-post a {
+            color: #e2e8f0;
+            text-decoration: none;
+        }
+        
+        .forum-last-post a:hover {
+            text-decoration: underline;
+        }
+
+        .last-post-user {
+            color: #fbbf24;
+            font-weight: bold;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        .pagination a, .pagination span {
+            color: #cbd5e1;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .pagination a:hover {
+            background-color: #fbbf24;
+            color: #0a192f;
+            border-color: #fbbf24;
+        }
+
+        .pagination .current {
+            background-color: #1d4ed8;
+            color: white;
+            border-color: #1d4ed8;
+            font-weight: bold;
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(15, 23, 42, 0.9);
+            padding: 2rem;
+            text-align: center;
+            border-top: 1px solid rgba(148, 163, 184, 0.1);
+            margin-top: 2rem;
+        }
+        .footer-content {
+            color: #64748b;
+        }
+        
+        /* Particules */
+        .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -10; }
+        .particle { position: absolute; width: 2px; height: 2px; background: rgba(251, 191, 36, 0.3); border-radius: 50%; animation: float 6s infinite linear; }
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+
+    <!-- En-tête -->
+    <header class="header">
+        <div class="nav-container">
+            <a href="#" class="logo">EMPIRE</a>
+            <nav class="nav-links">
+                <a href="#">Mon Compte</a>
+                <a href="#">Déconnexion</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Contenu Principal -->
+    <main class="main-content">
+        
+        <!-- Catégorie de Forum -->
+        <div class="forum-category">
+            <div class="category-header">
+                <h2>Annonces et Informations</h2>
+            </div>
+            <div class="forum-list-header">
+                <div>Forum</div>
+                <div style="text-align:center;">Sujets</div>
+                <div style="text-align:center;">Messages</div>
+                <div>Dernier message</div>
+            </div>
+            <!-- Ligne de Forum -->
+            <div class="forum-row">
+                <div class="forum-info">
+                    <a href="#" class="forum-title">Annonces officielles</a>
+                    <div class="forum-description">Toutes les nouvelles et annonces importantes concernant le jeu.</div>
+                </div>
+                <div class="forum-stats">12</div>
+                <div class="forum-stats">150</div>
+                <div class="forum-last-post">
+                    <a href="#">Mise à jour v1.5</a><br>
+                    par <a href="#" class="last-post-user">Admin</a>, hier à 14:32
+                </div>
+            </div>
+            <!-- Fin Ligne de Forum -->
+        </div>
+        <!-- Fin Catégorie de Forum -->
+
+        <!-- Catégorie de Forum -->
+        <div class="forum-category">
+            <div class="category-header">
+                <h2>Communauté</h2>
+            </div>
+            <div class="forum-list-header">
+                <div>Forum</div>
+                <div style="text-align:center;">Sujets</div>
+                <div style="text-align:center;">Messages</div>
+                <div>Dernier message</div>
+            </div>
+            <!-- Ligne de Forum -->
+            <div class="forum-row">
+                <div class="forum-info">
+                    <a href="#" class="forum-title">Discussions Générales</a>
+                    <div class="forum-description">Parlez de tout et de rien avec les autres joueurs.</div>
+                </div>
+                <div class="forum-stats">345</div>
+                <div class="forum-stats">4,890</div>
+                <div class="forum-last-post">
+                    <a href="#">Meilleure stratégie ?</a><br>
+                    par <a href="#" class="last-post-user">JoueurXYZ</a>, il y a 2h
+                </div>
+            </div>
+            <!-- Ligne de Forum -->
+            <div class="forum-row">
+                <div class="forum-info">
+                    <a href="#" class="forum-title">Présentations</a>
+                    <div class="forum-description">Nouveau ici ? Présentez-vous à la communauté !</div>
+                </div>
+                <div class="forum-stats">128</div>
+                <div class="forum-stats">980</div>
+                <div class="forum-last-post">
+                    <a href="#">Salut à tous !</a><br>
+                    par <a href="#" class="last-post-user">Newbie_75</a>, aujourd'hui à 11:05
+                </div>
+            </div>
+             <!-- Ligne de Forum -->
+            <div class="forum-row">
+                <div class="forum-info">
+                    <a href="#" class="forum-title">Support et Questions</a>
+                    <div class="forum-description">Besoin d'aide ? Posez vos questions ici.</div>
+                </div>
+                <div class="forum-stats">210</div>
+                <div class="forum-stats">1,530</div>
+                <div class="forum-last-post">
+                    <a href="#">Problème de connexion</a><br>
+                    par <a href="#" class="last-post-user">User123</a>, aujourd'hui à 16:40
+                </div>
+            </div>
+        </div>
+        <!-- Fin Catégorie de Forum -->
+
+        <!-- Pagination -->
+        <div class="pagination">
+            <span class="current">1</span>
+            <a href="#">2</a>
+            <a href="#">3</a>
+            <span>...</span>
+            <a href="#">15</a>
+            <a href="#">Suivant &raquo;</a>
+        </div>
+
+    </main>
+
+    <!-- Pied de page -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2024 Empire - Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Script pour les particules ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const particlesContainer = document.getElementById('particles');
+            if (!particlesContainer) return;
+            const particleCount = 50;
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        });
+    </script>
+</body>
+</html>
