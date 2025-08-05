@@ -1,6 +1,9 @@
 <?php
-// Inclusion du fichier de gestion de compte (à adapter si nécessaire)
-// include("core/CAccount.php"); 
+// Inclusion du fichier de gestion de compte pour traiter l'inscription et
+// initialiser les objets de session et de formulaire. En cas d'erreur dans le
+// processus d'inscription, CAccount redirige vers cette page avec les
+// messages correspondants stockés dans l'objet $form.
+include("core/CAccount.php");
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -89,22 +92,22 @@
                         <!-- Champ Nom d'utilisateur -->
                         <div class="mb-4">
                             <label for="name" class="block text-sm font-medium text-gray-300 mb-1">Nom d'utilisateur</label>
-                            <input type="text" id="name" name="name" class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg p-2.5 focus:ring-amber-500 focus:border-amber-500" placeholder="Ex: Cesar123" value="<?php /* echo $form->getValue('name'); */ ?>">
-                            <div class="form-error"><?php /* echo $form->getError('name'); */ ?></div>
+                            <input type="text" id="name" name="name" class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg p-2.5 focus:ring-amber-500 focus:border-amber-500" placeholder="Ex: Cesar123" value="<?php echo htmlspecialchars($form->getValue('name')); ?>">
+                            <div class="form-error"><?php echo htmlspecialchars($form->getError('name')); ?></div>
                         </div>
 
                         <!-- Champ Mot de passe -->
                         <div class="mb-4">
                             <label for="pw" class="block text-sm font-medium text-gray-300 mb-1">Mot de passe</label>
                             <input type="password" id="pw" name="pw" class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg p-2.5 focus:ring-amber-500 focus:border-amber-500" placeholder="••••••••">
-                            <div class="form-error"><?php /* echo $form->getError('pw'); */ ?></div>
+                            <div class="form-error"><?php echo htmlspecialchars($form->getError('pw')); ?></div>
                         </div>
 
                         <!-- Champ E-mail -->
                         <div class="mb-4">
                             <label for="email" class="block text-sm font-medium text-gray-300 mb-1">Adresse e-mail</label>
-                            <input type="email" id="email" name="email" class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg p-2.5 focus:ring-amber-500 focus:border-amber-500" placeholder="votre.email@exemple.com" value="<?php /* echo $form->getValue('email'); */ ?>">
-                            <div class="form-error"><?php /* echo $form->getError('email'); */ ?></div>
+                            <input type="email" id="email" name="email" class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg p-2.5 focus:ring-amber-500 focus:border-amber-500" placeholder="votre.email@exemple.com" value="<?php echo htmlspecialchars($form->getValue('email')); ?>">
+                            <div class="form-error"><?php echo htmlspecialchars($form->getError('email')); ?></div>
                         </div>
 
                         <!-- Checkbox Conditions d'utilisation -->
@@ -115,7 +118,7 @@
                                     J'accepte les <a href="conditions.htm" target="_blank" class="font-medium text-amber-400 hover:underline">Conditions d'utilisation</a>.
                                 </label>
                             </div>
-                            <div class="form-error"><?php /* echo $form->getError('agree'); */ ?></div>
+                            <div class="form-error"><?php echo htmlspecialchars($form->getError('agree')); ?></div>
                         </div>
                         
                         <!-- Bouton d'inscription -->
