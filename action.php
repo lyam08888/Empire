@@ -24,12 +24,12 @@ else{
 <meta name="page-topic" content="لعبة متصفح ، لعبة استراتيجية ، لعبة على الانترنت ، لعبة اونلاين">
 <meta name="audience" content="all">
 <meta name="Expires" content="never">
-<meta name="Keywords" content="ikariama, لعبة استراتيجية , العب مجانا , لعبة على الاننرنت , لعبة حربية , ار بي جي, لعبة متصفح , لعبة على الشبكة, لعب">
-<meta name="Description" content="ikariama لعبة متصفح مجانية. يتمثل التحدي للاعب في قيادة شعبه من خلال العالم القديم. لبناء المدن والتجارة والانتصار على الجزر.">  
+<meta name="Keywords" content="empire, لعبة استراتيجية , العب مجانا , لعبة على الاننرنت , لعبة حربية , ار بي جي, لعبة متصفح , لعبة على الشبكة, لعب">
+<meta name="Description" content="empire لعبة متصفح مجانية. يتمثل التحدي للاعب في قيادة شعبه من خلال العالم القديم. لبناء المدن والتجارة والانتصار على الجزر.">  
 <meta name="robots" content="index,follow">
 <meta name="Revisit" content="After 14 days"> 
 <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
-<title>ikariama - لعبة المتصفح المجانية</title>
+<title>empire - لعبة المتصفح المجانية</title>
 <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 <script type="text/javascript" src="complete-0.3.5.js"></script>
 <?php

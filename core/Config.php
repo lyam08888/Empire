@@ -6,7 +6,7 @@
 //║Version  : 0.1                                      ║
 //║Author   : Prince 3                                 ║
 //║E-MAIL   : khatibe_30@hotmail.fr                    ║
-//║Copyright: Ikariama(c) 2010. All rights reserved.   ║
+//║Copyright: Empire(c) 2010. All rights reserved.   ║
 //╚════════════════════════════════════════════════════╝
 ?>
 <?php
@@ -16,7 +16,7 @@ define("COOKIE_PATH", "/");
 define("SQL_SERVER", "localhost");
 define("SQL_USER", "root");
 define("SQL_PASS", "1010");
-define("SQL_DB", "ikariam");
+define("SQL_DB", "empire");
 define("TB_PREFIX", "db_");
 
 define("USER",0);

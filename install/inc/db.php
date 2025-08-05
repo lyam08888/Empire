@@ -6,7 +6,7 @@
 //║Version  : 0.1                                      ║
 //║Author   : Prince 3                                 ║
 //║E-MAIL   : khatibe_30@hotmail.fr                    ║
-//║Copyright: Ikariama(c) 2010. All rights reserved.   ║
+//║Copyright: Empire(c) 2010. All rights reserved.   ║
 //╚════════════════════════════════════════════════════╝
 ?>
 <?php 

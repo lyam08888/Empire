@@ -69,7 +69,7 @@ function GetBuildingArabicName($pos){
         el: "cityCountdown"
         });
     	tmpCnt.subscribe("finished", function() {
-        top.document.title = "إيكارياما ikariama" + " - عالم Alpha";
+        top.document.title = "إيكارياما empire" + " - عالم Alpha";
         setTimeout(function() {
          location.href="?view=city&id=<?php echo $city->cid;?>";
         },2000);
@@ -129,7 +129,7 @@ function GetBuildingArabicName($pos){
         el: "cityCountdown"
         });
     	tmpCnt.subscribe("finished", function() {
-        top.document.title = "إيكارياما ikariama" + " - عالم Alpha";
+        top.document.title = "إيكارياما empire" + " - عالم Alpha";
         setTimeout(function() {
          location.href="?view=city&id=<?php echo $city->cid;?>";
         },2000);
