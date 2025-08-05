@@ -471,8 +471,36 @@
                researchCompleted: [],
                queues: { build: [], research: [], military: [] },
                cooldowns: { build: 0, research: 0, military: 0 },
-               exploredIslands: [{ x: 7, y: 7 }], // Île de départ explorée
+               exploredIslands: [{ x: 7, y: 7, name: "Île Capitale", type: "capital", resources: ["wood", "wine"], population: 1000, development: 1 }],
                colonizedIslands: [],
+               currentIsland: { x: 7, y: 7 }, // Île actuellement sélectionnée
+               islandDetails: {
+                   "7-7": {
+                       name: "Île Capitale",
+                       type: "capital",
+                       climate: "temperate",
+                       terrain: ["plains", "forest", "hills"],
+                       naturalResources: ["wood", "wine", "marble"],
+                       population: 1000,
+                       happiness: 75,
+                       development: 1,
+                       infrastructure: { roads: 1, ports: 1, defenses: 1 },
+                       specialBuildings: [],
+                       districts: {
+                           residential: { level: 1, population: 400 },
+                           commercial: { level: 1, income: 50 },
+                           industrial: { level: 1, production: 30 },
+                           military: { level: 1, defense: 25 }
+                       }
+                   }
+               },
+               worldEvents: [],
+               tradeRoutes: [],
+               diplomacy: {
+                   relations: {},
+                   treaties: [],
+                   reputation: 50
+               },
                playerStats: { level: 1, xp: 0, totalBuildings: 2, totalUnits: 0 },
                achievements: [],
                activeQuests: [],
@@ -510,8 +538,13 @@
                
                // Migration des anciennes sauvegardes
                if (!gameState.cooldowns) gameState.cooldowns = { build: 0, research: 0, military: 0 };
-               if (!gameState.exploredIslands) gameState.exploredIslands = [{ x: 7, y: 7 }];
+               if (!gameState.exploredIslands) gameState.exploredIslands = [{ x: 7, y: 7, name: "Île Capitale", type: "capital", resources: ["wood", "wine"], population: 1000, development: 1 }];
                if (!gameState.colonizedIslands) gameState.colonizedIslands = [];
+               if (!gameState.currentIsland) gameState.currentIsland = { x: 7, y: 7 };
+               if (!gameState.islandDetails) gameState.islandDetails = {};
+               if (!gameState.worldEvents) gameState.worldEvents = [];
+               if (!gameState.tradeRoutes) gameState.tradeRoutes = [];
+               if (!gameState.diplomacy) gameState.diplomacy = { relations: {}, treaties: [], reputation: 50 };
                if (!gameState.playerStats) gameState.playerStats = { level: 1, xp: 0, totalBuildings: 2, totalUnits: 0 };
                if (!gameState.achievements) gameState.achievements = [];
                if (!gameState.activeQuests) gameState.activeQuests = [];
@@ -591,10 +624,66 @@
                const townHallLevel = gameState.buildings.townHall?.level || 1;
                const academyLevel = gameState.buildings.academy?.level || 0;
                
-               // Production de base
-               let goldProduction = townHallLevel * 2 * seconds / 3600;
-               let woodProduction = 5 * seconds / 3600;
-               let researchProduction = academyLevel > 0 ? academyLevel * 2 * seconds / 3600 : 0;
+               // Production de base de l'île capitale
+               const capitalKey = "7-7";
+               const capitalData = gameState.islandDetails[capitalKey];
+               
+               let baseProduction = {
+                   gold: townHallLevel * 2 * seconds / 3600,
+                   wood: 5 * seconds / 3600,
+                   research: academyLevel > 0 ? academyLevel * 2 * seconds / 3600 : 0,
+                   wine: 0,
+                   marble: 0,
+                   crystal: 0,
+                   sulfur: 0
+               };
+               
+               // Bonus des ressources naturelles de l'île capitale
+               if (capitalData && capitalData.naturalResources) {
+                   capitalData.naturalResources.forEach(resource => {
+                       if (baseProduction[resource] !== undefined) {
+                           baseProduction[resource] *= 1.5; // +50% pour les ressources naturelles
+                       } else {
+                           baseProduction[resource] = 1 * seconds / 3600; // Production de base pour les nouvelles ressources
+                       }
+                   });
+               }
+               
+               // Bonus des districts de l'île capitale
+               if (capitalData && capitalData.districts) {
+                   baseProduction.gold += (capitalData.districts.commercial.income || 0) * seconds / 3600;
+                   
+                   const industrialBonus = (capitalData.districts.industrial.production || 0) / 100;
+                   Object.keys(baseProduction).forEach(resource => {
+                       if (resource !== 'gold') {
+                           baseProduction[resource] *= (1 + industrialBonus);
+                       }
+                   });
+               }
+               
+               // Production des colonies
+               gameState.colonizedIslands.forEach(colony => {
+                   const colonyKey = `${colony.x}-${colony.y}`;
+                   const colonyData = gameState.islandDetails[colonyKey];
+                   
+                   if (colonyData) {
+                       // Production basée sur le développement de la colonie
+                       const developmentMultiplier = colonyData.development * 0.5;
+                       
+                       // Ressources naturelles de la colonie
+                       if (colonyData.naturalResources) {
+                           colonyData.naturalResources.forEach(resource => {
+                               const amount = developmentMultiplier * 2 * seconds / 3600;
+                               baseProduction[resource] = (baseProduction[resource] || 0) + amount;
+                           });
+                       }
+                       
+                       // Production des districts de la colonie
+                       if (colonyData.districts) {
+                           baseProduction.gold += (colonyData.districts.commercial.income || 0) * 0.5 * seconds / 3600;
+                       }
+                   }
+               });
                
                // Bonus des bâtiments spécialisés
                Object.entries(gameState.buildings).forEach(([id, building]) => {
@@ -603,26 +692,48 @@
                    
                    switch(building.type) {
                        case "Foresterie":
-                           woodProduction += level * 1.5 * seconds / 3600;
+                           baseProduction.wood += level * 1.5 * seconds / 3600;
                            break;
                        case "Cave à Vin":
-                           gameState.resources.wine += level * 1 * seconds / 3600;
+                           baseProduction.wine += level * 1 * seconds / 3600;
                            break;
                        case "Carrière de Pierre":
-                           gameState.resources.marble += level * 0.8 * seconds / 3600;
+                           baseProduction.marble += level * 0.8 * seconds / 3600;
                            break;
                        case "Verrerie":
-                           gameState.resources.crystal += level * 0.6 * seconds / 3600;
+                           baseProduction.crystal += level * 0.6 * seconds / 3600;
                            break;
                        case "Alchimiste":
-                           gameState.resources.sulfur += level * 0.5 * seconds / 3600;
+                           baseProduction.sulfur += level * 0.5 * seconds / 3600;
                            break;
                    }
                });
                
-               gameState.resources.gold += goldProduction;
-               gameState.resources.wood += woodProduction;
-               gameState.resources.research += researchProduction;
+               // Bonus des routes commerciales
+               gameState.tradeRoutes.forEach(route => {
+                   const profit = calculateTradeRouteProfit(route);
+                   baseProduction.gold += profit * seconds / 3600; // Profit par minute converti
+               });
+               
+               // Bonus de niveau du joueur
+               const levelBonus = gameState.playerStats.level * 0.05; // 5% par niveau
+               Object.keys(baseProduction).forEach(resource => {
+                   baseProduction[resource] *= (1 + levelBonus);
+               });
+               
+               // Bonus des technologies recherchées
+               if (gameState.researchCompleted.includes('Commerce')) {
+                   baseProduction.gold *= 1.25;
+               }
+               if (gameState.researchCompleted.includes('Philosophie')) {
+                   baseProduction.research *= 1.2;
+               }
+               
+               // Appliquer la production finale
+               Object.entries(baseProduction).forEach(([resource, amount]) => {
+                   gameState.resources[resource] = (gameState.resources[resource] || 0) + Math.max(0, amount);
+               });
+               
                gameState.lastUpdate = Date.now();
            }
 
@@ -743,29 +854,181 @@
            }
 
           function renderWorldMap() {
-              dom.worldMapGrid.innerHTML = '';
-              const mapSize = config.worldMap.size;
-              const islands = [...config.worldMap.islands, ...(gameState.colonizedIslands || [])];
-              for (let i = 0; i < mapSize * mapSize; i++) {
-                  const tile = document.createElement('div');
-                  tile.className = 'map-tile world-tile';
-                  const x = i % mapSize;
-                  const y = Math.floor(i / mapSize);
-                  const island = islands.find(isl => isl.x === x && isl.y === y);
-                  const explored = gameState.exploredIslands.some(p => p.x === x && p.y === y);
-                  if (!explored) {
-                      tile.classList.add('unexplored');
-                      tile.textContent = '?';
-                  } else {
-                      tile.classList.add('explored');
+              dom.worldGrid.innerHTML = '';
+              
+              let html = `
+                  <div class="card" style="grid-column: 1 / -1;">
+                      <div style="display: flex; justify-content: space-between; align-items: center;">
+                          <h3>🌍 Carte du Monde - Empire de ${gameState.playerStats.empireName || 'l\'Empereur'}</h3>
+                          <div style="display: flex; gap: 1rem;">
+                              <div>Îles explorées: ${gameState.exploredIslands.length}</div>
+                              <div>Colonies: ${gameState.colonizedIslands.length}</div>
+                              <div>Routes commerciales: ${gameState.tradeRoutes.length}</div>
+                          </div>
+                      </div>
+                  </div>
+                  
+                  <div class="card" style="grid-column: 1 / -1;">
+                      <div id="world-map-container" style="position: relative;">
+                          <div id="world-map-grid" style="display: grid; grid-template-columns: repeat(15, 1fr); gap: 1px; background: #1e40af; padding: 0.5rem; border-radius: 0.5rem;">
+              `;
+              
+              // Générer la carte du monde 15x15
+              for (let y = 0; y < 15; y++) {
+                  for (let x = 0; x < 15; x++) {
+                      const island = getIslandAtPosition(x, y);
+                      const isExplored = gameState.exploredIslands.some(exp => exp.x === x && exp.y === y);
+                      const isColonized = gameState.colonizedIslands.some(col => col.x === x && col.y === y);
+                      const isCurrentIsland = gameState.currentIsland.x === x && gameState.currentIsland.y === y;
+                      
+                      let tileClass = 'ocean';
+                      let tileIcon = '🌊';
+                      let tileTitle = 'Océan';
+                      
                       if (island) {
-                          tile.classList.add(island.type);
-                          tile.innerHTML = `<span class="tooltip">${island.name} [${x},${y}]</span>`;
+                          tileClass = island.type;
+                          tileIcon = getIslandTypeIcon(island.type);
+                          tileTitle = island.name || `Île [${x},${y}]`;
+                          
+                          if (!isExplored && island.type !== 'capital') {
+                              tileIcon = '❓';
+                              tileTitle = 'Territoire inexploré';
+                          }
                       }
+                      
+                      html += `
+                          <div class="world-tile ${tileClass} ${isCurrentIsland ? 'current-island' : ''}" 
+                               onclick="selectWorldTile(${x}, ${y})" 
+                               title="${tileTitle}"
+                               style="aspect-ratio: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; border-radius: 0.25rem; position: relative; ${isCurrentIsland ? 'border: 2px solid var(--color-primary); box-shadow: 0 0 10px var(--color-primary);' : 'border: 1px solid rgba(255,255,255,0.2);'} ${isColonized ? 'background: var(--color-success);' : isExplored ? 'background: var(--color-warning);' : island ? 'background: var(--color-panel);' : 'background: #1e40af;'}">
+                              ${tileIcon}
+                              ${isColonized ? '<div style="position: absolute; top: -2px; right: -2px; background: var(--color-success); border-radius: 50%; width: 8px; height: 8px;"></div>' : ''}
+                              ${hasTradeRoute(x, y) ? '<div style="position: absolute; bottom: -2px; left: -2px; background: var(--color-warning); border-radius: 50%; width: 8px; height: 8px;"></div>' : ''}
+                          </div>
+                      `;
                   }
-                  tile.addEventListener('click', () => handleWorldTileClick(x, y, island, explored));
-                  dom.worldMapGrid.appendChild(tile);
               }
+              
+              html += `
+                          </div>
+                          <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem; font-size: 0.9rem;">
+                              <div><span style="color: var(--color-primary);">🏛️</span> Votre capitale</div>
+                              <div><span style="color: var(--color-success);">🏝️</span> Vos colonies</div>
+                              <div><span style="color: var(--color-warning);">🗺️</span> Îles explorées</div>
+                              <div><span style="color: var(--color-danger);">⚔️</span> Territoires hostiles</div>
+                              <div><span style="color: var(--color-text-muted);">🤝</span> Alliés</div>
+                              <div><span style="color: var(--color-warning);">💰</span> Routes commerciales</div>
+                          </div>
+                      </div>
+                  </div>
+              `;
+              
+              // Civilisations connues
+              html += `
+                  <div class="card" style="grid-column: 1 / -1;">
+                      <h3>🏛️ Civilisations Connues</h3>
+                      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
+              `;
+              
+              const knownCivilizations = getKnownCivilizations();
+              knownCivilizations.forEach(civ => {
+                  const relation = gameState.diplomacy.relations[civ.id] || 0;
+                  const relationText = getRelationText(relation);
+                  const relationColor = getRelationColor(relation);
+                  
+                  html += `
+                      <div style="background: var(--color-panel-light); padding: 1rem; border-radius: 0.5rem; border-left: 4px solid ${relationColor};">
+                          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                              <h4 style="margin: 0; color: ${relationColor};">${civ.icon} ${civ.name}</h4>
+                              <span style="font-size: 0.8rem; color: ${relationColor};">${relationText}</span>
+                          </div>
+                          <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">${civ.description}</p>
+                          <div style="font-size: 0.8rem; color: var(--color-text-muted);">
+                              <div>Territoire: ${civ.territories} îles</div>
+                              <div>Puissance militaire: ${civ.militaryPower}</div>
+                              <div>Richesse: ${civ.wealth}</div>
+                          </div>
+                          <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                              <button onclick="openDiplomacy('${civ.id}')" class="action-btn" style="font-size: 0.8rem; padding: 0.25rem 0.5rem;">
+                                  Diplomatie
+                              </button>
+                              <button onclick="proposeTrade('${civ.id}')" class="action-btn" style="font-size: 0.8rem; padding: 0.25rem 0.5rem;">
+                                  Commerce
+                              </button>
+                          </div>
+                      </div>
+                  `;
+              });
+              
+              html += `
+                      </div>
+                  </div>
+              `;
+              
+              // Routes commerciales actives
+              if (gameState.tradeRoutes.length > 0) {
+                  html += `
+                      <div class="card" style="grid-column: 1 / -1;">
+                          <h3>🚢 Routes Commerciales Actives</h3>
+                          <div style="margin-top: 1rem;">
+                  `;
+                  
+                  gameState.tradeRoutes.forEach((route, index) => {
+                      const profit = calculateTradeRouteProfit(route);
+                      html += `
+                          <div style="background: var(--color-panel-light); padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                              <div>
+                                  <strong>${route.from.name} ↔ ${route.to.name}</strong><br>
+                                  <span style="font-size: 0.9rem; color: var(--color-text-muted);">
+                                      ${route.goods.join(', ')} | Distance: ${route.distance} cases
+                                  </span>
+                              </div>
+                              <div style="text-align: right;">
+                                  <div style="color: var(--color-success); font-weight: bold;">+${profit} or/min</div>
+                                  <button onclick="cancelTradeRoute(${index})" class="action-btn" style="font-size: 0.8rem; padding: 0.25rem 0.5rem; background: var(--color-danger);">
+                                      Annuler
+                                  </button>
+                              </div>
+                          </div>
+                      `;
+                  });
+                  
+                  html += `
+                          </div>
+                      </div>
+                  `;
+              }
+              
+              // Événements mondiaux récents
+              if (gameState.worldEvents.length > 0) {
+                  html += `
+                      <div class="card" style="grid-column: 1 / -1;">
+                          <h3>📰 Événements Mondiaux</h3>
+                          <div style="margin-top: 1rem; max-height: 200px; overflow-y: auto;">
+                  `;
+                  
+                  gameState.worldEvents.slice(-10).reverse().forEach(event => {
+                      const timeAgo = Math.floor((Date.now() - event.timestamp) / 60000);
+                      const timeText = timeAgo < 1 ? 'À l\'instant' : `Il y a ${timeAgo} min`;
+                      
+                      html += `
+                          <div style="background: var(--color-panel-light); padding: 0.5rem; border-radius: 0.25rem; margin-bottom: 0.5rem; border-left: 3px solid var(--color-primary);">
+                              <div style="display: flex; justify-content: space-between; align-items: center;">
+                                  <strong>${event.title}</strong>
+                                  <span style="font-size: 0.8rem; color: var(--color-text-muted);">${timeText}</span>
+                              </div>
+                              <p style="margin: 0.25rem 0 0 0; font-size: 0.9rem;">${event.description}</p>
+                          </div>
+                      `;
+                  });
+                  
+                  html += `
+                          </div>
+                      </div>
+                  `;
+              }
+              
+              dom.worldGrid.innerHTML = html;
            }
 
            function handleWorldTileClick(x, y, island, explored) {
@@ -787,24 +1050,162 @@
            }
            
            function renderIslandView() {
+               const currentIslandKey = `${gameState.currentIsland.x}-${gameState.currentIsland.y}`;
+               const islandData = gameState.islandDetails[currentIslandKey] || createDefaultIslandData(gameState.currentIsland);
+               
                dom.islandGrid.innerHTML = '';
-               const mapSize = config.islandLayout.size;
-               const plots = config.islandLayout.plots;
-               for (let i = 0; i < mapSize * mapSize; i++) {
-                   const tile = document.createElement('div');
-                   tile.className = 'map-tile island-tile';
-                   const x = i % mapSize;
-                   const y = Math.floor(i / mapSize);
-                   const plot = plots.find(p => p.x === x && p.y === y);
-                   if (plot) {
-                       tile.classList.add(plot.type);
-                       tile.innerHTML = `${plot.icon}<span class="tooltip">${plot.name}</span>`;
-                       tile.addEventListener('click', () => {
-                           showModal(`Information: ${plot.name}`, `Type: ${plot.type}. Des actions (espionner, attaquer) pourraient être ajoutées ici.`);
-                       });
+               
+               let html = `
+                   <div class="card" style="grid-column: 1 / -1;">
+                       <div style="display: flex; justify-content: space-between; align-items: center;">
+                           <div>
+                               <h3>🏝️ ${islandData.name}</h3>
+                               <p>Population: ${islandData.population.toLocaleString()} | Bonheur: ${islandData.happiness}% | Développement: Niveau ${islandData.development}</p>
+                           </div>
+                           <div style="text-align: right;">
+                               <div>Climat: ${getClimateIcon(islandData.climate)} ${islandData.climate}</div>
+                               <div>Réputation: ${gameState.diplomacy.reputation}/100</div>
+                           </div>
+                       </div>
+                   </div>
+                   
+                   <div class="card" style="grid-column: 1 / -1;">
+                       <h3>🗺️ Carte de l'Île</h3>
+                       <div id="island-map" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.25rem; margin: 1rem 0;">
+               `;
+               
+               // Générer la carte de l'île 6x6
+               for (let y = 0; y < 6; y++) {
+                   for (let x = 0; x < 6; x++) {
+                       const tileId = `tile-${x}-${y}`;
+                       const terrain = getTerrainForTile(x, y, islandData);
+                       const building = getBuildingOnTile(x, y);
+                       const isCenter = (x === 2 || x === 3) && (y === 2 || y === 3);
+                       
+                       html += `
+                           <div class="island-tile ${terrain}" 
+                                onclick="selectTile(${x}, ${y})" 
+                                title="${getTerrainName(terrain)} ${building ? '- ' + building : ''}"
+                                style="aspect-ratio: 1; border: 2px solid var(--color-border); border-radius: 0.25rem; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; position: relative; ${isCenter ? 'border-color: var(--color-primary);' : ''}">
+                               ${getTerrainIcon(terrain)}
+                               ${building ? `<div style="position: absolute; top: -5px; right: -5px; background: var(--color-primary); border-radius: 50%; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem;">🏗️</div>` : ''}
+                           </div>
+                       `;
                    }
-                   dom.islandGrid.appendChild(tile);
                }
+               
+               html += `
+                       </div>
+                       <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
+                           <div><span style="color: #22c55e;">🌲</span> Forêt</div>
+                           <div><span style="color: #84cc16;">🌾</span> Plaines</div>
+                           <div><span style="color: #a3a3a3;">⛰️</span> Collines</div>
+                           <div><span style="color: #3b82f6;">🌊</span> Côte</div>
+                           <div><span style="color: #f59e0b;">🏜️</span> Désert</div>
+                           <div><span style="color: #8b5cf6;">💎</span> Gisement</div>
+                       </div>
+                   </div>
+               `;
+               
+               // Districts de l'île
+               html += `
+                   <div class="card">
+                       <h4>🏘️ District Résidentiel</h4>
+                       <p>Population: ${islandData.districts.residential.population}</p>
+                       <p>Niveau: ${islandData.districts.residential.level}</p>
+                       <button onclick="upgradeDistrict('residential')" class="action-btn" ${canUpgradeDistrict('residential') ? '' : 'disabled'}>
+                           Améliorer (${getDistrictUpgradeCost('residential').gold} or)
+                       </button>
+                   </div>
+                   
+                   <div class="card">
+                       <h4>🏪 District Commercial</h4>
+                       <p>Revenus: +${islandData.districts.commercial.income} or/min</p>
+                       <p>Niveau: ${islandData.districts.commercial.level}</p>
+                       <button onclick="upgradeDistrict('commercial')" class="action-btn" ${canUpgradeDistrict('commercial') ? '' : 'disabled'}>
+                           Améliorer (${getDistrictUpgradeCost('commercial').gold} or)
+                       </button>
+                   </div>
+                   
+                   <div class="card">
+                       <h4>🏭 District Industriel</h4>
+                       <p>Production: +${islandData.districts.industrial.production}% ressources</p>
+                       <p>Niveau: ${islandData.districts.industrial.level}</p>
+                       <button onclick="upgradeDistrict('industrial')" class="action-btn" ${canUpgradeDistrict('industrial') ? '' : 'disabled'}>
+                           Améliorer (${getDistrictUpgradeCost('industrial').gold} or)
+                       </button>
+                   </div>
+                   
+                   <div class="card">
+                       <h4>🛡️ District Militaire</h4>
+                       <p>Défense: ${islandData.districts.military.defense} points</p>
+                       <p>Niveau: ${islandData.districts.military.level}</p>
+                       <button onclick="upgradeDistrict('military')" class="action-btn" ${canUpgradeDistrict('military') ? '' : 'disabled'}>
+                           Améliorer (${getDistrictUpgradeCost('military').gold} or)
+                       </button>
+                   </div>
+               `;
+               
+               // Infrastructure de l'île
+               html += `
+                   <div class="card" style="grid-column: 1 / -1;">
+                       <h3>🛤️ Infrastructure</h3>
+                       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                           <div>
+                               <h4>🛣️ Routes (Niveau ${islandData.infrastructure.roads})</h4>
+                               <p>Réduit les coûts de transport de ${islandData.infrastructure.roads * 10}%</p>
+                               <button onclick="upgradeInfrastructure('roads')" class="action-btn" ${canUpgradeInfrastructure('roads') ? '' : 'disabled'}>
+                                   Améliorer (${getInfrastructureCost('roads').gold} or, ${getInfrastructureCost('roads').wood} bois)
+                               </button>
+                           </div>
+                           <div>
+                               <h4>⚓ Ports (Niveau ${islandData.infrastructure.ports})</h4>
+                               <p>+${islandData.infrastructure.ports * 15}% revenus commerciaux</p>
+                               <button onclick="upgradeInfrastructure('ports')" class="action-btn" ${canUpgradeInfrastructure('ports') ? '' : 'disabled'}>
+                                   Améliorer (${getInfrastructureCost('ports').gold} or, ${getInfrastructureCost('ports').marble} marbre)
+                               </button>
+                           </div>
+                           <div>
+                               <h4>🏰 Défenses (Niveau ${islandData.infrastructure.defenses})</h4>
+                               <p>+${islandData.infrastructure.defenses * 20} points de défense</p>
+                               <button onclick="upgradeInfrastructure('defenses')" class="action-btn" ${canUpgradeInfrastructure('defenses') ? '' : 'disabled'}>
+                                   Améliorer (${getInfrastructureCost('defenses').gold} or, ${getInfrastructureCost('defenses').sulfur} soufre)
+                               </button>
+                           </div>
+                       </div>
+                   </div>
+               `;
+               
+               // Ressources naturelles de l'île
+               html += `
+                   <div class="card" style="grid-column: 1 / -1;">
+                       <h3>🌿 Ressources Naturelles</h3>
+                       <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
+               `;
+               
+               islandData.naturalResources.forEach(resource => {
+                   const resourceIcon = {
+                       wood: '🌲', wine: '🍇', marble: '🏛️', 
+                       crystal: '💎', sulfur: '🔥', gold: '💰'
+                   }[resource];
+                   
+                   html += `
+                       <div style="background: var(--color-panel-light); padding: 0.75rem; border-radius: 0.5rem; text-align: center;">
+                           <div style="font-size: 1.5rem;">${resourceIcon}</div>
+                           <div style="font-size: 0.9rem; margin-top: 0.25rem;">${resource}</div>
+                       </div>
+                   `;
+               });
+               
+               html += `
+                       </div>
+                       <p style="margin-top: 1rem; color: var(--color-text-muted); font-style: italic;">
+                           Les ressources naturelles augmentent la production de base de ces ressources sur cette île.
+                       </p>
+                   </div>
+               `;
+               
+               dom.islandGrid.innerHTML = html;
            }
 
            function updateContextPanel(plotId) {
@@ -1754,6 +2155,751 @@
                setTimeout(() => {
                    notification.remove();
                }, 5000);
+           }
+
+           // --- FONCTIONS UTILITAIRES POUR LES ÎLES ---
+           function createDefaultIslandData(island) {
+               const climates = ['temperate', 'tropical', 'arid', 'arctic', 'volcanic'];
+               const terrainTypes = [
+                   ['plains', 'forest', 'hills'],
+                   ['jungle', 'beach', 'volcano'],
+                   ['desert', 'oasis', 'canyon'],
+                   ['tundra', 'glacier', 'mountain'],
+                   ['lava', 'ash', 'crater']
+               ];
+               
+               const climate = climates[Math.floor(Math.random() * climates.length)];
+               const terrain = terrainTypes[climates.indexOf(climate)];
+               
+               const resourcePools = {
+                   temperate: ['wood', 'wine', 'marble'],
+                   tropical: ['wood', 'wine', 'crystal'],
+                   arid: ['marble', 'crystal', 'sulfur'],
+                   arctic: ['crystal', 'marble', 'gold'],
+                   volcanic: ['sulfur', 'crystal', 'gold']
+               };
+               
+               const naturalResources = resourcePools[climate] || ['wood', 'wine'];
+               
+               const islandData = {
+                   name: island.name || generateIslandName(),
+                   type: island.type || 'colony',
+                   climate: climate,
+                   terrain: terrain,
+                   naturalResources: naturalResources,
+                   population: island.population || 500,
+                   happiness: 70,
+                   development: 1,
+                   infrastructure: { roads: 1, ports: 1, defenses: 1 },
+                   specialBuildings: [],
+                   districts: {
+                       residential: { level: 1, population: 200 },
+                       commercial: { level: 1, income: 25 },
+                       industrial: { level: 1, production: 15 },
+                       military: { level: 1, defense: 10 }
+                   }
+               };
+               
+               const key = `${island.x}-${island.y}`;
+               gameState.islandDetails[key] = islandData;
+               return islandData;
+           }
+           
+           function generateIslandName() {
+               const prefixes = ['Île', 'Atoll', 'Archipel', 'Terre'];
+               const suffixes = ['Dorée', 'Mystérieuse', 'Fertile', 'Rocheuse', 'Verdoyante', 'Sauvage', 'Paisible', 'Lointaine'];
+               const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+               const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+               return `${prefix} ${suffix}`;
+           }
+           
+           function getClimateIcon(climate) {
+               const icons = {
+                   temperate: '🌤️',
+                   tropical: '🌴',
+                   arid: '🏜️',
+                   arctic: '❄️',
+                   volcanic: '🌋'
+               };
+               return icons[climate] || '🌤️';
+           }
+           
+           function getTerrainForTile(x, y, islandData) {
+               // Génération procédurale du terrain basée sur la position
+               const seed = x * 7 + y * 13 + islandData.climate.length;
+               const terrainIndex = seed % islandData.terrain.length;
+               return islandData.terrain[terrainIndex];
+           }
+           
+           function getTerrainIcon(terrain) {
+               const icons = {
+                   plains: '🌾', forest: '🌲', hills: '⛰️', jungle: '🌿',
+                   beach: '🏖️', volcano: '🌋', desert: '🏜️', oasis: '🏝️',
+                   canyon: '🏔️', tundra: '🏔️', glacier: '🧊', mountain: '⛰️',
+                   lava: '🌋', ash: '🌫️', crater: '🕳️', coast: '🌊'
+               };
+               return icons[terrain] || '🌾';
+           }
+           
+           function getTerrainName(terrain) {
+               const names = {
+                   plains: 'Plaines', forest: 'Forêt', hills: 'Collines', jungle: 'Jungle',
+                   beach: 'Plage', volcano: 'Volcan', desert: 'Désert', oasis: 'Oasis',
+                   canyon: 'Canyon', tundra: 'Toundra', glacier: 'Glacier', mountain: 'Montagne',
+                   lava: 'Lave', ash: 'Cendres', crater: 'Cratère', coast: 'Côte'
+               };
+               return names[terrain] || 'Terrain';
+           }
+           
+           function getBuildingOnTile(x, y) {
+               // Vérifier s'il y a un bâtiment sur cette case
+               const isCenter = (x === 2 || x === 3) && (y === 2 || y === 3);
+               if (isCenter) {
+                   return 'Centre-ville';
+               }
+               return null;
+           }
+           
+           function selectTile(x, y) {
+               const currentIslandKey = `${gameState.currentIsland.x}-${gameState.currentIsland.y}`;
+               const islandData = gameState.islandDetails[currentIslandKey];
+               const terrain = getTerrainForTile(x, y, islandData);
+               const building = getBuildingOnTile(x, y);
+               
+               let actions = [];
+               if (!building && terrain !== 'coast' && terrain !== 'lava') {
+                   actions.push(`<button onclick="buildOnTile(${x}, ${y})" class="action-btn">Construire ici</button>`);
+               }
+               if (terrain === 'forest') {
+                   actions.push(`<button onclick="harvestResource(${x}, ${y}, 'wood')" class="action-btn">Récolter Bois</button>`);
+               }
+               if (terrain === 'hills' || terrain === 'mountain') {
+                   actions.push(`<button onclick="harvestResource(${x}, ${y}, 'marble')" class="action-btn">Extraire Marbre</button>`);
+               }
+               
+               showModal(
+                   `Case [${x},${y}] - ${getTerrainName(terrain)}`,
+                   `Terrain: ${getTerrainName(terrain)}<br>
+                    ${building ? `Bâtiment: ${building}<br>` : ''}
+                    ${actions.length > 0 ? actions.join('<br>') : 'Aucune action disponible'}`
+               );
+           }
+           
+           function buildOnTile(x, y) {
+               // Système de construction sur les cases spécifiques
+               const buildingOptions = [
+                   { name: 'Ferme', cost: { wood: 100, gold: 50 }, effect: 'Production +10 nourriture' },
+                   { name: 'Mine', cost: { wood: 150, gold: 100 }, effect: 'Production +15 minerai' },
+                   { name: 'Scierie', cost: { wood: 80, gold: 40 }, effect: 'Production +20% bois' },
+                   { name: 'Avant-poste', cost: { wood: 200, sulfur: 50 }, effect: 'Défense +25 points' }
+               ];
+               
+               let html = 'Choisissez un bâtiment à construire :<br><br>';
+               buildingOptions.forEach((building, index) => {
+                   const canAfford = Object.entries(building.cost).every(([res, cost]) => gameState.resources[res] >= cost);
+                   const costText = Object.entries(building.cost).map(([res, cost]) => `${cost} ${res}`).join(', ');
+                   
+                   html += `
+                       <div style="margin-bottom: 1rem; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.25rem; ${canAfford ? '' : 'opacity: 0.5;'}">
+                           <strong>${building.name}</strong><br>
+                           Coût: ${costText}<br>
+                           Effet: ${building.effect}<br>
+                           <button onclick="constructBuilding(${x}, ${y}, ${index})" class="action-btn" ${canAfford ? '' : 'disabled'}>
+                               Construire
+                           </button>
+                       </div>
+                   `;
+               });
+               
+               showModal(`Construction sur [${x},${y}]`, html);
+           }
+           
+           function constructBuilding(x, y, buildingIndex) {
+               const buildingOptions = [
+                   { name: 'Ferme', cost: { wood: 100, gold: 50 }, effect: 'Production +10 nourriture' },
+                   { name: 'Mine', cost: { wood: 150, gold: 100 }, effect: 'Production +15 minerai' },
+                   { name: 'Scierie', cost: { wood: 80, gold: 40 }, effect: 'Production +20% bois' },
+                   { name: 'Avant-poste', cost: { wood: 200, sulfur: 50 }, effect: 'Défense +25 points' }
+               ];
+               
+               const building = buildingOptions[buildingIndex];
+               
+               // Vérifier les ressources
+               for (const [resource, cost] of Object.entries(building.cost)) {
+                   if (gameState.resources[resource] < cost) {
+                       logEvent(`❌ Ressources insuffisantes pour construire ${building.name}`);
+                       return;
+                   }
+               }
+               
+               // Déduire les coûts
+               Object.entries(building.cost).forEach(([resource, cost]) => {
+                   gameState.resources[resource] -= cost;
+               });
+               
+               // Ajouter le bâtiment aux bâtiments spéciaux de l'île
+               const currentIslandKey = `${gameState.currentIsland.x}-${gameState.currentIsland.y}`;
+               const islandData = gameState.islandDetails[currentIslandKey];
+               islandData.specialBuildings.push({
+                   name: building.name,
+                   x: x,
+                   y: y,
+                   effect: building.effect
+               });
+               
+               logEvent(`🏗️ ${building.name} construite sur [${x},${y}]`);
+               addXP(25);
+               gameState.playerStats.totalBuildings++;
+               
+               dom.modal.style.display = 'none';
+               renderIslandView();
+               updateAllUI();
+               saveState();
+           }
+           
+           function harvestResource(x, y, resourceType) {
+               const amount = Math.floor(Math.random() * 50) + 25;
+               gameState.resources[resourceType] = (gameState.resources[resourceType] || 0) + amount;
+               
+               animateResourceGain(resourceType);
+               logEvent(`⛏️ Récolté ${amount} ${resourceType} sur [${x},${y}]`);
+               addXP(10);
+               
+               dom.modal.style.display = 'none';
+               updateAllUI();
+               saveState();
+           }
+           
+           // --- FONCTIONS POUR LES DISTRICTS ET INFRASTRUCTURE ---
+           function getDistrictUpgradeCost(districtType) {
+               const currentIslandKey = `${gameState.currentIsland.x}-${gameState.currentIsland.y}`;
+               const islandData = gameState.islandDetails[currentIslandKey];
+               const currentLevel = islandData.districts[districtType].level;
+               
+               const baseCosts = {
+                   residential: { gold: 500 },
+                   commercial: { gold: 800 },
+                   industrial: { gold: 1000 },
+                   military: { gold: 1200 }
+               };
+               
+               const cost = {};
+               Object.entries(baseCosts[districtType]).forEach(([resource, amount]) => {
+                   cost[resource] = amount * currentLevel;
+               });
+               
+               return cost;
+           }
+           
+           function canUpgradeDistrict(districtType) {
+               const cost = getDistrictUpgradeCost(districtType);
+               return Object.entries(cost).every(([resource, amount]) => gameState.resources[resource] >= amount);
+           }
+           
+           function upgradeDistrict(districtType) {
+               const cost = getDistrictUpgradeCost(districtType);
+               
+               // Vérifier les ressources
+               for (const [resource, amount] of Object.entries(cost)) {
+                   if (gameState.resources[resource] < amount) {
+                       logEvent(`❌ Ressources insuffisantes pour améliorer le district ${districtType}`);
+                       return;
+                   }
+               }
+               
+               // Déduire les coûts
+               Object.entries(cost).forEach(([resource, amount]) => {
+                   gameState.resources[resource] -= amount;
+               });
+               
+               // Améliorer le district
+               const currentIslandKey = `${gameState.currentIsland.x}-${gameState.currentIsland.y}`;
+               const islandData = gameState.islandDetails[currentIslandKey];
+               const district = islandData.districts[districtType];
+               
+               district.level++;
+               
+               // Appliquer les bonus
+               switch (districtType) {
+                   case 'residential':
+                       district.population += 200;
+                       islandData.population += 200;
+                       break;
+                   case 'commercial':
+                       district.income += 25;
+                       break;
+                   case 'industrial':
+                       district.production += 15;
+                       break;
+                   case 'military':
+                       district.defense += 15;
+                       break;
+               }
+               
+               logEvent(`🏗️ District ${districtType} amélioré au niveau ${district.level}`);
+               addXP(50);
+               
+               renderIslandView();
+               updateAllUI();
+               saveState();
+           }
+           
+           function getInfrastructureCost(infraType) {
+               const currentIslandKey = `${gameState.currentIsland.x}-${gameState.currentIsland.y}`;
+               const islandData = gameState.islandDetails[currentIslandKey];
+               const currentLevel = islandData.infrastructure[infraType];
+               
+               const baseCosts = {
+                   roads: { gold: 300, wood: 200 },
+                   ports: { gold: 500, marble: 150 },
+                   defenses: { gold: 800, sulfur: 100 }
+               };
+               
+               const cost = {};
+               Object.entries(baseCosts[infraType]).forEach(([resource, amount]) => {
+                   cost[resource] = amount * currentLevel;
+               });
+               
+               return cost;
+           }
+           
+           function canUpgradeInfrastructure(infraType) {
+               const cost = getInfrastructureCost(infraType);
+               return Object.entries(cost).every(([resource, amount]) => gameState.resources[resource] >= amount);
+           }
+           
+           function upgradeInfrastructure(infraType) {
+               const cost = getInfrastructureCost(infraType);
+               
+               // Vérifier les ressources
+               for (const [resource, amount] of Object.entries(cost)) {
+                   if (gameState.resources[resource] < amount) {
+                       logEvent(`❌ Ressources insuffisantes pour améliorer ${infraType}`);
+                       return;
+                   }
+               }
+               
+               // Déduire les coûts
+               Object.entries(cost).forEach(([resource, amount]) => {
+                   gameState.resources[resource] -= amount;
+               });
+               
+               // Améliorer l'infrastructure
+               const currentIslandKey = `${gameState.currentIsland.x}-${gameState.currentIsland.y}`;
+               const islandData = gameState.islandDetails[currentIslandKey];
+               islandData.infrastructure[infraType]++;
+               
+               logEvent(`🛤️ ${infraType} amélioré au niveau ${islandData.infrastructure[infraType]}`);
+               addXP(75);
+               
+               renderIslandView();
+               updateAllUI();
+               saveState();
+           }
+
+           // --- FONCTIONS UTILITAIRES POUR LE MONDE ---
+           function getIslandAtPosition(x, y) {
+               // Génération procédurale d'îles basée sur la position
+               const seed = x * 31 + y * 17;
+               const islandProbability = 0.15; // 15% de chance d'avoir une île
+               
+               if (x === 7 && y === 7) {
+                   // Île capitale du joueur
+                   return {
+                       x: x, y: y,
+                       name: "Île Capitale",
+                       type: "capital",
+                       owner: "player"
+                   };
+               }
+               
+               // Utiliser le seed pour déterminer s'il y a une île
+               const random = (seed * 9301 + 49297) % 233280 / 233280;
+               
+               if (random < islandProbability) {
+                   const islandTypes = ['neutral', 'enemy', 'ally', 'resource', 'pirate'];
+                   const typeIndex = Math.floor((seed % 100) / 20);
+                   const type = islandTypes[typeIndex] || 'neutral';
+                   
+                   return {
+                       x: x, y: y,
+                       name: generateIslandName(),
+                       type: type,
+                       owner: type === 'neutral' ? null : type,
+                       resources: generateIslandResources(seed),
+                       population: Math.floor(random * 2000) + 500,
+                       strength: Math.floor(random * 100) + 20
+                   };
+               }
+               
+               return null;
+           }
+           
+           function getIslandTypeIcon(type) {
+               const icons = {
+                   capital: '🏛️',
+                   colony: '🏝️',
+                   neutral: '🗺️',
+                   enemy: '⚔️',
+                   ally: '🤝',
+                   resource: '💎',
+                   pirate: '🏴‍☠️',
+                   trading: '🏪'
+               };
+               return icons[type] || '🏝️';
+           }
+           
+           function generateIslandResources(seed) {
+               const allResources = ['wood', 'wine', 'marble', 'crystal', 'sulfur', 'gold'];
+               const numResources = (seed % 3) + 1; // 1 à 3 ressources
+               const resources = [];
+               
+               for (let i = 0; i < numResources; i++) {
+                   const resourceIndex = (seed + i * 7) % allResources.length;
+                   const resource = allResources[resourceIndex];
+                   if (!resources.includes(resource)) {
+                       resources.push(resource);
+                   }
+               }
+               
+               return resources;
+           }
+           
+           function hasTradeRoute(x, y) {
+               return gameState.tradeRoutes.some(route => 
+                   (route.from.x === x && route.from.y === y) || 
+                   (route.to.x === x && route.to.y === y)
+               );
+           }
+           
+           function selectWorldTile(x, y) {
+               const island = getIslandAtPosition(x, y);
+               const isExplored = gameState.exploredIslands.some(exp => exp.x === x && exp.y === y);
+               const isColonized = gameState.colonizedIslands.some(col => col.x === x && col.y === y);
+               
+               if (!island) {
+                   showModal('Océan', `Position [${x},${y}] - Rien que de l'eau à perte de vue.`);
+                   return;
+               }
+               
+               if (!isExplored && island.type !== 'capital') {
+                   const explorationCost = calculateExplorationCost(x, y);
+                   showModal(
+                       'Territoire Inexploré',
+                       `Position [${x},${y}]<br><br>
+                        Coût d'exploration: ${explorationCost.gold} or, ${explorationCost.wood} bois<br><br>
+                        <button onclick="exploreIsland(${x}, ${y})" class="action-btn" ${canAffordExploration(explorationCost) ? '' : 'disabled'}>
+                            Explorer
+                        </button>`
+                   );
+                   return;
+               }
+               
+               // Île explorée - afficher les options
+               let actions = [];
+               
+               if (island.type === 'capital' || isColonized) {
+                   actions.push(`<button onclick="visitIsland(${x}, ${y})" class="action-btn">Visiter cette île</button>`);
+               } else if (island.type === 'neutral') {
+                   const colonizationCost = calculateColonizationCost(island);
+                   actions.push(`<button onclick="colonizeIsland(${x}, ${y})" class="action-btn" ${canAffordColonization(colonizationCost) ? '' : 'disabled'}>Coloniser (${colonizationCost.gold} or)</button>`);
+               } else if (island.type === 'enemy') {
+                   actions.push(`<button onclick="attackIsland(${x}, ${y})" class="action-btn">Attaquer</button>`);
+               } else if (island.type === 'ally') {
+                   actions.push(`<button onclick="establishTradeRoute(${x}, ${y})" class="action-btn">Établir route commerciale</button>`);
+               }
+               
+               if (island.type !== 'enemy') {
+                   actions.push(`<button onclick="sendDiplomaticMission(${x}, ${y})" class="action-btn">Mission diplomatique</button>`);
+               }
+               
+               const resourceText = island.resources ? `<br>Ressources: ${island.resources.join(', ')}` : '';
+               const populationText = island.population ? `<br>Population: ${island.population.toLocaleString()}` : '';
+               
+               showModal(
+                   `${island.name} [${x},${y}]`,
+                   `Type: ${island.type}<br>
+                    Propriétaire: ${island.owner || 'Aucun'}${resourceText}${populationText}<br><br>
+                    ${actions.join('<br>')}`
+               );
+           }
+           
+           function calculateExplorationCost(x, y) {
+               const distance = Math.abs(x - 7) + Math.abs(y - 7); // Distance de Manhattan depuis la capitale
+               return {
+                   gold: 100 + distance * 20,
+                   wood: 50 + distance * 10
+               };
+           }
+           
+           function canAffordExploration(cost) {
+               return Object.entries(cost).every(([resource, amount]) => gameState.resources[resource] >= amount);
+           }
+           
+           function exploreIsland(x, y) {
+               const cost = calculateExplorationCost(x, y);
+               
+               if (!canAffordExploration(cost)) {
+                   logEvent('❌ Ressources insuffisantes pour l\'exploration');
+                   return;
+               }
+               
+               // Déduire les coûts
+               Object.entries(cost).forEach(([resource, amount]) => {
+                   gameState.resources[resource] -= amount;
+               });
+               
+               // Ajouter l'île aux îles explorées
+               const island = getIslandAtPosition(x, y);
+               gameState.exploredIslands.push({
+                   x: x, y: y,
+                   name: island.name,
+                   type: island.type,
+                   resources: island.resources,
+                   population: island.population,
+                   exploredAt: Date.now()
+               });
+               
+               // Événement mondial
+               gameState.worldEvents.push({
+                   title: 'Nouvelle Découverte',
+                   description: `Vos explorateurs ont découvert ${island.name}, une île ${island.type}`,
+                   timestamp: Date.now()
+               });
+               
+               logEvent(`🗺️ ${island.name} explorée ! Type: ${island.type}`);
+               addXP(30);
+               
+               dom.modal.style.display = 'none';
+               renderWorldMap();
+               updateAllUI();
+               saveState();
+           }
+           
+           function calculateColonizationCost(island) {
+               const baseCost = 1000;
+               const populationMultiplier = island.population ? island.population / 1000 : 1;
+               return {
+                   gold: Math.floor(baseCost * populationMultiplier),
+                   wood: Math.floor(200 * populationMultiplier),
+                   sulfur: Math.floor(100 * populationMultiplier)
+               };
+           }
+           
+           function canAffordColonization(cost) {
+               return Object.entries(cost).every(([resource, amount]) => gameState.resources[resource] >= amount);
+           }
+           
+           function colonizeIsland(x, y) {
+               const island = getIslandAtPosition(x, y);
+               const cost = calculateColonizationCost(island);
+               
+               if (!canAffordColonization(cost)) {
+                   logEvent('❌ Ressources insuffisantes pour la colonisation');
+                   return;
+               }
+               
+               // Déduire les coûts
+               Object.entries(cost).forEach(([resource, amount]) => {
+                   gameState.resources[resource] -= amount;
+               });
+               
+               // Ajouter la colonie
+               const colony = {
+                   x: x, y: y,
+                   name: island.name,
+                   type: 'colony',
+                   colonizedAt: Date.now(),
+                   development: 1,
+                   population: island.population,
+                   happiness: 60
+               };
+               
+               gameState.colonizedIslands.push(colony);
+               
+               // Créer les détails de l'île
+               createDefaultIslandData(colony);
+               
+               // Événement mondial
+               gameState.worldEvents.push({
+                   title: 'Nouvelle Colonie',
+                   description: `${island.name} a été colonisée avec succès`,
+                   timestamp: Date.now()
+               });
+               
+               logEvent(`🏝️ ${island.name} colonisée avec succès !`);
+               addXP(100);
+               
+               dom.modal.style.display = 'none';
+               renderWorldMap();
+               updateAllUI();
+               saveState();
+           }
+           
+           function visitIsland(x, y) {
+               gameState.currentIsland = { x: x, y: y };
+               logEvent(`🚢 Voyage vers l'île [${x},${y}]`);
+               
+               dom.modal.style.display = 'none';
+               
+               // Changer vers la vue île
+               document.querySelector('[data-view="island"]').click();
+               
+               renderIslandView();
+               saveState();
+           }
+           
+           function getKnownCivilizations() {
+               // Civilisations générées dynamiquement basées sur les îles explorées
+               const civilizations = [
+                   {
+                       id: 'atlanteans',
+                       name: 'Atlantes',
+                       icon: '🔱',
+                       description: 'Maîtres des océans et de la technologie aquatique',
+                       territories: 8,
+                       militaryPower: 'Élevée',
+                       wealth: 'Très riche',
+                       specialty: 'Navigation et commerce maritime'
+                   },
+                   {
+                       id: 'desert_nomads',
+                       name: 'Nomades du Désert',
+                       icon: '🐪',
+                       description: 'Marchands habiles et guerriers du désert',
+                       territories: 5,
+                       militaryPower: 'Moyenne',
+                       wealth: 'Riche',
+                       specialty: 'Commerce et exploration'
+                   },
+                   {
+                       id: 'mountain_clans',
+                       name: 'Clans des Montagnes',
+                       icon: '⛰️',
+                       description: 'Forgerons légendaires et mineurs experts',
+                       territories: 4,
+                       militaryPower: 'Très élevée',
+                       wealth: 'Moyenne',
+                       specialty: 'Métallurgie et défense'
+                   },
+                   {
+                       id: 'forest_druids',
+                       name: 'Druides de la Forêt',
+                       icon: '🌲',
+                       description: 'Gardiens de la nature et de la magie ancienne',
+                       territories: 6,
+                       militaryPower: 'Faible',
+                       wealth: 'Pauvre',
+                       specialty: 'Magie et ressources naturelles'
+                   }
+               ];
+               
+               // Ne montrer que les civilisations "découvertes" basées sur l'exploration
+               const exploredCount = gameState.exploredIslands.length;
+               return civilizations.slice(0, Math.min(Math.floor(exploredCount / 3), civilizations.length));
+           }
+           
+           function getRelationText(relation) {
+               if (relation >= 80) return 'Allié';
+               if (relation >= 60) return 'Ami';
+               if (relation >= 40) return 'Neutre+';
+               if (relation >= 20) return 'Neutre';
+               if (relation >= 0) return 'Neutre-';
+               if (relation >= -20) return 'Méfiant';
+               if (relation >= -40) return 'Hostile';
+               return 'Ennemi';
+           }
+           
+           function getRelationColor(relation) {
+               if (relation >= 60) return 'var(--color-success)';
+               if (relation >= 20) return 'var(--color-warning)';
+               if (relation >= -20) return 'var(--color-text)';
+               return 'var(--color-danger)';
+           }
+           
+           function calculateTradeRouteProfit(route) {
+               const baseProfit = 10;
+               const distanceBonus = Math.max(1, route.distance / 5);
+               const goodsBonus = route.goods.length * 5;
+               return Math.floor(baseProfit + distanceBonus + goodsBonus);
+           }
+           
+           function openDiplomacy(civId) {
+               const civ = getKnownCivilizations().find(c => c.id === civId);
+               const currentRelation = gameState.diplomacy.relations[civId] || 0;
+               
+               let actions = [];
+               
+               if (currentRelation < 80) {
+                   actions.push(`<button onclick="improveDiplomacy('${civId}')" class="action-btn">Améliorer relations (500 or)</button>`);
+               }
+               
+               if (currentRelation >= 40) {
+                   actions.push(`<button onclick="proposeTreaty('${civId}')" class="action-btn">Proposer traité</button>`);
+               }
+               
+               if (currentRelation >= 60) {
+                   actions.push(`<button onclick="requestMilitaryAid('${civId}')" class="action-btn">Demander aide militaire</button>`);
+               }
+               
+               showModal(
+                   `Diplomatie - ${civ.name}`,
+                   `Relations actuelles: ${getRelationText(currentRelation)} (${currentRelation})<br><br>
+                    ${civ.description}<br><br>
+                    ${actions.join('<br>')}`
+               );
+           }
+           
+           function improveDiplomacy(civId) {
+               if (gameState.resources.gold < 500) {
+                   logEvent('❌ Pas assez d\'or pour améliorer les relations');
+                   return;
+               }
+               
+               gameState.resources.gold -= 500;
+               gameState.diplomacy.relations[civId] = (gameState.diplomacy.relations[civId] || 0) + 10;
+               
+               const civ = getKnownCivilizations().find(c => c.id === civId);
+               logEvent(`🤝 Relations améliorées avec ${civ.name}`);
+               
+               dom.modal.style.display = 'none';
+               renderWorldMap();
+               updateAllUI();
+               saveState();
+           }
+           
+           function establishTradeRoute(x, y) {
+               const island = getIslandAtPosition(x, y);
+               const distance = Math.abs(x - gameState.currentIsland.x) + Math.abs(y - gameState.currentIsland.y);
+               
+               const route = {
+                   from: { x: gameState.currentIsland.x, y: gameState.currentIsland.y, name: 'Votre île' },
+                   to: { x: x, y: y, name: island.name },
+                   goods: island.resources || ['biens divers'],
+                   distance: distance,
+                   establishedAt: Date.now()
+               };
+               
+               gameState.tradeRoutes.push(route);
+               
+               logEvent(`🚢 Route commerciale établie avec ${island.name}`);
+               addXP(50);
+               
+               dom.modal.style.display = 'none';
+               renderWorldMap();
+               updateAllUI();
+               saveState();
+           }
+           
+           function cancelTradeRoute(index) {
+               const route = gameState.tradeRoutes[index];
+               gameState.tradeRoutes.splice(index, 1);
+               
+               logEvent(`❌ Route commerciale ${route.from.name} - ${route.to.name} annulée`);
+               
+               renderWorldMap();
+               updateAllUI();
+               saveState();
            }
 
            // --- SYSTÈME DE TUTORIEL ---

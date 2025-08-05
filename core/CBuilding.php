@@ -50,6 +50,13 @@ class CBuilding {
 		    if(!isset($get['building'])||
 			   !$this->canBuild())
 			 header("Location: action.php?view=error");
+			
+			// Check town hall restriction
+			if($get['building'] == 0 && !$this->canBuildTownHall()) {
+				header("Location: action.php?view=error&message=town_hall_exists");
+				return;
+			}
+			
 			$this->constructBuilding($get['building'],$get['position']);
 		  break;
 		  case "upgradeBuilding":
@@ -155,8 +162,20 @@ class CBuilding {
 	 return $id[$level]["time"];
 	}
 	
+	private function canBuildTownHall() {
+		global $city;
+		return $city->getBuildingCount(0) < 1;
+	}
+	
 	private function constructBuilding($bid,$pos) {
 		global $database,$city,$session;
+		
+		// Check town hall restriction
+		if($bid == 0 && !$this->canBuildTownHall()) {
+			header("Location: action.php?view=error&message=town_hall_exists");
+			return;
+		}
+		
 		$uptimerequire = $this->GetBuildingReqTime($bid,1);
 		$time = time() + $uptimerequire;
 		if($this->meetRequirement($bid)) {
