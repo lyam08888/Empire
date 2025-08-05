@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Empire - Prototype de Jeu Complet</title>
+    <title>Empire - Prototype de Jeu Avancé</title>
     <meta name="description" content="Prototype d'interface complet pour le jeu de stratégie Empire, basé sur un cahier des charges détaillé.">
     <meta name="author" content="Empire Game Studio">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%231e3a8a'/><text x='16' y='20' text-anchor='middle' fill='white' font-family='Arial' font-size='18' font-weight='bold'>E</text></svg>" type="image/svg+xml">
@@ -42,7 +42,7 @@
         .header-content { display: flex; justify-content: space-between; align-items: center; max-width: 1600px; margin: 0 auto; }
         .resources { display: flex; flex-wrap: wrap; gap: 1rem; background: var(--color-panel-light); padding: 0.5rem 1rem; border-radius: 0.5rem; }
         .resource-item { display: flex; align-items: center; gap: 0.5rem; font-weight: bold; }
-        .resource-item span { color: var(--color-primary); }
+        .resource-item span { color: var(--color-primary); min-width: 50px; }
         .player-info a { color: var(--color-text-muted); text-decoration: none; transition: color 0.3s; }
         .player-info a:hover { color: var(--color-primary); }
 
@@ -61,6 +61,7 @@
             overflow: auto;
             padding: 1.5rem;
         }
+        .main-view h2 { color: var(--color-primary); margin-bottom: 1rem; font-size: 1.8rem; }
         
         /* --- VUE VILLE --- */
         .city-view-content { position: relative; width: 100%; height: 100%; }
@@ -76,18 +77,25 @@
         /* --- VUE ÎLE & MONDE --- */
         .map-grid { display: grid; gap: 1rem; }
         .island-view-content { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
-        .world-view-content { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
         .map-tile { background: var(--color-panel-light); border: 1px solid var(--color-border); border-radius: 0.5rem; padding: 1rem; text-align: center; cursor: pointer; transition: all 0.3s; }
         .map-tile:hover { border-color: var(--color-primary); transform: translateY(-5px); }
         .map-tile h4 { color: var(--color-primary); }
         .map-tile p { color: var(--color-text-muted); font-size: 0.9rem; }
 
+        /* --- VUE RECHERCHE & MILITAIRE --- */
+        .management-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
+        .card { background: var(--color-panel-light); border: 1px solid var(--color-border); border-radius: 0.5rem; padding: 1rem; }
+        .card h4 { color: var(--color-primary); margin-bottom: 0.5rem; }
+        .card p { color: var(--color-text-muted); font-size: 0.9rem; margin-bottom: 1rem; }
+        .card .cost { font-size: 0.8rem; margin-bottom: 1rem; }
+        .action-btn { width: 100%; background: var(--color-primary); color: var(--color-dark-1); border: none; padding: 0.75rem; border-radius: 0.5rem; font-weight: bold; font-size: 1rem; cursor: pointer; transition: all 0.3s; }
+        .action-btn:hover { transform: scale(1.05); }
+        .action-btn:disabled { background: #6b7280; cursor: not-allowed; transform: none; }
+
         /* --- PANNEAU CONTEXTUEL DROIT --- */
         .right-sidebar { width: 280px; flex-shrink: 0; background: var(--color-panel); padding: 1rem; border-radius: 1rem; display: flex; flex-direction: column; }
         .context-panel h3 { color: var(--color-primary); border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem; margin-bottom: 1rem; }
         #context-content p { color: var(--color-text-muted); line-height: 1.5; }
-        #context-content .action-btn { width: 100%; background: var(--color-primary); color: var(--color-dark-1); border: none; padding: 0.75rem; border-radius: 0.5rem; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 1rem; transition: transform 0.2s; }
-        #context-content .action-btn:hover { transform: scale(1.05); }
         .build-queue-list { list-style: none; margin-top: auto; padding-top: 1rem; }
         .queue-item { background: var(--color-panel-light); padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem; }
         .queue-item .name { font-weight: bold; }
@@ -98,7 +106,7 @@
         .footer-content { max-width: 1600px; margin: 0 auto; color: var(--color-text-muted); text-align: center; }
 
         /* --- MODAL --- */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000; animation: fadeIn 0.3s; }
         .modal-content { background: var(--color-dark-1); border: 1px solid var(--color-primary); padding: 2rem; border-radius: 1rem; text-align: center; width: 90%; max-width: 400px; }
         .modal-content h4 { font-size: 1.5rem; color: var(--color-primary); margin-bottom: 1rem; }
         #modal-cost { color: var(--color-text-muted); margin-bottom: 1rem; }
@@ -122,6 +130,7 @@
                     <div class="resource-item" title="Cristal">💎 <span id="resCrystal">0</span></div>
                     <div class="resource-item" title="Soufre">🔥 <span id="resSulfur">0</span></div>
                     <div class="resource-item" title="Or">💰 <span id="resGold">0</span></div>
+                    <div class="resource-item" title="Points de Recherche">🔬 <span id="resResearch">0</span></div>
                 </div>
                 <div class="player-info"><a href="#">Déconnexion</a></div>
             </div>
@@ -145,50 +154,27 @@
 
             <!-- VUE CENTRALE (Conteneur pour toutes les vues) -->
             <div class="main-view-container">
-                <section id="view-city" class="main-view">
-                    <div class="city-view-content" id="city-grid"></div>
-                </section>
-                <section id="view-island" class="main-view hidden">
-                    <h2>Vue de l'Île</h2>
-                    <div class="map-grid island-view-content">
-                        <div class="map-tile"><h4>Scierie (Commun)</h4><p>Niveau 5</p></div>
-                        <div class="map-tile"><h4>Mine de Marbre</h4><p>Niveau 3</p></div>
-                        <div class="map-tile"><h4>Ville de Joueur_02</h4><p>Points: 1,250</p></div>
-                        <div class="map-tile"><h4>Votre Ville</h4><p>Points: 800</p></div>
-                    </div>
-                </section>
-                <section id="view-world" class="main-view hidden">
-                    <h2>Carte du Monde</h2>
-                     <div class="map-grid world-view-content">
-                        <!-- Grille générée par JS -->
-                     </div>
-                </section>
-                <section id="view-research" class="main-view hidden"><h2>Recherche</h2><p>Interface de recherche à venir...</p></section>
-                <section id="view-military" class="main-view hidden"><h2>Militaire</h2><p>Interface militaire à venir...</p></section>
+                <section id="view-city" class="main-view"><div class="city-view-content" id="city-grid"></div></section>
+                <section id="view-island" class="main-view hidden"><h2>Vue de l'Île</h2><div class="map-grid island-view-content"><div class="map-tile"><h4>Scierie (Commun)</h4><p>Niveau 5</p></div><div class="map-tile"><h4>Mine de Marbre</h4><p>Niveau 3</p></div><div class="map-tile"><h4>Ville de Joueur_02</h4><p>Points: 1,250</p></div><div class="map-tile"><h4>Votre Ville</h4><p>Points: 800</p></div></div></section>
+                <section id="view-world" class="main-view hidden"><h2>Carte du Monde</h2></section>
+                <section id="view-research" class="main-view hidden"><h2>Recherche</h2><div id="research-grid" class="management-grid"></div></section>
+                <section id="view-military" class="main-view hidden"><h2>Militaire</h2><div id="military-grid" class="management-grid"></div></section>
                 <section id="view-diplomacy" class="main-view hidden"><h2>Diplomatie</h2><p>Interface de diplomatie à venir...</p></section>
             </div>
             
             <!-- PANNEAU DROIT -->
             <aside class="right-sidebar">
-                <div id="context-panel">
-                    <h3>Informations</h3>
-                    <div id="context-content"><p>Sélectionnez un élément pour voir ses détails.</p></div>
-                </div>
-                <div class="build-queue-list" id="buildQueueListWrapper">
-                     <h3>File de construction</h3>
-                     <ul id="buildQueueList"></ul>
-                </div>
+                <div id="context-panel"><h3>Informations</h3><div id="context-content"><p>Sélectionnez un élément.</p></div></div>
+                <div class="build-queue-list"><h3>Files d'attente</h3><ul id="queueList"></ul></div>
             </aside>
         </main>
 
         <!-- FOOTER -->
-        <footer class="game-footer">
-            <div class="footer-content" id="event-log">Construction de la Caserne terminée.</div>
-        </footer>
+        <footer class="game-footer"><div class="footer-content" id="event-log">Bienvenue dans Empire !</div></footer>
     </div>
     
-    <!-- MODAL DE CONFIRMATION -->
-    <div class="modal-overlay" id="upgradeModal">
+    <!-- MODAL -->
+    <div class="modal-overlay" id="actionModal">
         <div class="modal-content">
             <h4 id="modalTitle"></h4><p id="modalMessage"></p><div id="modal-cost"></div>
             <div class="modal-actions">
@@ -201,151 +187,187 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // --- CONFIGURATION DU JEU ---
-            const buildingSpecs = {
-                "Hôtel de Ville": { description: "Augmente la population maximale et le revenu en or.", icon: "🏛️", levels: [ { cost: { wood: 150, gold: 0 }, buildTime: 10 }, { cost: { wood: 350, gold: 0 }, buildTime: 25 }, { cost: { wood: 700, gold: 0 }, buildTime: 60 } ] },
-                "Caserne": { description: "Permet de recruter des unités terrestres.", icon: "⚔️", levels: [ { cost: { wood: 200, gold: 50 }, buildTime: 15 }, { cost: { wood: 450, gold: 120 }, buildTime: 35 } ] },
-                "Entrepôt": { description: "Augmente la capacité de stockage des ressources.", icon: "🧱", levels: [ { cost: { wood: 250, gold: 0 }, buildTime: 12 }, { cost: { wood: 500, gold: 0 }, buildTime: 30 } ] }
+            const config = {
+                buildings: {
+                    "Hôtel de Ville": { description: "Augmente la population et le revenu en or.", icon: "🏛️", levels: [ { cost: { wood: 150 }, buildTime: 10 }, { cost: { wood: 350 }, buildTime: 25 } ] },
+                    "Caserne": { description: "Permet de recruter des unités.", icon: "⚔️", levels: [ { cost: { wood: 200, gold: 50 }, buildTime: 15 }, { cost: { wood: 450, gold: 120 }, buildTime: 35 } ] },
+                    "Entrepôt": { description: "Augmente le stockage.", icon: "🧱", levels: [ { cost: { wood: 250 }, buildTime: 12 }, { cost: { wood: 500 }, buildTime: 30 } ] },
+                    "Académie": { description: "Produit des points de recherche.", icon: "🔬", levels: [ { cost: { wood: 300, crystal: 100 }, buildTime: 20 }, { cost: { wood: 600, crystal: 250 }, buildTime: 45 } ] }
+                },
+                research: {
+                    economy: { name: "Économie", icon: "💰", techs: { "Expansion": { description: "Permet de fonder une nouvelle colonie.", cost: { research: 500 }, time: 60 } } },
+                    military: { name: "Militaire", icon: "⚔️", techs: { "Balistique": { description: "Améliore la précision des catapultes.", cost: { research: 300 }, time: 45 } } }
+                },
+                units: {
+                    "Hoplite": { description: "Unité de base solide.", icon: "🛡️", cost: { wood: 50, sulfur: 30, gold: 10 }, time: 5 },
+                    "Archer": { description: "Attaque à distance.", icon: "🏹", cost: { wood: 40, gold: 15 }, time: 4 }
+                },
+                cityLayout: [
+                    { id: "townHall", top: "40%", left: "45%", width: "120px", height: "120px" },
+                    { id: "plot1", top: "35%", left: "25%", width: "90px", height: "90px" },
+                    { id: "plot2", top: "55%", left: "30%", width: "90px", height: "90px" },
+                    { id: "plot3", top: "50%", left: "60%", width: "90px", height: "90px" },
+                    { id: "academy", top: "20%", left: "60%", width: "90px", height: "90px" }
+                ]
             };
-            const cityLayout = [
-                { id: "townHall", top: "40%", left: "45%", width: "120px", height: "120px" },
-                { id: "plot1", top: "35%", left: "25%", width: "90px", height: "90px" },
-                { id: "plot2", top: "55%", left: "30%", width: "90px", height: "90px" },
-                { id: "plot3", top: "50%", left: "60%", width: "90px", height: "90px" },
-            ];
 
             // --- ÉTAT DU JEU ---
             let gameState = {
-                resources: { wood: 1000, wine: 100, marble: 100, crystal: 100, sulfur: 100, gold: 5000 },
-                buildings: { "townHall": { type: "Hôtel de Ville", level: 1 }, "plot1": { type: "Caserne", level: 1 }, "plot2": { type: null, level: 0 }, "plot3": { type: null, level: 0 } },
-                buildQueue: []
+                resources: { wood: 1000, wine: 100, marble: 100, crystal: 100, sulfur: 100, gold: 5000, research: 0 },
+                buildings: { "townHall": { type: "Hôtel de Ville", level: 1 }, "plot1": { type: "Caserne", level: 1 }, "plot2": { type: null, level: 0 }, "plot3": { type: null, level: 0 }, "academy": { type: "Académie", level: 1 } },
+                researchCompleted: [],
+                queues: { build: [], research: [], military: [] }
             };
 
-            // --- ÉLÉMENTS DU DOM ---
+            // --- DOM ELEMENTS ---
             const dom = {
-                res: { wood: document.getElementById('resWood'), wine: document.getElementById('resWine'), marble: document.getElementById('resMarble'), crystal: document.getElementById('resCrystal'), sulfur: document.getElementById('resSulfur'), gold: document.getElementById('resGold') },
+                res: Object.keys(gameState.resources).reduce((acc, key) => ({ ...acc, [key]: document.getElementById(`res${key.charAt(0).toUpperCase() + key.slice(1)}`) }), {}),
                 cityGrid: document.getElementById('city-grid'),
                 contextContent: document.getElementById('context-content'),
-                buildQueueList: document.getElementById('buildQueueList'),
+                queueList: document.getElementById('queueList'),
                 eventLog: document.getElementById('event-log'),
-                modal: document.getElementById('upgradeModal'),
+                modal: document.getElementById('actionModal'),
                 modalTitle: document.getElementById('modalTitle'),
                 modalMessage: document.getElementById('modalMessage'),
                 modalCost: document.getElementById('modal-cost'),
                 modalConfirmBtn: document.getElementById('modalConfirmBtn'),
                 modalCancelBtn: document.getElementById('modalCancelBtn'),
                 navLinks: document.querySelectorAll('.main-nav a'),
-                mainViews: document.querySelectorAll('.main-view')
+                mainViews: document.querySelectorAll('.main-view'),
+                researchGrid: document.getElementById('research-grid'),
+                militaryGrid: document.getElementById('military-grid'),
             };
 
             let selectedPlotId = null;
-            let upgradeAction = null;
+            let currentAction = null;
 
             // --- NAVIGATION & VUES ---
             function switchView(viewId) {
                 dom.mainViews.forEach(view => view.classList.add('hidden'));
                 document.getElementById(`view-${viewId}`).classList.remove('hidden');
-                
-                dom.navLinks.forEach(link => {
-                    link.classList.toggle('active', link.dataset.view === viewId);
-                });
-                updateContextPanel(); // Reset context panel on view switch
+                dom.navLinks.forEach(link => link.classList.toggle('active', link.dataset.view === viewId));
+                updateContextPanel(); // Reset context panel
             }
 
-            // --- FONCTIONS PRINCIPALES ---
+            // --- LOGIQUE DE JEU PRINCIPALE ---
             function init() {
                 renderCityLayout();
+                renderResearchTree();
+                renderMilitaryUnits();
                 updateAllUI();
-                switchView('city'); // Vue initiale
+                switchView('city');
                 setInterval(gameLoop, 1000);
-
-                // Ajout des écouteurs pour la navigation
-                dom.navLinks.forEach(link => {
-                    link.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        switchView(link.dataset.view);
-                    });
-                });
+                dom.navLinks.forEach(link => link.addEventListener('click', (e) => switchView(link.dataset.view)));
             }
 
             function gameLoop() {
-                processBuildQueue();
-                updateBuildQueueUI();
+                // Production de ressources
+                const townHallLevel = gameState.buildings.townHall.level;
+                gameState.resources.gold += townHallLevel * 2 / 3600; // Or par seconde
+                gameState.resources.wood += 5 / 3600; // Bois de base
+                const academyLevel = gameState.buildings.academy?.level || 0;
+                if (academyLevel > 0) gameState.resources.research += academyLevel * 2 / 3600;
+
+                processQueues();
+                updateAllUI();
             }
 
-            function processBuildQueue() {
+            function processQueues() {
                 const now = Date.now();
-                const finished = [];
-                gameState.buildQueue.forEach((item, index) => {
-                    if (now >= item.endTime) {
-                        if (item.level === 1) gameState.buildings[item.plotId].type = item.type;
-                        gameState.buildings[item.plotId].level = item.level;
-                        finished.push(index);
-                        document.querySelector(`[data-plot-id='${item.plotId}']`).classList.remove('constructing');
-                        logEvent(`${item.type} (Niv. ${item.level}) terminé.`);
+                let stateChanged = false;
+                ['build', 'research', 'military'].forEach(qType => {
+                    const finished = [];
+                    gameState.queues[qType].forEach((item, index) => {
+                        if (now >= item.endTime) {
+                            finished.push(index);
+                            logEvent(`${item.name} terminé.`);
+                            if (qType === 'build') {
+                                if (item.level === 1) gameState.buildings[item.id].type = item.name;
+                                gameState.buildings[item.id].level = item.level;
+                            } else if (qType === 'research') {
+                                gameState.researchCompleted.push(item.name);
+                            }
+                        }
+                    });
+                    if (finished.length > 0) {
+                        gameState.queues[qType] = gameState.queues[qType].filter((_, index) => !finished.includes(index));
+                        stateChanged = true;
                     }
                 });
-
-                if (finished.length > 0) {
-                    gameState.buildQueue = gameState.buildQueue.filter((_, index) => !finished.includes(index));
+                if (stateChanged) {
                     renderCityLayout();
-                    if (selectedPlotId && finished.some(i => gameState.buildQueue[i]?.plotId === selectedPlotId)) {
-                        selectPlot(selectedPlotId);
-                    }
+                    renderResearchTree();
+                    renderMilitaryUnits();
+                    if (selectedPlotId) updateContextPanel(selectedPlotId);
                 }
             }
             
-            function selectPlot(plotId) {
-                document.querySelectorAll('.building-plot.selected').forEach(p => p.classList.remove('selected'));
-                document.querySelector(`[data-plot-id='${plotId}']`).classList.add('selected');
-                selectedPlotId = plotId;
-                updateContextPanel(plotId);
-            }
+            function startAction(type, id, name, level) {
+                const queue = gameState.queues[type];
+                let spec, cost, time;
 
-            function startUpgrade(plotId, type, targetLevel) {
-                const spec = buildingSpecs[type].levels[targetLevel - 1];
-                if (gameState.resources.wood < spec.cost.wood || gameState.resources.gold < spec.cost.gold) {
-                    alert("Ressources insuffisantes !");
-                    return;
+                if (type === 'build') {
+                    spec = config.buildings[name].levels[level - 1];
+                    cost = spec.cost;
+                    time = spec.buildTime;
+                } else if (type === 'research') {
+                    const branch = Object.keys(config.research).find(br => config.research[br].techs[name]);
+                    spec = config.research[branch].techs[name];
+                    cost = spec.cost;
+                    time = spec.time;
+                } else if (type === 'military') {
+                    spec = config.units[name];
+                    cost = spec.cost;
+                    time = spec.time;
                 }
-                gameState.resources.wood -= spec.cost.wood;
-                gameState.resources.gold -= spec.cost.gold;
-                const endTime = Date.now() + spec.buildTime * 1000;
-                gameState.buildQueue.push({ plotId, type, level: targetLevel, endTime });
-                document.querySelector(`[data-plot-id='${plotId}']`).classList.add('constructing');
-                logEvent(`Lancement de la construction de ${type} (Niv. ${targetLevel}).`);
+                
+                for(const res in cost) {
+                    if (gameState.resources[res] < cost[res]) {
+                        showModal("Action impossible", "Ressources insuffisantes.");
+                        return;
+                    }
+                }
+                for(const res in cost) gameState.resources[res] -= cost[res];
+
+                const endTime = Date.now() + time * 1000;
+                queue.push({ id, name, level, endTime });
+                logEvent(`Lancement: ${name}.`);
                 updateAllUI();
-                updateContextPanel(plotId);
+                if (selectedPlotId) updateContextPanel(selectedPlotId);
             }
 
-            // --- FONCTIONS D'AFFICHAGE (UI) ---
+            // --- FONCTIONS D'AFFICHAGE ---
             function updateAllUI() {
                 updateResourceUI();
-                updateBuildQueueUI();
+                updateQueueUI();
             }
 
             function updateResourceUI() {
                 for (const res in dom.res) {
-                    dom.res[res].textContent = Math.floor(gameState.resources[res]);
+                    if(dom.res[res]) dom.res[res].textContent = Math.floor(gameState.resources[res]);
                 }
             }
 
             function renderCityLayout() {
                 dom.cityGrid.innerHTML = '';
-                cityLayout.forEach(plot => {
+                config.cityLayout.forEach(plot => {
                     const el = document.createElement('div');
                     el.className = 'building-plot';
                     el.dataset.plotId = plot.id;
                     el.style.cssText = `top:${plot.top}; left:${plot.left}; width:${plot.width}; height:${plot.height};`;
-                    const buildingState = gameState.buildings[plot.id];
-                    if (buildingState && buildingState.type) {
-                        el.innerHTML = `${buildingSpecs[buildingState.type].icon}<div class="level">Niv. ${buildingState.level}</div>`;
+                    const building = gameState.buildings[plot.id];
+                    if (building && building.type) {
+                        el.innerHTML = `${config.buildings[building.type].icon}<div class="level">Niv. ${building.level}</div>`;
                     } else {
                         el.innerHTML = '➕';
                     }
-                    if (gameState.buildQueue.some(item => item.plotId === plot.id)) {
-                        el.classList.add('constructing');
-                    }
-                    el.addEventListener('click', () => selectPlot(plot.id));
+                    if (gameState.queues.build.some(item => item.id === plot.id)) el.classList.add('constructing');
+                    el.addEventListener('click', () => {
+                        selectedPlotId = plot.id;
+                        document.querySelectorAll('.building-plot.selected').forEach(p => p.classList.remove('selected'));
+                        el.classList.add('selected');
+                        updateContextPanel(plot.id);
+                    });
                     dom.cityGrid.appendChild(el);
                 });
             }
@@ -355,71 +377,130 @@
                     dom.contextContent.innerHTML = '<p>Sélectionnez un élément pour voir ses détails.</p>';
                     return;
                 }
-                const buildingState = gameState.buildings[plotId];
+                const building = gameState.buildings[plotId];
                 let html = '';
-                if (buildingState && buildingState.type) {
-                    const { type, level } = buildingState;
-                    const spec = buildingSpecs[type];
+                if (building && building.type) {
+                    const { type, level } = building;
+                    const spec = config.buildings[type];
                     const nextLevel = level < spec.levels.length ? level + 1 : null;
-                    html = `<h3>${type} (Niveau ${level})</h3><p>${spec.description}</p>`;
-                    if (gameState.buildQueue.some(item => item.plotId === plotId)) {
+                    html = `<h3>${type} (Niv ${level})</h3><p>${spec.description}</p>`;
+                    if (gameState.queues.build.some(item => item.id === plotId)) {
                         html += `<p style="color: var(--color-primary); margin-top: 1rem;">Amélioration en cours...</p>`;
                     } else if (nextLevel) {
-                        html += `<button class="action-btn" data-action="upgrade" data-plot-id="${plotId}" data-type="${type}" data-level="${nextLevel}">Améliorer</button>`;
+                        html += `<button class="action-btn" data-action="build" data-id="${plotId}" data-name="${type}" data-level="${nextLevel}">Améliorer</button>`;
                     } else {
-                        html += `<p style="color: var(--color-primary); margin-top: 1rem;">Niveau maximum atteint</p>`;
+                        html += `<p style="color: var(--color-primary); margin-top: 1rem;">Niveau maximum</p>`;
                     }
                 } else {
-                    html = `<h3>Emplacement Vide</h3><p>Cliquez sur un bâtiment ci-dessous pour construire.</p><div class="build-options">`;
-                    for (const type in buildingSpecs) {
-                        html += `<button class="action-btn" data-action="build" data-plot-id="${plotId}" data-type="${type}" data-level="1">${buildingSpecs[type].icon} ${type}</button>`;
+                    html = `<h3>Emplacement Vide</h3><p>Cliquez pour construire :</p><div>`;
+                    for (const type in config.buildings) {
+                        html += `<button class="action-btn" data-action="build" data-id="${plotId}" data-name="${type}" data-level="1">${config.buildings[type].icon} ${type}</button>`;
                     }
                     html += `</div>`;
                 }
                 dom.contextContent.innerHTML = html;
             }
+
+            function renderResearchTree() {
+                let html = '';
+                for (const branchKey in config.research) {
+                    const branch = config.research[branchKey];
+                    html += `<div><h3>${branch.name}</h3>`;
+                    for (const techKey in branch.techs) {
+                        const tech = branch.techs[techKey];
+                        const isCompleted = gameState.researchCompleted.includes(techKey);
+                        const isResearching = gameState.queues.research.some(t => t.name === techKey);
+                        html += `<div class="card"><h4>${techKey}</h4><p>${tech.description}</p><p class="cost">Coût: 🔬${tech.cost.research}</p>`;
+                        if (isCompleted) {
+                            html += `<button class="action-btn" disabled>Terminé</button>`;
+                        } else if (isResearching) {
+                            html += `<button class="action-btn" disabled>En cours...</button>`;
+                        } else {
+                            html += `<button class="action-btn" data-action="research" data-name="${techKey}" data-level="1">Rechercher</button>`;
+                        }
+                        html += `</div>`;
+                    }
+                    html += `</div>`;
+                }
+                dom.researchGrid.innerHTML = html;
+            }
+
+            function renderMilitaryUnits() {
+                let html = '';
+                for (const unitKey in config.units) {
+                    const unit = config.units[unitKey];
+                    const isRecruiting = gameState.queues.military.some(u => u.name === unitKey);
+                    html += `<div class="card"><h4>${unitKey} ${unit.icon}</h4><p>${unit.description}</p><p class="cost">Coût: 🌲${unit.cost.wood || 0} 🔥${unit.cost.sulfur || 0} 💰${unit.cost.gold || 0}</p>`;
+                    if (isRecruiting) {
+                        html += `<button class="action-btn" disabled>En formation...</button>`;
+                    } else {
+                        html += `<button class="action-btn" data-action="military" data-name="${unitKey}" data-level="1">Recruter</button>`;
+                    }
+                    html += `</div>`;
+                }
+                dom.militaryGrid.innerHTML = html;
+            }
             
-            function updateBuildQueueUI() {
-                dom.buildQueueList.innerHTML = '';
-                gameState.buildQueue.forEach(item => {
-                    const remainingTime = Math.max(0, Math.ceil((item.endTime - Date.now()) / 1000));
-                    const li = document.createElement('li');
-                    li.className = 'queue-item';
-                    li.innerHTML = `<div class="name">${item.type} (Niv. ${item.level})</div><div class="timer">${new Date(remainingTime * 1000).toISOString().substr(14, 5)}</div>`;
-                    dom.buildQueueList.appendChild(li);
+            function updateQueueUI() {
+                dom.queueList.innerHTML = '';
+                ['build', 'research', 'military'].forEach(qType => {
+                    gameState.queues[qType].forEach(item => {
+                        const remainingTime = Math.max(0, Math.ceil((item.endTime - Date.now()) / 1000));
+                        const li = document.createElement('li');
+                        li.className = 'queue-item';
+                        li.innerHTML = `<div class="name">${item.name} ${item.level ? `(Niv. ${item.level})` : ''}</div><div class="timer">${new Date(remainingTime * 1000).toISOString().substr(14, 5)}</div>`;
+                        dom.queueList.appendChild(li);
+                    });
                 });
             }
             
-            function showUpgradeModal(plotId, type, level) {
-                const spec = buildingSpecs[type].levels[level - 1];
-                upgradeAction = () => startUpgrade(plotId, type, level);
-                dom.modalTitle.textContent = `${level > 1 ? 'Améliorer' : 'Construire'} ${type}`;
-                dom.modalMessage.textContent = `Voulez-vous vraiment ${level > 1 ? 'améliorer' : 'construire'} ce bâtiment ?`;
-                dom.modalCost.innerHTML = `Coût: 🌲${spec.cost.wood} 💰${spec.cost.gold} - Temps: ${spec.buildTime}s`;
+            function showModal(action, id, name, level) {
+                let spec, cost, time, title, message;
+                if (action === 'build') {
+                    spec = config.buildings[name].levels[level - 1];
+                    title = `${level > 1 ? 'Améliorer' : 'Construire'} ${name}`;
+                    message = `Voulez-vous vraiment lancer cette action ?`;
+                    cost = spec.cost;
+                    time = spec.buildTime;
+                } else if (action === 'research') {
+                    const branch = Object.keys(config.research).find(br => config.research[br].techs[name]);
+                    spec = config.research[branch].techs[name];
+                    title = `Rechercher ${name}`;
+                    message = `Lancer la recherche ?`;
+                    cost = spec.cost;
+                    time = spec.time;
+                } else if (action === 'military') {
+                    spec = config.units[name];
+                    title = `Recruter ${name}`;
+                    message = `Lancer le recrutement ?`;
+                    cost = spec.cost;
+                    time = spec.time;
+                }
+                
+                currentAction = () => startAction(action, id, name, level);
+                dom.modalTitle.textContent = title;
+                dom.modalMessage.textContent = message;
+                dom.modalCost.innerHTML = `Coût: ${Object.entries(cost).map(([res, val]) => `${res}: ${val}`).join(', ')} - Temps: ${time}s`;
                 dom.modal.style.display = 'flex';
             }
 
-            function logEvent(message) {
-                dom.eventLog.textContent = message;
-            }
+            function logEvent(message) { dom.eventLog.textContent = message; }
 
-            // --- GESTIONNAIRES D'ÉVÉNEMENTS ---
-            dom.contextContent.addEventListener('click', e => {
-                const target = e.target.closest('button');
+            // --- EVENT LISTENERS ---
+            document.body.addEventListener('click', e => {
+                const target = e.target.closest('button[data-action]');
                 if (!target) return;
-                const { action, plotId, type, level } = target.dataset;
-                if (action === 'upgrade' || action === 'build') {
-                    showUpgradeModal(plotId, type, parseInt(level));
-                }
+                const { action, id, name, level } = target.dataset;
+                showModal(action, id, name, parseInt(level));
             });
             dom.modalConfirmBtn.addEventListener('click', () => {
-                if (upgradeAction) upgradeAction();
+                if (currentAction) currentAction();
                 dom.modal.style.display = 'none';
-                upgradeAction = null;
+                currentAction = null;
             });
             dom.modalCancelBtn.addEventListener('click', () => {
                 dom.modal.style.display = 'none';
-                upgradeAction = null;
+                currentAction = null;
             });
 
             // --- INITIALISATION ---
