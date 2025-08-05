@@ -1,10 +1,10 @@
 <?php
 if(!isset($_SESSION['sessid']))
-	header("Location: ../index.php");
+        header("Location: ../index.html");
 
 ?>
 <div id="cityNav">
- <form id="changeCityForm" action="action.php" method="POST">
+ <form id="changeCityForm" action="action.html" method="POST">
   <fieldset style="display: none;">
   <input type="hidden" name="action" value="header" />
   <input type="hidden" name="function" value="changeCurrentCity" />

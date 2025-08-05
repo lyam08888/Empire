@@ -204,10 +204,10 @@
     <!-- En-tête -->
     <header class="header">
         <div class="nav-container">
-            <a href="index.php" class="logo">EMPIRE</a>
+            <a href="index.html" class="logo">EMPIRE</a>
             <nav class="nav-links">
-                <a href="index.php">Connexion</a>
-                <a href="register.php">Inscription</a>
+                <a href="index.html">Connexion</a>
+                <a href="register.html">Inscription</a>
             </nav>
         </div>
     </header>
