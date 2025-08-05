@@ -4,6 +4,7 @@ include("core/CAccount.php");
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+
 <meta charset="utf-8" />
 <meta name="language" content="fr">
 <meta name="author" content="prince 3">
@@ -18,6 +19,7 @@ include("core/CAccount.php");
 <meta name="robots" content="index,follow">
 <meta name="Revisit" content="After 14 days"> 
 <title>ikariama - jeu de navigateur gratuit</title>
+
 <link href="css/rstyle.css" rel="stylesheet" type="text/css" media="screen">
 <script src="common.js" defer></script>
 </head>
@@ -27,11 +29,13 @@ include("core/CAccount.php");
 <!--Main div-->
 <div id="main">
 <div>
+
  <div id="links">
  <a href="index.php" title="vers la connexion">Connexion</a>
  <a href="register.php" title="Inscris-toi ici !">Inscription</a>
  <a href="tour_step1.php" title="Courte visite d'empire">Visite du jeu</a>
  <a href="board.php" target="_blank" title="vers les forums">Forum</a> </div>
+
 </div>
 <div id="text">
  <img class="bild1" src="img/bild1.jpg" height="85" width="173">
@@ -41,6 +45,7 @@ include("core/CAccount.php");
  <table id="logindata" cellpadding="0" cellspacing="0">
  <tbody>
  <tr>
+
  <td><label for="welt" class="labelwelt">Monde</label></td>
  <td>
  <select id="universe" name="universe" class="uni" size="1">
@@ -68,6 +73,7 @@ include("core/CAccount.php");
  <?php echo $form->getError('agree');?> </span>
  <br><br>
  <input class="button" value="S'inscrire" name="loginMode" type="submit"><br><br>
+
  <input name="ft" type="hidden" value="a1" />
  </form>
 </div><br/>

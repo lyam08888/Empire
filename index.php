@@ -11,6 +11,7 @@ include("core/CAccount.php");
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+
 <meta charset="utf-8" />
 <meta name="language" content="fr">
 <meta name="author" content="prince 3">
@@ -26,12 +27,16 @@ include("core/CAccount.php");
 <meta name="Revisit" content="After 14 days"> 
 <title>ikariama - jeu de navigateur gratuit</title>
 
+
 <link href="css/istyle.css" rel="stylesheet" type="text/css" media="screen">
 <script src="common.js" defer></script>
 <script src="login.js" defer></script>
 </head>
-<body>
+
+
+<body dir="ltr">
 <div id="headback">
+
 <header id="headlogo"></header>
 <main id="main">
 <nav id="links">
@@ -52,14 +57,17 @@ Bienvenue sur Ikariam
 empire</p>
  <div class="joinbutton">
  <a href="register.php" title="Inscription">Joue maintenant gratuitement !</a> </div>
+
  <form id="loginForm" name="loginForm" action="#" onsubmit="changeAction('login');" method="post"> 
  <input type="hidden" name="ft" value="a4" />
  <table id="logindata" cellpadding="0" cellspacing="0">
 
  <tbody><tr>
+
  <td><label for="welt" class="labelwelt">Monde</label></td>
  <td><label for="login" class="labellogin">Nom d'utilisateur</label></td>
  <td><label for="pwd" class="labelpwd">Mot de passe</label></td>
+
  <td></td>
  </tr>
  <tr>
@@ -71,11 +79,13 @@ empire</p>
  <td><input id="login" name="user" class="login" type="text" value="<?php echo $form->getDiff("user",$_COOKIE['COOKUSR']); ?>"><span class="error"> <?php echo $form->getError("user"); ?></span></td>
  <td><input id="pwd" name="pw" class="pass" type="password" value="<?php echo $form->getValue("pw");?>" maxlength="20" autocomplete='off' /> <span class="error"><?php echo $form->getError("pw"); ?></span></td>
  <td rowspan="4" style="text-align: right; vertical-align: top;">
+
  <input class="button" value="Connexion" name="loginMode" type="submit"><br><br>
  <span style="font-size: 10px;">En me connectant, j'accepte<br> <a style="color: rgb(223, 88, 67);" target="_blank" href="conditions.htm">les conditions d'utilisation</a>.</span><br><br>
  <span class="forgotpwd">
  <a href="lostpwd.php" title="Demander un nouveau mot de passe ici">
  Mot de passe oublié&nbsp;?</a></span></td></tr>
+
  <tr style="height: 15px;">
  <td colspan="3"></td>
  </tr>
