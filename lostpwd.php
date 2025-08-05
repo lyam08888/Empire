@@ -1,31 +1,305 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8" />
-<title>Mot de passe oublié - ikariama</title>
-<link href="css/istyle.css" rel="stylesheet" type="text/css" media="screen" />
-<script src="common.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Meta-tags pour le référencement et l'information -->
+    <title>Mot de passe oublié - Empire</title>
+    <meta name="description" content="Récupérez l'accès à votre compte Empire. Entrez votre adresse e-mail pour recevoir les instructions de réinitialisation du mot de passe.">
+    <meta name="keywords" content="mot de passe oublié, récupération de compte, jeu de stratégie, empire">
+    <meta name="author" content="Empire Game Studio">
+    
+    <!-- Favicon local -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%231e3a8a'/><text x='16' y='20' text-anchor='middle' fill='white' font-family='Arial' font-size='18' font-weight='bold'>E</text></svg>" type="image/svg+xml">
+
+    <style>
+        /* Styles de base, reset et animations */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0a192f 0%, #1e3a8a 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
+        }
+
+        /* Header */
+        .header {
+            padding: 1rem 2rem;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #fbbf24;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            animation: slideIn 1s ease-out;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #fbbf24;
+        }
+
+        /* Contenu principal */
+        .main-content {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 150px);
+        }
+
+        /* Formulaire */
+        .form-container {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 2.5rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            animation: fadeIn 1s ease-out 0.5s both;
+        }
+
+        .form-title {
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: #fbbf24;
+        }
+        
+        .form-description {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #94a3b8;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #cbd5e1;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 0.5rem;
+            color: #e2e8f0;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input.is-invalid {
+            border-color: #f87171;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #fbbf24;
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
+        }
+        
+        .form-error {
+            color: #f87171;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            min-height: 1rem;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            padding: 0.85rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(15, 23, 42, 0.9);
+            padding: 2rem;
+            text-align: center;
+            border-top: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        .footer-content {
+            color: #64748b;
+        }
+        
+        /* Particules */
+        .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -10; }
+        .particle { position: absolute; width: 2px; height: 2px; background: rgba(251, 191, 36, 0.3); border-radius: 50%; animation: float 6s infinite linear; }
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+    </style>
 </head>
-<body dir="ltr">
-<div id="headback">
-<header id="headlogo"></header>
-<main id="main">
-<nav id="links">
-  <a href="index.php" title="Vers la connexion">Connexion</a>
-  <a href="register.php" title="Inscris-toi ici !">Inscription</a>
-  <a href="tour_step1.php" title="Courte visite d'ikariama">Visite du jeu</a>
-  <a href="/board" target="_blank" title="Vers les forums">Forum</a>
-</nav>
-<section id="text">
-  <h1>Mot de passe oublié</h1>
-  <form id="lostForm" action="#" method="post">
-    <label for="email">Adresse e-mail</label>
-    <input id="email" name="email" type="email" class="login" />
-    <input class="button" type="submit" value="Envoyer" />
-  </form>
-</section>
-</main>
-<footer id="footer"></footer>
-</div>
+<body>
+    <div class="particles" id="particles"></div>
+
+    <!-- En-tête -->
+    <header class="header">
+        <div class="nav-container">
+            <a href="index.php" class="logo">EMPIRE</a>
+            <nav class="nav-links">
+                <a href="index.php">Connexion</a>
+                <a href="register.php">Inscription</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Contenu Principal -->
+    <main class="main-content">
+        <div class="form-container">
+            <h3 class="form-title">Mot de passe oublié</h3>
+            <p class="form-description">
+                Pas d'inquiétude. Entrez votre adresse e-mail et nous vous enverrons un lien pour réinitialiser votre mot de passe.
+            </p>
+            <form id="lostPasswordForm" action="#" method="post" novalidate>
+                <div class="form-group">
+                    <label for="email" class="form-label">Adresse e-mail</label>
+                    <input type="email" id="email" name="email" class="form-input" placeholder="votre.email@exemple.com" required>
+                    <div class="form-error" id="error-email"></div>
+                </div>
+                
+                <button type="submit" class="btn-submit">
+                    Envoyer le lien
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Pied de page -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2024 Empire - Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Validation du formulaire côté client ---
+        const form = document.getElementById('lostPasswordForm');
+        const email = document.getElementById('email');
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            let isValid = validateForm();
+            if (isValid) {
+                alert('Si un compte est associé à cet e-mail, un lien de réinitialisation a été envoyé.');
+                form.reset();
+            }
+        });
+
+        function validateForm() {
+            let valid = true;
+            resetErrors();
+
+            if (email.value.trim() === '') {
+                showError('email', 'L\'adresse e-mail est requise.');
+                valid = false;
+            } else if (!isValidEmail(email.value)) {
+                showError('email', 'Veuillez entrer une adresse e-mail valide.');
+                valid = false;
+            }
+            
+            return valid;
+        }
+
+        function showError(field, message) {
+            const errorElement = document.getElementById('error-' + field);
+            const inputElement = document.getElementById(field);
+            if(errorElement) errorElement.textContent = message;
+            if(inputElement) inputElement.classList.add('is-invalid');
+        }
+
+        function resetErrors() {
+            document.getElementById('error-email').textContent = '';
+            email.classList.remove('is-invalid');
+        }
+
+        function isValidEmail(email) {
+            const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return re.test(String(email).toLowerCase());
+        }
+
+        // --- Script pour les particules ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const particlesContainer = document.getElementById('particles');
+            if (!particlesContainer) return;
+            const particleCount = 50;
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        });
+    </script>
 </body>
 </html>
