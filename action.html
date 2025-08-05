@@ -248,6 +248,7 @@
                    <li><a data-view="world">🌍 <span>Monde</span></a></li>
                    <li><a data-view="research">🔬 <span>Recherche</span></a></li>
                    <li><a data-view="military">⚔️ <span>Militaire</span></a></li>
+                   <li><a data-view="battle">🛡️ <span>Bataille</span></a></li>
                    <li><a data-view="diplomacy">🤝 <span>Diplomatie</span></a></li>
                </ul>
            </nav>
@@ -259,6 +260,7 @@
                <section id="view-world" class="main-view hidden"><h2>Carte du Monde</h2><div id="world-map-grid" class="map-grid-container"></div></section>
                <section id="view-research" class="main-view hidden"><h2>Recherche</h2><div id="research-grid" class="management-grid"></div></section>
                <section id="view-military" class="main-view hidden"><h2>Militaire</h2><div id="military-grid" class="management-grid"></div></section>
+               <section id="view-battle" class="main-view hidden"><h2>Bataille</h2><div id="battle-grid" class="management-grid"></div></section>
                <section id="view-diplomacy" class="main-view hidden"><h2>Diplomatie</h2><div id="diplomacy-grid" class="management-grid"></div></section>
            </div>
            
@@ -284,6 +286,7 @@
            <a data-view="world">🌍</a>
            <a data-view="research">🔬</a>
            <a data-view="military">⚔️</a>
+           <a data-view="battle">🛡️</a>
            <a data-view="diplomacy">🤝</a>
        </nav>
    </div>
@@ -367,6 +370,7 @@
                buildings: { "townHall": { type: "Hôtel de Ville", level: 1 }, "plot1": { type: "Caserne", level: 1 }, "plot2": { type: null, level: 0 }, "plot3": { type: null, level: 0 }, "academy": { type: "Académie", level: 1 }, "plot4": { type: null, level: 0 }, "plot5": { type: null, level: 0 }, "plot6": { type: null, level: 0 }, "plot7": { type: null, level: 0 }, "plot8": { type: null, level: 0 } },
                researchCompleted: [],
                queues: { build: [], research: [], military: [] },
+               cooldowns: { build: 0, research: 0, military: 0 },
                lastUpdate: Date.now()
            };
 
@@ -381,22 +385,27 @@
                modalCost: document.getElementById('modal-cost'), modalConfirmBtn: document.getElementById('modalConfirmBtn'),
                modalCancelBtn: document.getElementById('modalCancelBtn'), navLinks: document.querySelectorAll('.main-nav a'),
                mainViews: document.querySelectorAll('.main-view'), researchGrid: document.getElementById('research-grid'),
-               militaryGrid: document.getElementById('military-grid'), diplomacyGrid: document.getElementById('diplomacy-grid'),
-               buildSelectModal: document.getElementById('buildSelectModal'), buildSelectList: document.getElementById('buildSelectList'), buildSelectCancel: document.getElementById('buildSelectCancel'),
+
+               militaryGrid: document.getElementById('military-grid'), battleGrid: document.getElementById('battle-grid'),
+               diplomacyGrid: document.getElementById('diplomacy-grid'),
+
            };
 
            let selectedPlotId = null;
            let currentAction = null;
+           const ACTION_COOLDOWNS = { build: 5, research: 5, military: 5 };
+           function isCooldownActive(type) { return gameState.cooldowns[type] && Date.now() < gameState.cooldowns[type]; }
 
            // --- PERSISTANCE DES DONNÉES ---
            function saveState() { localStorage.setItem('empireGameState', JSON.stringify(gameState)); }
-           function loadState() {
-               const savedState = localStorage.getItem('empireGameState');
+          function loadState() {
+              const savedState = localStorage.getItem('empireGameState');
                gameState = savedState ? JSON.parse(savedState) : JSON.parse(JSON.stringify(defaultGameState));
-               const offlineTime = (Date.now() - gameState.lastUpdate) / 1000;
-               produceResources(offlineTime);
-               gameState.lastUpdate = Date.now();
-           }
+               if (!gameState.cooldowns) gameState.cooldowns = { build: 0, research: 0, military: 0 };
+              const offlineTime = (Date.now() - gameState.lastUpdate) / 1000;
+              produceResources(offlineTime);
+              gameState.lastUpdate = Date.now();
+          }
 
            // --- NAVIGATION & VUES ---
            function switchView(viewId) {
@@ -428,6 +437,7 @@
                renderWorldMap();
                renderResearchTree();
                renderMilitaryUnits();
+               renderBattle();
                renderDiplomacy();
                updateAllUI();
            }
@@ -476,7 +486,8 @@
                }
            }
            
-           function startAction(type, id, name, level) {
+          function startAction(type, id, name, level) {
+               if (isCooldownActive(type)) { showModal("Action impossible", "Cette action est encore en cooldown."); return; }
                const queue = gameState.queues[type];
                let spec, cost, time;
                if (type === 'build') { spec = config.buildings[name].levels[level - 1]; }
@@ -487,10 +498,11 @@
                for(const res in cost) gameState.resources[res] -= cost[res];
                const endTime = Date.now() + time * 1000;
                queue.push({ id, name, level, endTime });
+               gameState.cooldowns[type] = Date.now() + ACTION_COOLDOWNS[type] * 1000;
                logEvent(`Lancement: ${name}.`);
                updateAllUI();
                if (selectedPlotId) updateContextPanel(selectedPlotId);
-           }
+          }
 
            // --- FONCTIONS D'AFFICHAGE ---
            function updateAllUI() { updateResourceUI(); updateQueueUI(); }
@@ -565,10 +577,15 @@
                        const { type, level } = building; const spec = config.buildings[type]; const nextLevel = level < spec.levels.length ? level + 1 : null;
                        html = `<h3>${type} (Niv ${level})</h3><p>${spec.description}</p>`;
                        if (gameState.queues.build.some(item => item.id === plotId)) { html += `<p style="color: var(--color-primary); margin-top: 1rem;">Amélioration en cours...</p>`; }
+                       else if (isCooldownActive('build')) { html += `<button class="action-btn" disabled>Cooldown...</button>`; }
                        else if (nextLevel) { html += `<button class="action-btn" data-action="build" data-id="${plotId}" data-name="${type}" data-level="${nextLevel}">Améliorer</button>`; }
                        else { html += `<p style="color: var(--color-primary); margin-top: 1rem;">Niveau maximum</p>`; }
                    } else {
-                       html = `<h3>Emplacement Vide</h3><p>Cliquez pour construire :</p><button class="action-btn" id="chooseBuildingBtn">Choisir un bâtiment</button>`;
+
+                       html = `<h3>Emplacement Vide</h3><p>Cliquez pour construire :</p><div style="display:flex; flex-direction:column; gap:0.5rem;">`;
+                       for (const type in config.buildings) { html += isCooldownActive('build') ? `<button class="action-btn" disabled>${config.buildings[type].icon} ${type}</button>` : `<button class="action-btn" data-action="build" data-id="${plotId}" data-name="${type}" data-level="1">${config.buildings[type].icon} ${type}</button>`; }
+                       html += `</div>`;
+
                    }
                }
                dom.contextPanel.innerHTML = html;
@@ -616,6 +633,7 @@
                        branchHtml += `<div class="card"><h4>${techKey}</h4><p>${tech.description}</p><p class="cost">Coût: 🔬${tech.cost.research}</p>`;
                        if (isCompleted) { branchHtml += `<button class="action-btn" disabled>Terminé</button>`; }
                        else if (isResearching) { branchHtml += `<button class="action-btn" disabled>En cours...</button>`; }
+                       else if (isCooldownActive('research')) { branchHtml += `<button class="action-btn" disabled>Cooldown...</button>`; }
                        else { branchHtml += `<button class="action-btn" data-action="research" data-name="${techKey}" data-level="1">Rechercher</button>`; }
                        branchHtml += `</div>`;
                    }
@@ -628,8 +646,27 @@
                    const unit = config.units[unitKey]; const isRecruiting = gameState.queues.military.some(u => u.name === unitKey);
                    let html = `<div class="card"><h4>${unitKey} ${unit.icon}</h4><p>${unit.description}</p><p class="cost">Coût: 🌲${unit.cost.wood || 0} 🔥${unit.cost.sulfur || 0} 💰${unit.cost.gold || 0}</p>`;
                    if (isRecruiting) { html += `<button class="action-btn" disabled>En formation...</button>`; }
+                   else if (isCooldownActive('military')) { html += `<button class="action-btn" disabled>Cooldown...</button>`; }
                    else { html += `<button class="action-btn" data-action="military" data-name="${unitKey}" data-level="1">Recruter</button>`; }
                    html += `</div>`; dom.militaryGrid.innerHTML += html;
+               }
+           }
+           function renderBattle() {
+               dom.battleGrid.innerHTML = `
+                   <div class="card">
+                       <h3>Simuler une bataille</h3>
+                       <button class="action-btn" id="simulateBattleBtn">Lancer un combat</button>
+                       <div id="battleResult" class="battle-result"></div>
+                   </div>`;
+               const btn = document.getElementById('simulateBattleBtn');
+               if (btn) {
+                   btn.addEventListener('click', () => {
+                       const attacker = { units: [{ type: 'hoplite', count: 10 }, { type: 'archer', count: 5 }], resources: {} };
+                       const defender = { units: [{ type: 'hoplite', count: 8 }], wallDefense: 0, resources: { wood: 100, gold: 100 } };
+                       const result = resolveBattle(attacker, defender);
+                       const lootText = Object.keys(result.loot).length ? Object.entries(result.loot).map(([r,v]) => `${r}: ${v}`).join(', ') : 'aucun';
+                       document.getElementById('battleResult').textContent = `Vainqueur: ${result.winner}. Butin: ${lootText}.`;
+                   });
                }
            }
            function renderDiplomacy() {
@@ -691,6 +728,7 @@
                const target = e.target.closest('button[data-action]');
                if (!target) return;
                const { action, id, name, level } = target.dataset;
+               if (isCooldownActive(action)) { showModal('Action en cooldown', 'Veuillez patienter avant de relancer cette action.'); return; }
                showModal(action, id, name, parseInt(level));
            });
            dom.modalConfirmBtn.addEventListener('click', () => { if (currentAction) currentAction(); dom.modal.style.display = 'none'; });
