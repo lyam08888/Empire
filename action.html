@@ -918,7 +918,19 @@
                if (!gameState.diplomacy) gameState.diplomacy = { relations: {}, treaties: [], reputation: 50 };
                if (!gameState.playerStats) gameState.playerStats = { level: 1, xp: 0, totalBuildings: 2, totalUnits: 0 };
                if (!gameState.achievements) gameState.achievements = [];
-               if (!gameState.activeQuests) gameState.activeQuests = [];
+               if (!gameState.activeQuests) {
+                   gameState.activeQuests = [];
+               } else {
+                   // Reconnect quest condition functions that were lost during JSON serialization
+                   gameState.activeQuests = gameState.activeQuests
+                       .map(q => {
+                           const template = QUEST_TEMPLATES.find(t => t.id === q.id);
+                           // If the template exists, merge it with the saved quest and restore the condition function.
+                           // If no matching template is found, return null so it can be filtered out.
+                           return template ? { ...template, ...q, condition: template.condition } : null;
+                       })
+                       .filter(Boolean); // Remove quests without valid templates
+               }
                if (!gameState.completedQuests) gameState.completedQuests = [];
                if (!gameState.eventHistory) gameState.eventHistory = [];
                if (!gameState.lastEventTime) gameState.lastEventTime = 0;
@@ -2301,7 +2313,8 @@
                    html += '<p style="color: var(--color-text-muted); font-style: italic;">Aucune quête active pour le moment.</p>';
                } else {
                    gameState.activeQuests.forEach(quest => {
-                       const progress = quest.condition() ? '✅ Prêt à terminer' : '⏳ En cours';
+                       const isReady = typeof quest.condition === 'function' ? quest.condition() : false;
+                       const progress = isReady ? '✅ Prêt à terminer' : '⏳ En cours';
                        const rewardText = Object.entries(quest.reward)
                            .map(([res, amt]) => `${res}: ${amt}`)
                            .join(', ');
@@ -2312,7 +2325,7 @@
                                <p style="margin: 0 0 0.5rem 0;">${quest.description}</p>
                                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
                                    <span style="color: var(--color-text-muted);">Récompenses: ${rewardText}</span>
-                                   <span style="font-weight: bold; color: ${quest.condition() ? 'var(--color-success)' : 'var(--color-warning)'};">${progress}</span>
+                                   <span style="font-weight: bold; color: ${isReady ? 'var(--color-success)' : 'var(--color-warning)'};">${progress}</span>
                                </div>
                            </div>
                        `;
