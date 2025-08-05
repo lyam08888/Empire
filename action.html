@@ -343,6 +343,7 @@
                buildings: { "townHall": { type: "Hôtel de Ville", level: 1 }, "plot1": { type: "Caserne", level: 1 }, "plot2": { type: null, level: 0 }, "plot3": { type: null, level: 0 }, "academy": { type: "Académie", level: 1 } },
                researchCompleted: [],
                queues: { build: [], research: [], military: [] },
+               cooldowns: { build: 0, research: 0, military: 0 },
                lastUpdate: Date.now()
            };
 
@@ -362,16 +363,19 @@
 
            let selectedPlotId = null;
            let currentAction = null;
+           const ACTION_COOLDOWNS = { build: 5, research: 5, military: 5 };
+           function isCooldownActive(type) { return gameState.cooldowns[type] && Date.now() < gameState.cooldowns[type]; }
 
            // --- PERSISTANCE DES DONNÉES ---
            function saveState() { localStorage.setItem('empireGameState', JSON.stringify(gameState)); }
-           function loadState() {
-               const savedState = localStorage.getItem('empireGameState');
+          function loadState() {
+              const savedState = localStorage.getItem('empireGameState');
                gameState = savedState ? JSON.parse(savedState) : JSON.parse(JSON.stringify(defaultGameState));
-               const offlineTime = (Date.now() - gameState.lastUpdate) / 1000;
-               produceResources(offlineTime);
-               gameState.lastUpdate = Date.now();
-           }
+               if (!gameState.cooldowns) gameState.cooldowns = { build: 0, research: 0, military: 0 };
+              const offlineTime = (Date.now() - gameState.lastUpdate) / 1000;
+              produceResources(offlineTime);
+              gameState.lastUpdate = Date.now();
+          }
 
            // --- NAVIGATION & VUES ---
            function switchView(viewId) {
@@ -451,7 +455,8 @@
                }
            }
            
-           function startAction(type, id, name, level) {
+          function startAction(type, id, name, level) {
+               if (isCooldownActive(type)) { showModal("Action impossible", "Cette action est encore en cooldown."); return; }
                const queue = gameState.queues[type];
                let spec, cost, time;
                if (type === 'build') { spec = config.buildings[name].levels[level - 1]; }
@@ -462,10 +467,11 @@
                for(const res in cost) gameState.resources[res] -= cost[res];
                const endTime = Date.now() + time * 1000;
                queue.push({ id, name, level, endTime });
+               gameState.cooldowns[type] = Date.now() + ACTION_COOLDOWNS[type] * 1000;
                logEvent(`Lancement: ${name}.`);
                updateAllUI();
                if (selectedPlotId) updateContextPanel(selectedPlotId);
-           }
+          }
 
            // --- FONCTIONS D'AFFICHAGE ---
            function updateAllUI() { updateResourceUI(); updateQueueUI(); }
@@ -540,11 +546,12 @@
                        const { type, level } = building; const spec = config.buildings[type]; const nextLevel = level < spec.levels.length ? level + 1 : null;
                        html = `<h3>${type} (Niv ${level})</h3><p>${spec.description}</p>`;
                        if (gameState.queues.build.some(item => item.id === plotId)) { html += `<p style="color: var(--color-primary); margin-top: 1rem;">Amélioration en cours...</p>`; }
+                       else if (isCooldownActive('build')) { html += `<button class="action-btn" disabled>Cooldown...</button>`; }
                        else if (nextLevel) { html += `<button class="action-btn" data-action="build" data-id="${plotId}" data-name="${type}" data-level="${nextLevel}">Améliorer</button>`; }
                        else { html += `<p style="color: var(--color-primary); margin-top: 1rem;">Niveau maximum</p>`; }
                    } else {
                        html = `<h3>Emplacement Vide</h3><p>Cliquez pour construire :</p><div style="display:flex; flex-direction:column; gap:0.5rem;">`;
-                       for (const type in config.buildings) { html += `<button class="action-btn" data-action="build" data-id="${plotId}" data-name="${type}" data-level="1">${config.buildings[type].icon} ${type}</button>`; }
+                       for (const type in config.buildings) { html += isCooldownActive('build') ? `<button class="action-btn" disabled>${config.buildings[type].icon} ${type}</button>` : `<button class="action-btn" data-action="build" data-id="${plotId}" data-name="${type}" data-level="1">${config.buildings[type].icon} ${type}</button>`; }
                        html += `</div>`;
                    }
                }
@@ -577,6 +584,7 @@
                        branchHtml += `<div class="card"><h4>${techKey}</h4><p>${tech.description}</p><p class="cost">Coût: 🔬${tech.cost.research}</p>`;
                        if (isCompleted) { branchHtml += `<button class="action-btn" disabled>Terminé</button>`; }
                        else if (isResearching) { branchHtml += `<button class="action-btn" disabled>En cours...</button>`; }
+                       else if (isCooldownActive('research')) { branchHtml += `<button class="action-btn" disabled>Cooldown...</button>`; }
                        else { branchHtml += `<button class="action-btn" data-action="research" data-name="${techKey}" data-level="1">Rechercher</button>`; }
                        branchHtml += `</div>`;
                    }
@@ -589,6 +597,7 @@
                    const unit = config.units[unitKey]; const isRecruiting = gameState.queues.military.some(u => u.name === unitKey);
                    let html = `<div class="card"><h4>${unitKey} ${unit.icon}</h4><p>${unit.description}</p><p class="cost">Coût: 🌲${unit.cost.wood || 0} 🔥${unit.cost.sulfur || 0} 💰${unit.cost.gold || 0}</p>`;
                    if (isRecruiting) { html += `<button class="action-btn" disabled>En formation...</button>`; }
+                   else if (isCooldownActive('military')) { html += `<button class="action-btn" disabled>Cooldown...</button>`; }
                    else { html += `<button class="action-btn" data-action="military" data-name="${unitKey}" data-level="1">Recruter</button>`; }
                    html += `</div>`; dom.militaryGrid.innerHTML += html;
                }
@@ -652,6 +661,7 @@
                const target = e.target.closest('button[data-action]');
                if (!target) return;
                const { action, id, name, level } = target.dataset;
+               if (isCooldownActive(action)) { showModal('Action en cooldown', 'Veuillez patienter avant de relancer cette action.'); return; }
                showModal(action, id, name, parseInt(level));
            });
            dom.modalConfirmBtn.addEventListener('click', () => { if (currentAction) currentAction(); dom.modal.style.display = 'none'; });
