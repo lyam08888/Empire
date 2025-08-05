@@ -34,6 +34,7 @@ if (!isset($_SESSION['sessid'])) {
     exit; // Toujours utiliser exit() après une redirection.
 }
 
+
 // --- INCLUSION DES CLASSES MÉTIER (MODÈLES) ---
 
 // Ces classes contiennent la logique principale du jeu.
@@ -46,6 +47,7 @@ require_once("core/CShips.php");
 
 // Instanciation des objets principaux
 $account = new CAccount;
+
 $city = new CCity;
 $island = new CIsland;
 $units = new CUnits(true);
