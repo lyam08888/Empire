@@ -356,12 +356,56 @@
                    "Artificier": { description: "Améliore les unités spéciales.", icon: "🎇", levels: [ { cost: { wood: 320, sulfur: 80 }, buildTime: 24 }, { cost: { wood: 700, sulfur: 180 }, buildTime: 55 } ] }
                },
                research: {
-                   economy: { name: "Économie", icon: "💰", techs: { "Expansion": { description: "Permet de fonder une nouvelle colonie.", cost: { research: 500 }, time: 60 } } },
-                   military: { name: "Militaire", icon: "⚔️", techs: { "Balistique": { description: "Améliore la précision des catapultes.", cost: { research: 300 }, time: 45 } } }
+                   economy: { 
+                       name: "Économie", 
+                       icon: "💰", 
+                       techs: { 
+                           "Commerce": { description: "Augmente les revenus en or de 25%.", cost: { research: 200 }, time: 30 },
+                           "Expansion": { description: "Permet de fonder une nouvelle colonie.", cost: { research: 500 }, time: 60 },
+                           "Banque": { description: "Génère des intérêts sur votre or.", cost: { research: 800 }, time: 90 },
+                           "Routes Commerciales": { description: "Réduit les coûts de transport de 50%.", cost: { research: 1200 }, time: 120 }
+                       } 
+                   },
+                   military: { 
+                       name: "Militaire", 
+                       icon: "⚔️", 
+                       techs: { 
+                           "Tactiques": { description: "Augmente l'attaque des unités de 15%.", cost: { research: 250 }, time: 40 },
+                           "Balistique": { description: "Améliore la précision des catapultes.", cost: { research: 400 }, time: 60 },
+                           "Fortification": { description: "Augmente la défense des murailles de 30%.", cost: { research: 600 }, time: 80 },
+                           "Poudre à Canon": { description: "Débloque les unités à poudre.", cost: { research: 1000 }, time: 100 }
+                       } 
+                   },
+                   science: {
+                       name: "Science",
+                       icon: "🔬",
+                       techs: {
+                           "Philosophie": { description: "Augmente la production de recherche de 20%.", cost: { research: 300 }, time: 50 },
+                           "Mathématiques": { description: "Réduit le temps de construction de 15%.", cost: { research: 500 }, time: 70 },
+                           "Ingénierie": { description: "Débloque des bâtiments avancés.", cost: { research: 750 }, time: 90 },
+                           "Alchimie": { description: "Permet la transmutation des ressources.", cost: { research: 1100 }, time: 110 }
+                       }
+                   },
+                   navigation: {
+                       name: "Navigation",
+                       icon: "⛵",
+                       techs: {
+                           "Cartographie": { description: "Révèle 3 îles aléatoirement.", cost: { research: 350 }, time: 45 },
+                           "Navigation": { description: "Augmente la vitesse des navires de 25%.", cost: { research: 550 }, time: 65 },
+                           "Astronomie": { description: "Améliore l'exploration maritime.", cost: { research: 800 }, time: 85 },
+                           "Boussole": { description: "Réduit les coûts d'exploration de 40%.", cost: { research: 1200 }, time: 105 }
+                       }
+                   }
                },
                units: {
                    "Hoplite": { description: "Unité de base solide.", icon: "🛡️", cost: { wood: 50, sulfur: 30, gold: 10 }, time: 5 },
-                   "Archer": { description: "Attaque à distance.", icon: "🏹", cost: { wood: 40, gold: 15 }, time: 4 }
+                   "Archer": { description: "Attaque à distance.", icon: "🏹", cost: { wood: 40, gold: 15 }, time: 4 },
+                   "Catapulte": { description: "Siège puissant contre les bâtiments.", icon: "🏹", cost: { wood: 200, sulfur: 100, gold: 50 }, time: 15 },
+                   "Cavalier": { description: "Unité rapide et mobile.", icon: "🐎", cost: { wood: 80, gold: 30 }, time: 8 },
+                   "Phalange": { description: "Formation défensive redoutable.", icon: "🛡️", cost: { wood: 120, sulfur: 60, gold: 25 }, time: 12 },
+                   "Éclaireur": { description: "Unité de reconnaissance rapide.", icon: "👁️", cost: { wood: 30, gold: 20 }, time: 3 },
+                   "Bélier": { description: "Spécialisé dans la destruction des murailles.", icon: "🐏", cost: { wood: 150, sulfur: 80, gold: 40 }, time: 10 },
+                   "Médecin": { description: "Soigne les unités blessées.", icon: "⚕️", cost: { wood: 60, crystal: 40, gold: 35 }, time: 7 }
                },
                diplomacy: {
                    alliances: { "Les Spartiates": { tag: "SPQR", members: 15, points: 12000 } },
@@ -497,10 +541,21 @@
            }
 
            function gameLoop() {
-               produceResources(1);
-               processQueues();
-               updateAllUI();
-               saveState();
+               try {
+                   produceResources(1);
+                   processQueues();
+                   updateAllUI();
+                   checkAchievements();
+                   
+                   // Sauvegarde automatique toutes les 30 secondes
+                   if (!gameLoop.lastSave || Date.now() - gameLoop.lastSave > 30000) {
+                       saveState();
+                       gameLoop.lastSave = Date.now();
+                   }
+               } catch (error) {
+                   console.error('Erreur dans la boucle de jeu:', error);
+                   logEvent('⚠️ Erreur détectée, tentative de récupération...');
+               }
            }
 
            function produceResources(seconds) {
@@ -1021,6 +1076,59 @@
                    html += `<div class="card"><h4>${name}</h4><p>${treaty.description}</p><button class="action-btn" data-action="diplomacy" data-name="${name}">Signer</button></div>`;
                }
                html += '</div>'; dom.diplomacyGrid.innerHTML += html;
+           }
+           
+           function renderAchievements() {
+               const achievementsGrid = document.getElementById('achievements-grid');
+               if (!achievementsGrid) return;
+               
+               const allAchievements = [
+                   { id: 'builder1', name: 'Premier Constructeur', desc: 'Construire 5 bâtiments', icon: '🏗️' },
+                   { id: 'builder2', name: 'Architecte', desc: 'Construire 15 bâtiments', icon: '🏛️' },
+                   { id: 'builder3', name: 'Maître Bâtisseur', desc: 'Construire 30 bâtiments', icon: '🏰' },
+                   { id: 'researcher1', name: 'Érudit', desc: 'Terminer 3 recherches', icon: '📚' },
+                   { id: 'researcher2', name: 'Savant', desc: 'Terminer 8 recherches', icon: '🧪' },
+                   { id: 'military1', name: 'Général', desc: 'Recruter 20 unités', icon: '⚔️' },
+                   { id: 'military2', name: 'Conquérant', desc: 'Recruter 50 unités', icon: '👑' },
+                   { id: 'rich1', name: 'Riche Marchand', desc: 'Posséder 10000 or', icon: '💰' },
+                   { id: 'rich2', name: 'Empereur Doré', desc: 'Posséder 50000 or', icon: '👑' },
+                   { id: 'explorer1', name: 'Explorateur', desc: 'Explorer 10 îles', icon: '🗺️' },
+                   { id: 'colonizer1', name: 'Colonisateur', desc: 'Coloniser 3 îles', icon: '🏝️' },
+                   { id: 'level5', name: 'Vétéran', desc: 'Atteindre le niveau 5', icon: '⭐' },
+                   { id: 'level10', name: 'Expert', desc: 'Atteindre le niveau 10', icon: '🌟' }
+               ];
+               
+               let html = `
+                   <div class="card" style="grid-column: 1 / -1;">
+                       <h3>📊 Statistiques du Joueur</h3>
+                       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                           <div><strong>Niveau:</strong> ${gameState.playerStats.level}</div>
+                           <div><strong>XP:</strong> ${gameState.playerStats.xp}/${gameState.playerStats.level * 100}</div>
+                           <div><strong>Bâtiments construits:</strong> ${gameState.playerStats.totalBuildings}</div>
+                           <div><strong>Unités recrutées:</strong> ${gameState.playerStats.totalUnits}</div>
+                           <div><strong>Recherches terminées:</strong> ${gameState.researchCompleted.length}</div>
+                           <div><strong>Îles explorées:</strong> ${gameState.exploredIslands.length}</div>
+                           <div><strong>Colonies fondées:</strong> ${gameState.colonizedIslands.length}</div>
+                           <div><strong>Achievements débloqués:</strong> ${gameState.achievements.length}/${allAchievements.length}</div>
+                       </div>
+                   </div>
+               `;
+               
+               allAchievements.forEach(achievement => {
+                   const isUnlocked = gameState.achievements.includes(achievement.id);
+                   html += `
+                       <div class="card ${isUnlocked ? 'achievement-unlocked' : 'achievement-locked'}" style="opacity: ${isUnlocked ? '1' : '0.6'}; border: 2px solid ${isUnlocked ? 'var(--color-success)' : 'var(--color-border)'};">
+                           <div style="font-size: 2rem; text-align: center; margin-bottom: 0.5rem;">${achievement.icon}</div>
+                           <h4 style="color: ${isUnlocked ? 'var(--color-success)' : 'var(--color-text-muted)'};">${achievement.name}</h4>
+                           <p>${achievement.desc}</p>
+                           <div style="text-align: center; margin-top: 0.5rem;">
+                               ${isUnlocked ? '<span style="color: var(--color-success); font-weight: bold;">✅ DÉBLOQUÉ</span>' : '<span style="color: var(--color-text-muted);">🔒 Verrouillé</span>'}
+                           </div>
+                       </div>
+                   `;
+               });
+               
+               achievementsGrid.innerHTML = html;
            }
            function updateQueueUI() {
                if (window.innerWidth <= 900) { dom.queueList.innerHTML = ''; return; } // Pas de liste sur mobile
