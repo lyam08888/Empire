@@ -44,7 +44,7 @@ include("core/CAccount.php");
  <tr>
  <td><label for="welt" class="labelwelt">عَالَم</label></td>
  <td>
- <select id="universe" class="uni" size="1">
+ <select id="universe" name="universe" class="uni" size="1">
  <option selected="selected" value="#">Alpha</option>
  <option value="#">Beta</option>
  </select> </td>

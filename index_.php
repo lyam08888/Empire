@@ -66,7 +66,7 @@ ikariama</p>
  </tr>
  <tr>
  <td>
- <select id="universe" class="uni" size="1">
+ <select id="universe" name="universe" class="uni" size="1">
  <option selected="selected" value="localhost/ikariam">Alpha</option>
  <option value="localhost/ikariam">Beta</option>
  </select> </td>
