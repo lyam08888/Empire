@@ -1,10 +1,3 @@
-<?php
-// Inclusion du fichier de gestion de compte pour traiter l'inscription et
-// initialiser les objets de session et de formulaire. En cas d'erreur dans le
-// processus d'inscription, CAccount redirige vers cette page avec les
-// messages correspondants stockés dans l'objet $form.
-include("core/CAccount.php");
-?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -15,131 +8,368 @@ include("core/CAccount.php");
     <title>Inscription - Empire - Le jeu de stratégie en ligne</title>
     <meta name="description" content="Rejoignez Empire, le jeu de stratégie gratuit par navigateur. Créez votre compte et commencez à bâtir votre civilisation dans le monde antique.">
     <meta name="keywords" content="inscription, créer un compte, jeu de stratégie, jeu en ligne, gratuit, empire">
-    <meta name="author" content="Votre Nom/Studio">
+    <meta name="author" content="Empire Game Studio">
     
-    <!-- Favicon (à remplacer par votre propre icône) -->
-    <link rel="icon" href="https://placehold.co/32x32/1e3a8a/ffffff?text=E" type="image/png">
-
-    <!-- Tailwind CSS pour un design moderne et responsif -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts pour une typographie élégante -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- Favicon local -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%231e3a8a'/><text x='16' y='20' text-anchor='middle' fill='white' font-family='Arial' font-size='18' font-weight='bold'>E</text></svg>" type="image/svg+xml">
 
     <style>
-        /* Appliquer la police Inter à tout le corps du document */
+        /* Styles de base, reset et animations */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0a192f; /* Un bleu nuit pour le fond */
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0a192f 0%, #1e3a8a 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
-        /* Style pour le fond avec image et dégradé */
-        .hero-background {
-            background-image: linear-gradient(to bottom, rgba(10, 25, 47, 0.9), rgba(10, 25, 47, 1)), url('https://images.unsplash.com/photo-1519923834699-ef0b7cde4422?q=80&w=2070&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center;
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        /* Style pour les messages d'erreur */
+
+        @keyframes slideIn {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
+        }
+
+        /* Header */
+        .header {
+            padding: 1rem 2rem;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #fbbf24;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            animation: slideIn 1s ease-out;
+            text-decoration: none;
+        }
+
+        .btn-secondary {
+            background: rgba(59, 130, 246, 0.8);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(59, 130, 246, 1);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Contenu principal */
+        .main-content {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 150px);
+        }
+
+        /* Formulaire d'inscription */
+        .register-form {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 2.5rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            animation: fadeIn 1s ease-out 0.5s both;
+        }
+
+        .form-title {
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #fbbf24;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #cbd5e1;
+            font-weight: 500;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 0.5rem;
+            color: #e2e8f0;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input.is-invalid, .form-select.is-invalid {
+            border-color: #f87171;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #fbbf24;
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
+        }
+        
         .form-error {
-            color: #ef4444; /* Rouge pour les erreurs */
+            color: #f87171; /* Rouge clair pour une meilleure visibilité */
             font-size: 0.875rem;
-            margin-top: 0.25rem;
+            margin-top: 0.5rem;
+            min-height: 1rem; /* Empêche le layout de sauter */
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .checkbox-group a {
+            color: #fbbf24;
+            text-decoration: none;
+        }
+        .checkbox-group a:hover {
+            text-decoration: underline;
+        }
+
+        .btn-register {
+            width: 100%;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #1e3a8a;
+            padding: 0.85rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(251, 191, 36, 0.4);
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(15, 23, 42, 0.9);
+            padding: 2rem;
+            text-align: center;
+            border-top: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        .footer-content {
+            color: #64748b;
+        }
+        
+        /* Particules */
+        .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -10; }
+        .particle { position: absolute; width: 2px; height: 2px; background: rgba(251, 191, 36, 0.3); border-radius: 50%; animation: float 6s infinite linear; }
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
         }
     </style>
 </head>
-<body class="text-gray-300">
+<body>
+    <div class="particles" id="particles"></div>
 
+    <!-- En-tête -->
+    <header class="header">
+        <div class="nav-container">
+            <a href="index.php" class="logo">EMPIRE</a>
+            <a href="index.php" class="btn-secondary">Connexion</a>
+        </div>
+    </header>
 
-    <div id="root" class="min-h-screen flex flex-col hero-background">
+    <!-- Contenu Principal -->
+    <main class="main-content">
+        <div class="register-form">
+            <h3 class="form-title">Créez votre Empire</h3>
+            <!-- Le formulaire envoie les données à register.php, qui doit contenir la logique serveur. -->
+            <form id="RegisterForm" name="RegisterForm" action="register.php" method="post" novalidate>
+                <input name="ft" type="hidden" value="a1" />
 
-
-        <!-- En-tête et Navigation -->
-        <header class="py-4 px-4 sm:px-6 lg:px-8">
-            <div class="container mx-auto flex justify-between items-center">
-                <a href="index.php" class="text-3xl font-black text-white tracking-wider">EMPIRE</a>
-                <nav class="hidden md:flex items-center space-x-6">
-                    <a href="tour_step1.php" class="hover:text-amber-400 transition duration-300">Visite du jeu</a>
-                    <a href="board.php" target="_blank" class="hover:text-amber-400 transition duration-300">Forum</a>
-                    <a href="index.php" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">Connexion</a>
-                </nav>
-                <!-- Menu burger pour mobile -->
-                <button class="md:hidden text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-                    </svg>
-                </button>
-            </div>
-        </header>
-
-        <!-- Contenu Principal : Formulaire d'inscription -->
-        <main class="flex-grow flex items-center justify-center py-12">
-            <div class="container mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
-                <div class="w-full max-w-lg bg-slate-800 bg-opacity-70 backdrop-blur-sm p-8 rounded-2xl shadow-2xl border border-slate-700">
-                    <h2 class="text-3xl font-bold text-white mb-8 text-center">Créez votre compte</h2>
-                    <form id="RegisterForm" name="RegisterForm" action="register.php" method="post">
-                        
-                        <!-- Champ Monde -->
-                        <div class="mb-4">
-                            <label for="universe" class="block text-sm font-medium text-gray-300 mb-1">Choisissez votre monde</label>
-                            <select id="universe" name="universe" class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg p-2.5 focus:ring-amber-500 focus:border-amber-500">
-                                <option selected>Alpha</option>
-                                <option>Beta</option>
-                                <option>Gamma</option>
-                            </select>
-                        </div>
-
-                        <!-- Champ Nom d'utilisateur -->
-                        <div class="mb-4">
-                            <label for="name" class="block text-sm font-medium text-gray-300 mb-1">Nom d'utilisateur</label>
-                            <input type="text" id="name" name="name" class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg p-2.5 focus:ring-amber-500 focus:border-amber-500" placeholder="Ex: Cesar123" value="<?php echo htmlspecialchars($form->getValue('name')); ?>">
-                            <div class="form-error"><?php echo htmlspecialchars($form->getError('name')); ?></div>
-                        </div>
-
-                        <!-- Champ Mot de passe -->
-                        <div class="mb-4">
-                            <label for="pw" class="block text-sm font-medium text-gray-300 mb-1">Mot de passe</label>
-                            <input type="password" id="pw" name="pw" class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg p-2.5 focus:ring-amber-500 focus:border-amber-500" placeholder="••••••••">
-                            <div class="form-error"><?php echo htmlspecialchars($form->getError('pw')); ?></div>
-                        </div>
-
-                        <!-- Champ E-mail -->
-                        <div class="mb-4">
-                            <label for="email" class="block text-sm font-medium text-gray-300 mb-1">Adresse e-mail</label>
-                            <input type="email" id="email" name="email" class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg p-2.5 focus:ring-amber-500 focus:border-amber-500" placeholder="votre.email@exemple.com" value="<?php echo htmlspecialchars($form->getValue('email')); ?>">
-                            <div class="form-error"><?php echo htmlspecialchars($form->getError('email')); ?></div>
-                        </div>
-
-                        <!-- Checkbox Conditions d'utilisation -->
-                        <div class="mb-6">
-                            <div class="flex items-center">
-                                <input id="agb" name="agb" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500 bg-slate-700">
-                                <label for="agb" class="ml-2 block text-sm text-gray-300">
-                                    J'accepte les <a href="conditions.htm" target="_blank" class="font-medium text-amber-400 hover:underline">Conditions d'utilisation</a>.
-                                </label>
-                            </div>
-                            <div class="form-error"><?php echo htmlspecialchars($form->getError('agree')); ?></div>
-                        </div>
-                        
-                        <!-- Bouton d'inscription -->
-                        <button type="submit" name="loginMode" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-300 transform hover:scale-105">
-                            S'inscrire
-                        </button>
-                        
-                        <input name="ft" type="hidden" value="a1" />
-                    </form>
+                <div class="form-group">
+                    <label for="universe" class="form-label">Choisissez votre monde</label>
+                    <select id="universe" name="universe" class="form-select">
+                        <option selected>Alpha</option>
+                        <option>Beta</option>
+                        <option>Gamma</option>
+                    </select>
                 </div>
-            </div>
-        </main>
 
-        <!-- Pied de page -->
-        <footer class="py-6 px-4 sm:px-6 lg:px-8 mt-auto">
-            <div class="container mx-auto text-center text-gray-500">
-                <p>&copy; 2024 Empire - Tous droits réservés.</p>
-            </div>
-        </footer>
+                <div class="form-group">
+                    <label for="name" class="form-label">Nom d'utilisateur</label>
+                    <input type="text" id="name" name="name" class="form-input" placeholder="Ex: Cesar123" value="" required>
+                    <div class="form-error" id="error-name"></div>
+                </div>
 
-    </div>
+                <div class="form-group">
+                    <label for="pw" class="form-label">Mot de passe</label>
+                    <input type="password" id="pw" name="pw" class="form-input" placeholder="••••••••" required>
+                    <div class="form-error" id="error-pw"></div>
+                </div>
 
+                <div class="form-group">
+                    <label for="email" class="form-label">Adresse e-mail</label>
+                    <input type="email" id="email" name="email" class="form-input" placeholder="votre.email@exemple.com" value="" required>
+                    <div class="form-error" id="error-email"></div>
+                </div>
+
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input id="agb" name="agb" type="checkbox" style="width: 1rem; height: 1rem;" required>
+                        <label for="agb">
+                            J'accepte les <a href="conditions.htm" target="_blank">Conditions d'utilisation</a>.
+                        </label>
+                    </div>
+                    <div class="form-error" id="error-agb"></div>
+                </div>
+                
+                <button type="submit" name="loginMode" class="btn-register">
+                    Rejoindre la bataille
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Pied de page -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2024 Empire - Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Validation du formulaire côté client ---
+        const form = document.getElementById('RegisterForm');
+        const username = document.getElementById('name');
+        const password = document.getElementById('pw');
+        const email = document.getElementById('email');
+        const terms = document.getElementById('agb');
+
+        form.addEventListener('submit', function(event) {
+            // Empêche l'envoi du formulaire pour faire notre propre validation
+            event.preventDefault();
+            
+            let isValid = validateForm();
+            
+            // Si le formulaire est valide, on l'envoie.
+            // Sinon, les messages d'erreur sont déjà affichés.
+            if (isValid) {
+                // Pour une application réelle, on enverrait le formulaire au serveur ici.
+                // form.submit(); 
+                alert('Formulaire valide ! Prêt à être envoyé au serveur.'); // Pour la démo
+            }
+        });
+
+        function validateForm() {
+            let valid = true;
+            // Réinitialiser les erreurs
+            resetErrors();
+
+            // Validation du nom d'utilisateur
+            if (username.value.trim() === '') {
+                showError('name', 'Le nom d\'utilisateur est requis.');
+                valid = false;
+            }
+
+            // Validation du mot de passe
+            if (password.value.trim() === '') {
+                showError('pw', 'Le mot de passe est requis.');
+                valid = false;
+            } else if (password.value.length < 6) {
+                showError('pw', 'Le mot de passe doit contenir au moins 6 caractères.');
+                valid = false;
+            }
+
+            // Validation de l'email
+            if (email.value.trim() === '') {
+                showError('email', 'L\'adresse e-mail est requise.');
+                valid = false;
+            } else if (!isValidEmail(email.value)) {
+                showError('email', 'Veuillez entrer une adresse e-mail valide.');
+                valid = false;
+            }
+
+            // Validation des conditions
+            if (!terms.checked) {
+                showError('agb', 'Vous devez accepter les conditions d\'utilisation.');
+                valid = false;
+            }
+            
+            return valid;
+        }
+
+        function showError(field, message) {
+            const errorElement = document.getElementById('error-' + field);
+            const inputElement = document.getElementById(field);
+            if(errorElement) errorElement.textContent = message;
+            if(inputElement) inputElement.classList.add('is-invalid');
+        }
+
+        function resetErrors() {
+            const errorElements = document.querySelectorAll('.form-error');
+            errorElements.forEach(el => el.textContent = '');
+            
+            const inputElements = document.querySelectorAll('.form-input, .form-select');
+            inputElements.forEach(el => el.classList.remove('is-invalid'));
+        }
+
+        function isValidEmail(email) {
+            const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return re.test(String(email).toLowerCase());
+        }
+
+        // --- Script pour les particules ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const particlesContainer = document.getElementById('particles');
+            if (!particlesContainer) return;
+            const particleCount = 50;
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        });
+    </script>
 </body>
 </html>
