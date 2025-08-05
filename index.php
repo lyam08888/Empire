@@ -20,11 +20,12 @@ include("core/CAccount.php");
 <meta name="page-topic" content="لعبة متصفح ، لعبة استراتيجية ، لعبة على الانترنت ، لعبة اونلاين">
 <meta name="audience" content="all">
 <meta name="Expires" content="never">
-<meta name="Keywords" content="ikariama, لعبة استراتيجية , العب مجانا , لعبة على الاننرنت , لعبة حربية , ار بي جي, لعبة متصفح , لعبة على الشبكة, لعب">
-<meta name="Description" content="ikariama لعبة متصفح مجانية. يتمثل التحدي للاعب في قيادة شعبه من خلال العالم القديم. لبناء المدن والتجارة والانتصار على الجزر.">  
+<meta name="Keywords" content="empire, لعبة استراتيجية , العب مجانا , لعبة على الاننرنت , لعبة حربية , ار بي جي, لعبة متصفح , لعبة على الشبكة, لعب">
+<meta name="Description" content="empire لعبة متصفح مجانية. يتمثل التحدي للاعب في قيادة شعبه من خلال العالم القديم. لبناء المدن والتجارة والانتصار على الجزر.">  
 <meta name="robots" content="index,follow">
 <meta name="Revisit" content="After 14 days"> 
 <title>ikariama - لعبة المتصفح المجانية</title>
+
 <link href="css/istyle.css" rel="stylesheet" type="text/css" media="screen">
 <script src="common.js" defer></script>
 <script src="login.js" defer></script>
@@ -48,12 +49,13 @@ include("core/CAccount.php");
 
 مرحبا بك في إكاريام
 
-ikariama</p>
+empire</p>
  <div class="joinbutton">
  <a href="register.php" title="تسجيل">العب الان مجانا !</a> </div>
- <form id="loginForm" name="loginForm" action="#" method="post">
+ <form id="loginForm" name="loginForm" action="#" onsubmit="changeAction('login');" method="post"> 
  <input type="hidden" name="ft" value="a4" />
  <table id="logindata" cellpadding="0" cellspacing="0">
+
  <tbody><tr>
  <td><label for="welt" class="labelwelt">عَالَم</label></td>
  <td><label for="login" class="labellogin">اسم الاعب</label></td>
@@ -62,9 +64,9 @@ ikariama</p>
  </tr>
  <tr>
  <td>
- <select id="universe" name="universe" class="uni" size="1">
- <option selected="selected" value="localhost/ikariam">Alpha</option>
- <option value="localhost/ikariam">Beta</option>
+ <select id="universe" class="uni" size="1">
+ <option selected="selected" value="localhost/empire">Alpha</option>
+ <option value="localhost/empire">Beta</option>
  </select> </td>
  <td><input id="login" name="user" class="login" type="text" value="<?php echo $form->getDiff("user",$_COOKIE['COOKUSR']); ?>"><span class="error"> <?php echo $form->getError("user"); ?></span></td>
  <td><input id="pwd" name="pw" class="pass" type="password" value="<?php echo $form->getValue("pw");?>" maxlength="20" autocomplete='off' /> <span class="error"><?php echo $form->getError("pw"); ?></span></td>
@@ -77,6 +79,7 @@ ikariama</p>
  <tr style="height: 15px;">
  <td colspan="3"></td>
  </tr>
+
 </tbody></table>
 </form>
 </section>

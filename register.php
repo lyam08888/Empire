@@ -1,10 +1,10 @@
 <?php 
 include("core/CAccount.php");
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="ar">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />               
+<meta charset="utf-8" />
 <meta name="language" content="de">
 <meta name="author" content="prince 3">
 <meta name="publisher" content="prince 3">
@@ -13,15 +13,14 @@ include("core/CAccount.php");
 <meta name="page-topic" content="لعبة متصفح ، لعبة استراتيجية ، لعبة على الانترنت ، لعبة اونلاين">
 <meta name="audience" content="all">
 <meta name="Expires" content="never">
-<meta name="Keywords" content="ikariama, لعبة استراتيجية , العب مجانا , لعبة على الاننرنت , لعبة حربية , ار بي جي, لعبة متصفح , لعبة على الشبكة, لعب">
-<meta name="Description" content="ikariama لعبة متصفح مجانية. يتمثل التحدي للاعب في قيادة شعبه من خلال العالم القديم. لبناء المدن والتجارة والانتصار على الجزر.">  
+<meta name="Keywords" content="empire, لعبة استراتيجية , العب مجانا , لعبة على الاننرنت , لعبة حربية , ار بي جي, لعبة متصفح , لعبة على الشبكة, لعب">
+<meta name="Description" content="empire لعبة متصفح مجانية. يتمثل التحدي للاعب في قيادة شعبه من خلال العالم القديم. لبناء المدن والتجارة والانتصار على الجزر.">  
 <meta name="robots" content="index,follow">
 <meta name="Revisit" content="After 14 days"> 
 <title>ikariama - لعبة المتصفح المجانية</title>
 <link href="css/rstyle.css" rel="stylesheet" type="text/css" media="screen">
-<script src="common.js" type="text/javascript"></script>
+<script src="common.js" defer></script>
 </head>
-
 <body>
 <div id="headback">
 <div id="headlogo"></div>
@@ -31,7 +30,7 @@ include("core/CAccount.php");
  <div id="links">
  <a href="index.php" title="الى تسجيل الدخول">تسجيل الدخول</a> 
  <a href="register.php" title="سجل هنا !">سجل هنا</a> 
- <a href="tour_step1.php" title="جولة بسيطة على ikariama">جولة في اللعبة</a> 
+ <a href="tour_step1.php" title="جولة بسيطة على empire">جولة في اللعبة</a> 
  <a href="board.php" target="_blank" title="الى المنتديات">المنتدى</a> </div>
 </div>
 <div id="text">

@@ -12,7 +12,7 @@
     </li>
 	<li class="notes"><a href="javascript:switchNoteDisplay()" title="ملاحظات"><span class="textLabel">ملاحظات</span></a>
     </li>
-	<li class="forum"><a href="http://board.ae.ikariam.com/" title="إلى منتدى النقاش" target="_blank"><span class="textLabel">منتدى</span></a>
+	<li class="forum"><a href="http://board.ae.empire.com/" title="إلى منتدى النقاش" target="_blank"><span class="textLabel">منتدى</span></a>
     </li>
 	<li class="logout"><a href="?action=loginAvatar&amp;function=logout" title="إنهاء جلسة اللعب"><span class="textLabel">خروج</span></a>
     </li>

@@ -27,7 +27,7 @@ LocalizationStrings['warnings'] = {};
 LocalizationStrings['warnings']['premiumTrader_lackingStorage'] = "Fr folgende Rohstoffe fehlt dir Speicherplatz: $res";
 LocalizationStrings['warnings']['premiumTrader_negativeResource'] = "Du hast zuwenig $res fr diesen Handel";
 LocalizationStrings['warnings']['tolargeText'] = 'انتباه! يشمل نصك على عدد حروف أكبر من العدد المسموح به!';
-ikariam = {
+empire = {
 	phpSet : {
 		serverTime : <?php echo "\"".time()."\"";?>,
 		currentView : <?php if(isset($_GET['view'])) echo "\"".$_GET['view']."\""; else echo "\"city\"";?>
@@ -50,15 +50,15 @@ ikariam = {
 	},
 	view : {
 		get : function() {
-			return ikariam.phpSet.currentView;
+			return empire.phpSet.currentView;
 		},
 		is : function(viewName) {
-			return (ikariam.phpSet.currentView == viewName)? true : false;
+			return (empire.phpSet.currentView == viewName)? true : false;
 		}
 	}
 };
-ikariam.time = {
-	serverTimeDiff : ikariam.phpSet.serverTime*1000-(new Date()).getTime()
+empire.time = {
+	serverTimeDiff : empire.phpSet.serverTime*1000-(new Date()).getTime()
 };
 selectGroup = {
 	groups:new Array(), //[groupname]=item
@@ -90,7 +90,7 @@ function showInContainer(source, target, exchangeClass) {
 	//objects or Id-strings, i don't care
 	if(typeof source == "string") { source = Dom.get(source); }
 	if(typeof target == "string") {target = Dom.get(target); }
-	if(typeof exchangeClass != "string") { alert("Error: ikariam.showInContainer -> Forgot to add an exchangeClass?"); }
+	if(typeof exchangeClass != "string") { alert("Error: empire.showInContainer -> Forgot to add an exchangeClass?"); }
 	for(i=0; i<target.childNodes.length; i++) {
 		if(typeof(target.childNodes[i].className) != "undefined" && target.childNodes[i].className==exchangeClass) {
 		target.removeChild(target.childNodes[i]);
