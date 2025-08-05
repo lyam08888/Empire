@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Empire - Prototype de Jeu Avancé</title>
-    <meta name="description" content="Prototype d'interface complet pour le jeu de stratégie Empire, basé sur un cahier des charges détaillé.">
+    <title>Empire - Jeu Complet Simulé</title>
+    <meta name="description" content="Prototype complet et persistant du jeu de stratégie Empire, simulant une architecture multi-écrans.">
     <meta name="author" content="Empire Game Studio">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%231e3a8a'/><text x='16' y='20' text-anchor='middle' fill='white' font-family='Arial' font-size='18' font-weight='bold'>E</text></svg>" type="image/svg+xml">
 
@@ -60,7 +60,9 @@
             border-radius: 1rem;
             overflow: auto;
             padding: 1.5rem;
+            animation: fadeIn 0.5s;
         }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .main-view h2 { color: var(--color-primary); margin-bottom: 1rem; font-size: 1.8rem; }
         
         /* --- VUE VILLE --- */
@@ -71,20 +73,15 @@
             align-items: center; font-size: 2rem; color: rgba(255, 255, 255, 0.5);
         }
         .building-plot:hover, .building-plot.selected { background: rgba(251, 191, 36, 0.3); border-color: var(--color-primary); }
-        .building-plot.constructing::after { content: '⏳'; position: absolute; top: 5px; right: 5px; font-size: 1rem; }
+        .building-plot.constructing::after { content: '⏳'; position: absolute; top: 5px; right: 5px; font-size: 1rem; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         .building-plot .level { position: absolute; bottom: 2px; right: 5px; font-size: 0.8rem; font-weight: bold; color: white; background: rgba(0,0,0,0.5); padding: 0 4px; border-radius: 3px; }
 
-        /* --- VUE ÎLE & MONDE --- */
-        .map-grid { display: grid; gap: 1rem; }
+        /* --- VUE ÎLE, MONDE, DIPLOMATIE --- */
+        .map-grid, .management-grid { display: grid; gap: 1rem; }
         .island-view-content { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
-        .map-tile { background: var(--color-panel-light); border: 1px solid var(--color-border); border-radius: 0.5rem; padding: 1rem; text-align: center; cursor: pointer; transition: all 0.3s; }
-        .map-tile:hover { border-color: var(--color-primary); transform: translateY(-5px); }
-        .map-tile h4 { color: var(--color-primary); }
-        .map-tile p { color: var(--color-text-muted); font-size: 0.9rem; }
-
-        /* --- VUE RECHERCHE & MILITAIRE --- */
-        .management-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
-        .card { background: var(--color-panel-light); border: 1px solid var(--color-border); border-radius: 0.5rem; padding: 1rem; }
+        .card { background: var(--color-panel-light); border: 1px solid var(--color-border); border-radius: 0.5rem; padding: 1rem; transition: all 0.3s; }
+        .card:hover { border-color: var(--color-primary); transform: translateY(-5px); }
         .card h4 { color: var(--color-primary); margin-bottom: 0.5rem; }
         .card p { color: var(--color-text-muted); font-size: 0.9rem; margin-bottom: 1rem; }
         .card .cost { font-size: 0.8rem; margin-bottom: 1rem; }
@@ -94,9 +91,11 @@
 
         /* --- PANNEAU CONTEXTUEL DROIT --- */
         .right-sidebar { width: 280px; flex-shrink: 0; background: var(--color-panel); padding: 1rem; border-radius: 1rem; display: flex; flex-direction: column; }
-        .context-panel h3 { color: var(--color-primary); border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem; margin-bottom: 1rem; }
-        #context-content p { color: var(--color-text-muted); line-height: 1.5; }
-        .build-queue-list { list-style: none; margin-top: auto; padding-top: 1rem; }
+        #context-panel { flex-shrink: 0; } /* Empêche le panneau d'info de rétrécir */
+        #context-panel h3 { color: var(--color-primary); border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+        #context-panel p { color: var(--color-text-muted); line-height: 1.5; }
+        .queue-container { list-style: none; margin-top: auto; padding-top: 1rem; }
+        .queue-container h3 { color: var(--color-primary); border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem; margin-bottom: 1rem; }
         .queue-item { background: var(--color-panel-light); padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem; }
         .queue-item .name { font-weight: bold; }
         .queue-item .timer { color: var(--color-primary); }
@@ -155,17 +154,22 @@
             <!-- VUE CENTRALE (Conteneur pour toutes les vues) -->
             <div class="main-view-container">
                 <section id="view-city" class="main-view"><div class="city-view-content" id="city-grid"></div></section>
-                <section id="view-island" class="main-view hidden"><h2>Vue de l'Île</h2><div class="map-grid island-view-content"><div class="map-tile"><h4>Scierie (Commun)</h4><p>Niveau 5</p></div><div class="map-tile"><h4>Mine de Marbre</h4><p>Niveau 3</p></div><div class="map-tile"><h4>Ville de Joueur_02</h4><p>Points: 1,250</p></div><div class="map-tile"><h4>Votre Ville</h4><p>Points: 800</p></div></div></section>
+                <section id="view-island" class="main-view hidden"><h2>Vue de l'Île</h2><div id="island-grid" class="map-grid island-view-content"></div></section>
                 <section id="view-world" class="main-view hidden"><h2>Carte du Monde</h2></section>
                 <section id="view-research" class="main-view hidden"><h2>Recherche</h2><div id="research-grid" class="management-grid"></div></section>
                 <section id="view-military" class="main-view hidden"><h2>Militaire</h2><div id="military-grid" class="management-grid"></div></section>
-                <section id="view-diplomacy" class="main-view hidden"><h2>Diplomatie</h2><p>Interface de diplomatie à venir...</p></section>
+                <section id="view-diplomacy" class="main-view hidden"><h2>Diplomatie</h2><div id="diplomacy-grid" class="management-grid"></div></section>
             </div>
             
             <!-- PANNEAU DROIT -->
             <aside class="right-sidebar">
-                <div id="context-panel"><h3>Informations</h3><div id="context-content"><p>Sélectionnez un élément.</p></div></div>
-                <div class="build-queue-list"><h3>Files d'attente</h3><ul id="queueList"></ul></div>
+                <div id="context-panel">
+                    <!-- Contenu injecté par JavaScript -->
+                </div>
+                <div class="queue-container">
+                    <h3>Files d'attente</h3>
+                    <ul id="queueList"></ul>
+                </div>
             </aside>
         </main>
 
@@ -174,15 +178,7 @@
     </div>
     
     <!-- MODAL -->
-    <div class="modal-overlay" id="actionModal">
-        <div class="modal-content">
-            <h4 id="modalTitle"></h4><p id="modalMessage"></p><div id="modal-cost"></div>
-            <div class="modal-actions">
-                <button class="modal-btn cancel" id="modalCancelBtn">Annuler</button>
-                <button class="modal-btn confirm" id="modalConfirmBtn">Confirmer</button>
-            </div>
-        </div>
-    </div>
+    <div class="modal-overlay" id="actionModal"><div class="modal-content"><h4 id="modalTitle"></h4><p id="modalMessage"></p><div id="modal-cost"></div><div class="modal-actions"><button class="modal-btn cancel" id="modalCancelBtn">Annuler</button><button class="modal-btn confirm" id="modalConfirmBtn">Confirmer</button></div></div></div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -202,74 +198,97 @@
                     "Hoplite": { description: "Unité de base solide.", icon: "🛡️", cost: { wood: 50, sulfur: 30, gold: 10 }, time: 5 },
                     "Archer": { description: "Attaque à distance.", icon: "🏹", cost: { wood: 40, gold: 15 }, time: 4 }
                 },
+                diplomacy: {
+                    alliances: { "Les Spartiates": { tag: "SPQR", members: 15, points: 12000 } },
+                    treaties: { "Traité Culturel": { description: "Augmente le bonheur de vos villes.", cost: { gold: 1000 } } }
+                },
                 cityLayout: [
-                    { id: "townHall", top: "40%", left: "45%", width: "120px", height: "120px" },
-                    { id: "plot1", top: "35%", left: "25%", width: "90px", height: "90px" },
-                    { id: "plot2", top: "55%", left: "30%", width: "90px", height: "90px" },
-                    { id: "plot3", top: "50%", left: "60%", width: "90px", height: "90px" },
+                    { id: "townHall", top: "40%", left: "45%", width: "120px", height: "120px" }, { id: "plot1", top: "35%", left: "25%", width: "90px", height: "90px" },
+                    { id: "plot2", top: "55%", left: "30%", width: "90px", height: "90px" }, { id: "plot3", top: "50%", left: "60%", width: "90px", height: "90px" },
                     { id: "academy", top: "20%", left: "60%", width: "90px", height: "90px" }
-                ]
+                ],
+                islandLayout: {
+                    "Scierie": { level: 5, type: "resource" }, "Mine de Marbre": { level: 3, type: "resource" },
+                    "Ville de Joueur_02": { points: 1250, type: "player" }, "Votre Ville": { points: 800, type: "player" }
+                }
             };
 
             // --- ÉTAT DU JEU ---
-            let gameState = {
+            let gameState;
+            const defaultGameState = {
                 resources: { wood: 1000, wine: 100, marble: 100, crystal: 100, sulfur: 100, gold: 5000, research: 0 },
                 buildings: { "townHall": { type: "Hôtel de Ville", level: 1 }, "plot1": { type: "Caserne", level: 1 }, "plot2": { type: null, level: 0 }, "plot3": { type: null, level: 0 }, "academy": { type: "Académie", level: 1 } },
                 researchCompleted: [],
-                queues: { build: [], research: [], military: [] }
+                queues: { build: [], research: [], military: [] },
+                lastUpdate: Date.now()
             };
 
             // --- DOM ELEMENTS ---
             const dom = {
-                res: Object.keys(gameState.resources).reduce((acc, key) => ({ ...acc, [key]: document.getElementById(`res${key.charAt(0).toUpperCase() + key.slice(1)}`) }), {}),
-                cityGrid: document.getElementById('city-grid'),
-                contextContent: document.getElementById('context-content'),
-                queueList: document.getElementById('queueList'),
-                eventLog: document.getElementById('event-log'),
-                modal: document.getElementById('actionModal'),
-                modalTitle: document.getElementById('modalTitle'),
-                modalMessage: document.getElementById('modalMessage'),
-                modalCost: document.getElementById('modal-cost'),
-                modalConfirmBtn: document.getElementById('modalConfirmBtn'),
-                modalCancelBtn: document.getElementById('modalCancelBtn'),
-                navLinks: document.querySelectorAll('.main-nav a'),
-                mainViews: document.querySelectorAll('.main-view'),
-                researchGrid: document.getElementById('research-grid'),
-                militaryGrid: document.getElementById('military-grid'),
+                res: Object.keys(defaultGameState.resources).reduce((acc, key) => ({ ...acc, [key]: document.getElementById(`res${key.charAt(0).toUpperCase() + key.slice(1)}`) }), {}),
+                cityGrid: document.getElementById('city-grid'), islandGrid: document.getElementById('island-grid'),
+                contextPanel: document.getElementById('context-panel'), queueList: document.getElementById('queueList'),
+                eventLog: document.getElementById('event-log'), modal: document.getElementById('actionModal'),
+                modalTitle: document.getElementById('modalTitle'), modalMessage: document.getElementById('modalMessage'),
+                modalCost: document.getElementById('modal-cost'), modalConfirmBtn: document.getElementById('modalConfirmBtn'),
+                modalCancelBtn: document.getElementById('modalCancelBtn'), navLinks: document.querySelectorAll('.main-nav a'),
+                mainViews: document.querySelectorAll('.main-view'), researchGrid: document.getElementById('research-grid'),
+                militaryGrid: document.getElementById('military-grid'), diplomacyGrid: document.getElementById('diplomacy-grid'),
             };
 
             let selectedPlotId = null;
             let currentAction = null;
+
+            // --- PERSISTANCE DES DONNÉES ---
+            function saveState() { localStorage.setItem('empireGameState', JSON.stringify(gameState)); }
+            function loadState() {
+                const savedState = localStorage.getItem('empireGameState');
+                gameState = savedState ? JSON.parse(savedState) : JSON.parse(JSON.stringify(defaultGameState));
+                const offlineTime = (Date.now() - gameState.lastUpdate) / 1000;
+                produceResources(offlineTime);
+                gameState.lastUpdate = Date.now();
+            }
 
             // --- NAVIGATION & VUES ---
             function switchView(viewId) {
                 dom.mainViews.forEach(view => view.classList.add('hidden'));
                 document.getElementById(`view-${viewId}`).classList.remove('hidden');
                 dom.navLinks.forEach(link => link.classList.toggle('active', link.dataset.view === viewId));
-                updateContextPanel(); // Reset context panel
+                updateContextPanel();
             }
 
             // --- LOGIQUE DE JEU PRINCIPALE ---
             function init() {
-                renderCityLayout();
-                renderResearchTree();
-                renderMilitaryUnits();
-                updateAllUI();
+                loadState();
+                renderAll();
                 switchView('city');
                 setInterval(gameLoop, 1000);
                 dom.navLinks.forEach(link => link.addEventListener('click', (e) => switchView(link.dataset.view)));
             }
+            
+            function renderAll() {
+                renderCityLayout();
+                renderIslandLayout();
+                renderResearchTree();
+                renderMilitaryUnits();
+                renderDiplomacy();
+                updateAllUI();
+            }
 
             function gameLoop() {
-                // Production de ressources
-                const townHallLevel = gameState.buildings.townHall.level;
-                gameState.resources.gold += townHallLevel * 2 / 3600; // Or par seconde
-                gameState.resources.wood += 5 / 3600; // Bois de base
-                const academyLevel = gameState.buildings.academy?.level || 0;
-                if (academyLevel > 0) gameState.resources.research += academyLevel * 2 / 3600;
-
+                produceResources(1);
                 processQueues();
                 updateAllUI();
+                saveState();
+            }
+
+            function produceResources(seconds) {
+                const townHallLevel = gameState.buildings.townHall.level;
+                gameState.resources.gold += townHallLevel * 2 * seconds / 3600;
+                gameState.resources.wood += 5 * seconds / 3600;
+                const academyLevel = gameState.buildings.academy?.level || 0;
+                if (academyLevel > 0) gameState.resources.research += academyLevel * 2 * seconds / 3600;
+                gameState.lastUpdate = Date.now();
             }
 
             function processQueues() {
@@ -295,9 +314,7 @@
                     }
                 });
                 if (stateChanged) {
-                    renderCityLayout();
-                    renderResearchTree();
-                    renderMilitaryUnits();
+                    renderAll();
                     if (selectedPlotId) updateContextPanel(selectedPlotId);
                 }
             }
@@ -305,30 +322,12 @@
             function startAction(type, id, name, level) {
                 const queue = gameState.queues[type];
                 let spec, cost, time;
-
-                if (type === 'build') {
-                    spec = config.buildings[name].levels[level - 1];
-                    cost = spec.cost;
-                    time = spec.buildTime;
-                } else if (type === 'research') {
-                    const branch = Object.keys(config.research).find(br => config.research[br].techs[name]);
-                    spec = config.research[branch].techs[name];
-                    cost = spec.cost;
-                    time = spec.time;
-                } else if (type === 'military') {
-                    spec = config.units[name];
-                    cost = spec.cost;
-                    time = spec.time;
-                }
-                
-                for(const res in cost) {
-                    if (gameState.resources[res] < cost[res]) {
-                        showModal("Action impossible", "Ressources insuffisantes.");
-                        return;
-                    }
-                }
+                if (type === 'build') { spec = config.buildings[name].levels[level - 1]; }
+                else if (type === 'research') { const branch = Object.keys(config.research).find(br => config.research[br].techs[name]); spec = config.research[branch].techs[name]; }
+                else if (type === 'military') { spec = config.units[name]; }
+                cost = spec.cost; time = spec.buildTime || spec.time;
+                for(const res in cost) { if (gameState.resources[res] < cost[res]) { showModal("Action impossible", "Ressources insuffisantes."); return; } }
                 for(const res in cost) gameState.resources[res] -= cost[res];
-
                 const endTime = Date.now() + time * 1000;
                 queue.push({ id, name, level, endTime });
                 logEvent(`Lancement: ${name}.`);
@@ -337,30 +336,15 @@
             }
 
             // --- FONCTIONS D'AFFICHAGE ---
-            function updateAllUI() {
-                updateResourceUI();
-                updateQueueUI();
-            }
-
-            function updateResourceUI() {
-                for (const res in dom.res) {
-                    if(dom.res[res]) dom.res[res].textContent = Math.floor(gameState.resources[res]);
-                }
-            }
-
+            function updateAllUI() { updateResourceUI(); updateQueueUI(); }
+            function updateResourceUI() { for (const res in dom.res) { if(dom.res[res]) dom.res[res].textContent = Math.floor(gameState.resources[res]); } }
             function renderCityLayout() {
                 dom.cityGrid.innerHTML = '';
                 config.cityLayout.forEach(plot => {
-                    const el = document.createElement('div');
-                    el.className = 'building-plot';
-                    el.dataset.plotId = plot.id;
+                    const el = document.createElement('div'); el.className = 'building-plot'; el.dataset.plotId = plot.id;
                     el.style.cssText = `top:${plot.top}; left:${plot.left}; width:${plot.width}; height:${plot.height};`;
                     const building = gameState.buildings[plot.id];
-                    if (building && building.type) {
-                        el.innerHTML = `${config.buildings[building.type].icon}<div class="level">Niv. ${building.level}</div>`;
-                    } else {
-                        el.innerHTML = '➕';
-                    }
+                    if (building && building.type) { el.innerHTML = `${config.buildings[building.type].icon}<div class="level">Niv. ${building.level}</div>`; } else { el.innerHTML = '➕'; }
                     if (gameState.queues.build.some(item => item.id === plot.id)) el.classList.add('constructing');
                     el.addEventListener('click', () => {
                         selectedPlotId = plot.id;
@@ -371,119 +355,100 @@
                     dom.cityGrid.appendChild(el);
                 });
             }
-
             function updateContextPanel(plotId) {
+                let html = '';
                 if (!plotId) {
-                    dom.contextContent.innerHTML = '<p>Sélectionnez un élément pour voir ses détails.</p>';
-                    return;
-                }
-                const building = gameState.buildings[plotId];
-                let html = '';
-                if (building && building.type) {
-                    const { type, level } = building;
-                    const spec = config.buildings[type];
-                    const nextLevel = level < spec.levels.length ? level + 1 : null;
-                    html = `<h3>${type} (Niv ${level})</h3><p>${spec.description}</p>`;
-                    if (gameState.queues.build.some(item => item.id === plotId)) {
-                        html += `<p style="color: var(--color-primary); margin-top: 1rem;">Amélioration en cours...</p>`;
-                    } else if (nextLevel) {
-                        html += `<button class="action-btn" data-action="build" data-id="${plotId}" data-name="${type}" data-level="${nextLevel}">Améliorer</button>`;
-                    } else {
-                        html += `<p style="color: var(--color-primary); margin-top: 1rem;">Niveau maximum</p>`;
-                    }
+                    html = '<h3>Informations</h3><p>Sélectionnez un élément pour voir ses détails.</p>';
                 } else {
-                    html = `<h3>Emplacement Vide</h3><p>Cliquez pour construire :</p><div>`;
-                    for (const type in config.buildings) {
-                        html += `<button class="action-btn" data-action="build" data-id="${plotId}" data-name="${type}" data-level="1">${config.buildings[type].icon} ${type}</button>`;
-                    }
-                    html += `</div>`;
-                }
-                dom.contextContent.innerHTML = html;
-            }
-
-            function renderResearchTree() {
-                let html = '';
-                for (const branchKey in config.research) {
-                    const branch = config.research[branchKey];
-                    html += `<div><h3>${branch.name}</h3>`;
-                    for (const techKey in branch.techs) {
-                        const tech = branch.techs[techKey];
-                        const isCompleted = gameState.researchCompleted.includes(techKey);
-                        const isResearching = gameState.queues.research.some(t => t.name === techKey);
-                        html += `<div class="card"><h4>${techKey}</h4><p>${tech.description}</p><p class="cost">Coût: 🔬${tech.cost.research}</p>`;
-                        if (isCompleted) {
-                            html += `<button class="action-btn" disabled>Terminé</button>`;
-                        } else if (isResearching) {
-                            html += `<button class="action-btn" disabled>En cours...</button>`;
-                        } else {
-                            html += `<button class="action-btn" data-action="research" data-name="${techKey}" data-level="1">Rechercher</button>`;
-                        }
+                    const building = gameState.buildings[plotId];
+                    if (building && building.type) {
+                        const { type, level } = building; const spec = config.buildings[type]; const nextLevel = level < spec.levels.length ? level + 1 : null;
+                        html = `<h3>${type} (Niv ${level})</h3><p>${spec.description}</p>`;
+                        if (gameState.queues.build.some(item => item.id === plotId)) { html += `<p style="color: var(--color-primary); margin-top: 1rem;">Amélioration en cours...</p>`; }
+                        else if (nextLevel) { html += `<button class="action-btn" data-action="build" data-id="${plotId}" data-name="${type}" data-level="${nextLevel}">Améliorer</button>`; }
+                        else { html += `<p style="color: var(--color-primary); margin-top: 1rem;">Niveau maximum</p>`; }
+                    } else {
+                        html = `<h3>Emplacement Vide</h3><p>Cliquez pour construire :</p><div>`;
+                        for (const type in config.buildings) { html += `<button class="action-btn" data-action="build" data-id="${plotId}" data-name="${type}" data-level="1">${config.buildings[type].icon} ${type}</button>`; }
                         html += `</div>`;
                     }
-                    html += `</div>`;
                 }
-                dom.researchGrid.innerHTML = html;
+                dom.contextPanel.innerHTML = html;
             }
-
-            function renderMilitaryUnits() {
-                let html = '';
-                for (const unitKey in config.units) {
-                    const unit = config.units[unitKey];
-                    const isRecruiting = gameState.queues.military.some(u => u.name === unitKey);
-                    html += `<div class="card"><h4>${unitKey} ${unit.icon}</h4><p>${unit.description}</p><p class="cost">Coût: 🌲${unit.cost.wood || 0} 🔥${unit.cost.sulfur || 0} 💰${unit.cost.gold || 0}</p>`;
-                    if (isRecruiting) {
-                        html += `<button class="action-btn" disabled>En formation...</button>`;
-                    } else {
-                        html += `<button class="action-btn" data-action="military" data-name="${unitKey}" data-level="1">Recruter</button>`;
+            function renderIslandLayout() {
+                dom.islandGrid.innerHTML = '';
+                for(const name in config.islandLayout) {
+                    const tile = config.islandLayout[name];
+                    const el = document.createElement('div'); el.className = 'card';
+                    el.innerHTML = `<h4>${name}</h4><p>${tile.type === 'resource' ? `Niveau ${tile.level}` : `Points: ${tile.points}`}</p>`;
+                    dom.islandGrid.appendChild(el);
+                }
+            }
+            function renderResearchTree() {
+                dom.researchGrid.innerHTML = '';
+                for (const branchKey in config.research) {
+                    const branch = config.research[branchKey]; let branchHtml = `<div><h3>${branch.name}</h3>`;
+                    for (const techKey in branch.techs) {
+                        const tech = branch.techs[techKey]; const isCompleted = gameState.researchCompleted.includes(techKey);
+                        const isResearching = gameState.queues.research.some(t => t.name === techKey);
+                        branchHtml += `<div class="card"><h4>${techKey}</h4><p>${tech.description}</p><p class="cost">Coût: 🔬${tech.cost.research}</p>`;
+                        if (isCompleted) { branchHtml += `<button class="action-btn" disabled>Terminé</button>`; }
+                        else if (isResearching) { branchHtml += `<button class="action-btn" disabled>En cours...</button>`; }
+                        else { branchHtml += `<button class="action-btn" data-action="research" data-name="${techKey}" data-level="1">Rechercher</button>`; }
+                        branchHtml += `</div>`;
                     }
-                    html += `</div>`;
+                    branchHtml += `</div>`; dom.researchGrid.innerHTML += branchHtml;
                 }
-                dom.militaryGrid.innerHTML = html;
             }
-            
+            function renderMilitaryUnits() {
+                dom.militaryGrid.innerHTML = '';
+                for (const unitKey in config.units) {
+                    const unit = config.units[unitKey]; const isRecruiting = gameState.queues.military.some(u => u.name === unitKey);
+                    let html = `<div class="card"><h4>${unitKey} ${unit.icon}</h4><p>${unit.description}</p><p class="cost">Coût: 🌲${unit.cost.wood || 0} 🔥${unit.cost.sulfur || 0} 💰${unit.cost.gold || 0}</p>`;
+                    if (isRecruiting) { html += `<button class="action-btn" disabled>En formation...</button>`; }
+                    else { html += `<button class="action-btn" data-action="military" data-name="${unitKey}" data-level="1">Recruter</button>`; }
+                    html += `</div>`; dom.militaryGrid.innerHTML += html;
+                }
+            }
+            function renderDiplomacy() {
+                dom.diplomacyGrid.innerHTML = '';
+                let html = '<div><h3>Alliances</h3>';
+                for(const name in config.diplomacy.alliances) {
+                    const ally = config.diplomacy.alliances[name];
+                    html += `<div class="card"><h4>${name} [${ally.tag}]</h4><p>Membres: ${ally.members} | Points: ${ally.points}</p><button class="action-btn">Voir</button></div>`;
+                }
+                html += '</div><div><h3>Traités</h3>';
+                for(const name in config.diplomacy.treaties) {
+                    const treaty = config.diplomacy.treaties[name];
+                    html += `<div class="card"><h4>${name}</h4><p>${treaty.description}</p><button class="action-btn" data-action="diplomacy" data-name="${name}">Signer</button></div>`;
+                }
+                html += '</div>'; dom.diplomacyGrid.innerHTML = html;
+            }
             function updateQueueUI() {
                 dom.queueList.innerHTML = '';
                 ['build', 'research', 'military'].forEach(qType => {
                     gameState.queues[qType].forEach(item => {
                         const remainingTime = Math.max(0, Math.ceil((item.endTime - Date.now()) / 1000));
-                        const li = document.createElement('li');
-                        li.className = 'queue-item';
+                        const li = document.createElement('li'); li.className = 'queue-item';
                         li.innerHTML = `<div class="name">${item.name} ${item.level ? `(Niv. ${item.level})` : ''}</div><div class="timer">${new Date(remainingTime * 1000).toISOString().substr(14, 5)}</div>`;
                         dom.queueList.appendChild(li);
                     });
                 });
             }
-            
             function showModal(action, id, name, level) {
                 let spec, cost, time, title, message;
-                if (action === 'build') {
-                    spec = config.buildings[name].levels[level - 1];
-                    title = `${level > 1 ? 'Améliorer' : 'Construire'} ${name}`;
-                    message = `Voulez-vous vraiment lancer cette action ?`;
-                    cost = spec.cost;
-                    time = spec.buildTime;
-                } else if (action === 'research') {
-                    const branch = Object.keys(config.research).find(br => config.research[br].techs[name]);
-                    spec = config.research[branch].techs[name];
-                    title = `Rechercher ${name}`;
-                    message = `Lancer la recherche ?`;
-                    cost = spec.cost;
-                    time = spec.time;
-                } else if (action === 'military') {
-                    spec = config.units[name];
-                    title = `Recruter ${name}`;
-                    message = `Lancer le recrutement ?`;
-                    cost = spec.cost;
-                    time = spec.time;
-                }
+                if (action === 'build') { spec = config.buildings[name].levels[level - 1]; title = `${level > 1 ? 'Améliorer' : 'Construire'} ${name}`; }
+                else if (action === 'research') { const branch = Object.keys(config.research).find(br => config.research[br].techs[name]); spec = config.research[branch].techs[name]; title = `Rechercher ${name}`; }
+                else if (action === 'military') { spec = config.units[name]; title = `Recruter ${name}`; }
+                else { showModal("Action inconnue", "Cette action n'est pas encore implémentée."); return; }
                 
+                message = `Voulez-vous vraiment lancer cette action ?`;
+                cost = spec.cost; time = spec.buildTime || spec.time;
                 currentAction = () => startAction(action, id, name, level);
-                dom.modalTitle.textContent = title;
-                dom.modalMessage.textContent = message;
-                dom.modalCost.innerHTML = `Coût: ${Object.entries(cost).map(([res, val]) => `${res}: ${val}`).join(', ')} - Temps: ${time}s`;
+                dom.modalTitle.textContent = title; dom.modalMessage.textContent = message;
+                dom.modalCost.innerHTML = `Coût: ${Object.entries(cost || {}).map(([res, val]) => `${res}: ${val}`).join(', ')} - Temps: ${time}s`;
                 dom.modal.style.display = 'flex';
             }
-
             function logEvent(message) { dom.eventLog.textContent = message; }
 
             // --- EVENT LISTENERS ---
@@ -493,15 +458,8 @@
                 const { action, id, name, level } = target.dataset;
                 showModal(action, id, name, parseInt(level));
             });
-            dom.modalConfirmBtn.addEventListener('click', () => {
-                if (currentAction) currentAction();
-                dom.modal.style.display = 'none';
-                currentAction = null;
-            });
-            dom.modalCancelBtn.addEventListener('click', () => {
-                dom.modal.style.display = 'none';
-                currentAction = null;
-            });
+            dom.modalConfirmBtn.addEventListener('click', () => { if (currentAction) currentAction(); dom.modal.style.display = 'none'; currentAction = null; });
+            dom.modalCancelBtn.addEventListener('click', () => { dom.modal.style.display = 'none'; currentAction = null; });
 
             // --- INITIALISATION ---
             init();
