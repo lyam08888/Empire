@@ -63,7 +63,19 @@ const BUILDINGS = {
     museum: { baseCost: { wood: 500, marble: 200 }, baseTime: 3600, effect: lvl => ({ happiness: lvl * 20 }) },
     port: { baseCost: { wood: 600 }, baseTime: 4200, effect: lvl => ({ shipSlots: lvl }) },
     barracks: { baseCost: { wood: 800, sulfur: 300 }, baseTime: 4800, effect: lvl => ({ recruitSpeed: 1 - lvl * 0.02 }) },
-    wall: { baseCost: { wood: 500, marble: 400 }, baseTime: 7200, effect: lvl => ({ defense: lvl * 15 }) }
+    wall: { baseCost: { wood: 500, marble: 400 }, baseTime: 7200, effect: lvl => ({ defense: lvl * 15 }) },
+    shipyard: { baseCost: { wood: 800, sulfur: 400 }, baseTime: 6000, effect: lvl => ({ shipBuildSpeed: 1 - lvl * 0.02 }) },
+    branchOffice: { baseCost: { wood: 300, gold: 200 }, baseTime: 2400, effect: lvl => ({ tradeBonus: lvl * 5 }) },
+    forester: { baseCost: { wood: 200 }, baseTime: 1800, effect: lvl => ({ woodProd: lvl * 2 }) },
+    stonemason: { baseCost: { wood: 200, marble: 100 }, baseTime: 1800, effect: lvl => ({ marbleProd: lvl * 2 }) },
+    glassblowing: { baseCost: { wood: 200, crystal: 100 }, baseTime: 1800, effect: lvl => ({ crystalProd: lvl * 2 }) },
+    winegrower: { baseCost: { wood: 200, wine: 100 }, baseTime: 1800, effect: lvl => ({ wineProd: lvl * 2 }) },
+    alchemist: { baseCost: { wood: 300, sulfur: 150 }, baseTime: 2400, effect: lvl => ({ sulfurProd: lvl * 2 }) },
+    carpentering: { baseCost: { wood: 300 }, baseTime: 2400, effect: lvl => ({ woodCostReduction: lvl * 0.02 }) },
+    architect: { baseCost: { wood: 300, marble: 100 }, baseTime: 2400, effect: lvl => ({ marbleCostReduction: lvl * 0.02 }) },
+    optician: { baseCost: { wood: 300, crystal: 100 }, baseTime: 2400, effect: lvl => ({ crystalCostReduction: lvl * 0.02 }) },
+    vineyard: { baseCost: { wood: 300, wine: 100 }, baseTime: 2400, effect: lvl => ({ wineProdBonus: lvl }) },
+    fireworker: { baseCost: { wood: 400, sulfur: 200 }, baseTime: 3000, effect: lvl => ({ firepower: lvl * 3 }) }
 };
 
 function upgradeBuilding(city, type) {

@@ -117,6 +117,7 @@
        .world-tile.player { background-color: var(--color-primary); opacity: 1; }
        .world-tile.ally { background-color: var(--color-success); opacity: 1; }
        .world-tile.enemy { background-color: var(--color-danger); opacity: 1; }
+       .world-tile.unexplored { opacity: 0.1; }
 
        /* --- VUE ÎLE --- */
        #island-grid { grid-template-columns: repeat(7, 1fr); background: #0c4a6e; border-radius: 1rem; padding: 1rem; }
@@ -162,6 +163,11 @@
        .modal-btn.confirm { background: var(--color-primary); color: var(--color-dark-1); }
        .modal-btn.cancel { background: var(--color-panel-light); color: var(--color-text); }
        .modal-btn:hover { opacity: 0.8; }
+
+       /* --- BUILDING SELECTION --- */
+       .build-select-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.5rem; max-height: 300px; overflow-y: auto; }
+       .build-option { background: var(--color-panel-light); padding: 0.5rem; border-radius: 0.5rem; display: flex; flex-direction: column; align-items: center; }
+       .build-option .cost { font-size: 0.8rem; color: var(--color-text-muted); margin-top: 0.25rem; }
 
        /* --- NAVIGATION MOBILE --- */
        .mobile-nav { display: none; }
@@ -219,7 +225,7 @@
        <!-- HEADER -->
        <header class="game-header">
            <div class="header-content">
-               <div class="player-info"><a href="#">Joueur_01</a></div>
+               <div class="player-info"><a href="#" title="Voir le profil du champion">Joueur_01</a></div>
                <div class="resources">
                    <div class="resource-item" title="Bois">🌲 <span id="resWood">0</span></div>
                    <div class="resource-item" title="Vin">🍇 <span id="resWine">0</span></div>
@@ -229,7 +235,7 @@
                    <div class="resource-item" title="Or">💰 <span id="resGold">0</span></div>
                    <div class="resource-item" title="Points de Recherche">🔬 <span id="resResearch">0</span></div>
                </div>
-               <div class="player-info"><a href="#">Déconnexion</a></div>
+               <div class="player-info"><a href="#" title="Quitter la bataille en douce">Déconnexion</a></div>
            </div>
        </header>
 
@@ -238,12 +244,14 @@
            <!-- MENU GAUCHE (Desktop) -->
            <nav class="left-sidebar main-nav">
                <ul>
-                   <li><a data-view="city">🏛️ <span>Ville</span></a></li>
-                   <li><a data-view="island">🏝️ <span>Île</span></a></li>
-                   <li><a data-view="world">🌍 <span>Monde</span></a></li>
-                   <li><a data-view="research">🔬 <span>Recherche</span></a></li>
-                   <li><a data-view="military">⚔️ <span>Militaire</span></a></li>
-                   <li><a data-view="diplomacy">🤝 <span>Diplomatie</span></a></li>
+
+                   <li><a data-view="city" title="Visitez votre ville en pantoufles">🏛️ <span>Ville</span></a></li>
+                   <li><a data-view="island" title="Explorer les îles en tongs">🏝️ <span>Île</span></a></li>
+                   <li><a data-view="world" title="Observer le monde d'un coup d'œil">🌍 <span>Monde</span></a></li>
+                   <li><a data-view="research" title="Traquer les savants fous">🔬 <span>Recherche</span></a></li>
+                   <li><a data-view="military" title="Armez-vous, ça va piquer">⚔️ <span>Militaire</span></a></li>
+                   <li><a data-view="diplomacy" title="Serrer des mains virtuelles">🤝 <span>Diplomatie</span></a></li>
+
                </ul>
            </nav>
 
@@ -254,6 +262,7 @@
                <section id="view-world" class="main-view hidden"><h2>Carte du Monde</h2><div id="world-map-grid" class="map-grid-container"></div></section>
                <section id="view-research" class="main-view hidden"><h2>Recherche</h2><div id="research-grid" class="management-grid"></div></section>
                <section id="view-military" class="main-view hidden"><h2>Militaire</h2><div id="military-grid" class="management-grid"></div></section>
+               <section id="view-battle" class="main-view hidden"><h2>Bataille</h2><div id="battle-grid" class="management-grid"></div></section>
                <section id="view-diplomacy" class="main-view hidden"><h2>Diplomatie</h2><div id="diplomacy-grid" class="management-grid"></div></section>
            </div>
            
@@ -274,17 +283,21 @@
 
        <!-- NAVIGATION MOBILE -->
        <nav class="mobile-nav main-nav">
-           <a data-view="city">🏛️</a>
-           <a data-view="island">🏝️</a>
-           <a data-view="world">🌍</a>
-           <a data-view="research">🔬</a>
-           <a data-view="military">⚔️</a>
-           <a data-view="diplomacy">🤝</a>
+²
+           <a href="#" data-view="city" title="Ville, version poche">🏛️</a>
+           <a href="#" data-view="island" title="Île au bout du doigt">🏝️</a>
+           <a href="#" data-view="world" title="Le monde tient dans ta main">🌍</a>
+           <a href="#" data-view="research" title="Science express">🔬</a>
+           <a href="#" data-view="military" title="Prêt pour l'assaut miniature">⚔️</a>
+           <a href="#" data-view="diplomacy" title="Diplomatie de poche">🤝</a>
+
        </nav>
    </div>
    
    <!-- MODAL -->
-   <div class="modal-overlay" id="actionModal"><div class="modal-content"><h4 id="modalTitle"></h4><p id="modalMessage"></p><div id="modal-cost"></div><div class="modal-actions"><button class="modal-btn cancel" id="modalCancelBtn">Annuler</button><button class="modal-btn confirm" id="modalConfirmBtn">Confirmer</button></div></div></div>
+
+   <div class="modal-overlay" id="actionModal"><div class="modal-content"><h4 id="modalTitle"></h4><p id="modalMessage"></p><div id="modal-cost"></div><div class="modal-actions"><button class="modal-btn cancel" id="modalCancelBtn" title="Annule comme un ninja">Annuler</button><button class="modal-btn confirm" id="modalConfirmBtn" title="Confirme, brave héros">Confirmer</button></div></div></div>
+
    <script src="gameplay.js"></script>
    <script>
        document.addEventListener('DOMContentLoaded', function() {
@@ -294,7 +307,23 @@
                    "Hôtel de Ville": { description: "Augmente la population et le revenu en or.", icon: "🏛️", levels: [ { cost: { wood: 150 }, buildTime: 10 }, { cost: { wood: 350 }, buildTime: 25 } ] },
                    "Caserne": { description: "Permet de recruter des unités.", icon: "⚔️", levels: [ { cost: { wood: 200, gold: 50 }, buildTime: 15 }, { cost: { wood: 450, gold: 120 }, buildTime: 35 } ] },
                    "Entrepôt": { description: "Augmente le stockage.", icon: "🧱", levels: [ { cost: { wood: 250 }, buildTime: 12 }, { cost: { wood: 500 }, buildTime: 30 } ] },
-                   "Académie": { description: "Produit des points de recherche.", icon: "🔬", levels: [ { cost: { wood: 300, crystal: 100 }, buildTime: 20 }, { cost: { wood: 600, crystal: 250 }, buildTime: 45 } ] }
+                   "Académie": { description: "Produit des points de recherche.", icon: "🔬", levels: [ { cost: { wood: 300, crystal: 100 }, buildTime: 20 }, { cost: { wood: 600, crystal: 250 }, buildTime: 45 } ] },
+                   "Taverne": { description: "Augmente le bonheur des habitants.", icon: "🍺", levels: [ { cost: { wood: 220, wine: 40 }, buildTime: 15 }, { cost: { wood: 450, wine: 100 }, buildTime: 35 } ] },
+                   "Musée": { description: "Exhibe des trésors culturels.", icon: "🏺", levels: [ { cost: { wood: 300, marble: 100 }, buildTime: 20 }, { cost: { wood: 600, marble: 250 }, buildTime: 45 } ] },
+                   "Muraille": { description: "Renforce la défense de la ville.", icon: "🛡️", levels: [ { cost: { wood: 250, marble: 150 }, buildTime: 25 }, { cost: { wood: 550, marble: 350 }, buildTime: 60 } ] },
+                   "Port": { description: "Permet les échanges maritimes.", icon: "⚓", levels: [ { cost: { wood: 400 }, buildTime: 30 }, { cost: { wood: 800 }, buildTime: 60 } ] },
+                   "Chantier Naval": { description: "Construit des navires de guerre.", icon: "🚢", levels: [ { cost: { wood: 500, sulfur: 200 }, buildTime: 35 }, { cost: { wood: 900, sulfur: 400 }, buildTime: 70 } ] },
+                   "Marché": { description: "Centre des échanges commerciaux.", icon: "🏬", levels: [ { cost: { wood: 300, gold: 100 }, buildTime: 20 }, { cost: { wood: 650, gold: 250 }, buildTime: 45 } ] },
+                   "Foresterie": { description: "Augmente la production de bois.", icon: "🌲", levels: [ { cost: { wood: 200 }, buildTime: 12 }, { cost: { wood: 450 }, buildTime: 30 } ] },
+                   "Carrière de Pierre": { description: "Augmente la production de marbre.", icon: "🪨", levels: [ { cost: { wood: 200, marble: 50 }, buildTime: 15 }, { cost: { wood: 500, marble: 120 }, buildTime: 35 } ] },
+                   "Verrerie": { description: "Produit du cristal.", icon: "🧪", levels: [ { cost: { wood: 250, crystal: 80 }, buildTime: 18 }, { cost: { wood: 550, crystal: 200 }, buildTime: 40 } ] },
+                   "Cave à Vin": { description: "Produit du vin.", icon: "🍷", levels: [ { cost: { wood: 220, wine: 50 }, buildTime: 18 }, { cost: { wood: 520, wine: 120 }, buildTime: 40 } ] },
+                   "Alchimiste": { description: "Transforme le soufre.", icon: "⚗️", levels: [ { cost: { wood: 240, sulfur: 60 }, buildTime: 18 }, { cost: { wood: 540, sulfur: 150 }, buildTime: 40 } ] },
+                   "Menuiserie": { description: "Réduit le coût en bois des constructions.", icon: "🪵", levels: [ { cost: { wood: 300 }, buildTime: 22 }, { cost: { wood: 650 }, buildTime: 50 } ] },
+                   "Architecte": { description: "Réduit le coût en marbre.", icon: "📐", levels: [ { cost: { wood: 300, marble: 100 }, buildTime: 22 }, { cost: { wood: 650, marble: 220 }, buildTime: 50 } ] },
+                   "Opticien": { description: "Réduit le coût en cristal.", icon: "👓", levels: [ { cost: { wood: 300, crystal: 100 }, buildTime: 22 }, { cost: { wood: 650, crystal: 220 }, buildTime: 50 } ] },
+                   "Vignoble": { description: "Augmente la production de vin.", icon: "🍇", levels: [ { cost: { wood: 240, wine: 40 }, buildTime: 16 }, { cost: { wood: 540, wine: 100 }, buildTime: 38 } ] },
+                   "Artificier": { description: "Améliore les unités spéciales.", icon: "🎇", levels: [ { cost: { wood: 320, sulfur: 80 }, buildTime: 24 }, { cost: { wood: 700, sulfur: 180 }, buildTime: 55 } ] }
                },
                research: {
                    economy: { name: "Économie", icon: "💰", techs: { "Expansion": { description: "Permet de fonder une nouvelle colonie.", cost: { research: 500 }, time: 60 } } },
@@ -311,7 +340,9 @@
                cityLayout: [
                    { id: "townHall", top: "40%", left: "45%", width: "120px", height: "120px" }, { id: "plot1", top: "35%", left: "25%", width: "90px", height: "90px" },
                    { id: "plot2", top: "55%", left: "30%", width: "90px", height: "90px" }, { id: "plot3", top: "50%", left: "60%", width: "90px", height: "90px" },
-                   { id: "academy", top: "20%", left: "60%", width: "90px", height: "90px" }
+                   { id: "academy", top: "20%", left: "60%", width: "90px", height: "90px" }, { id: "plot4", top: "20%", left: "30%", width: "90px", height: "90px" },
+                   { id: "plot5", top: "70%", left: "40%", width: "90px", height: "90px" }, { id: "plot6", top: "75%", left: "65%", width: "90px", height: "90px" },
+                   { id: "plot7", top: "25%", left: "75%", width: "90px", height: "90px" }, { id: "plot8", top: "65%", left: "75%", width: "90px", height: "90px" }
                ],
                islandLayout: {
                    size: 7,
@@ -333,6 +364,11 @@
                        { x: 3, y: 4, type: 'island', name: 'Île sauvage' },
                        { x: 12, y: 5, type: 'island', name: 'Île abandonnée' }
                    ]
+               },
+               worldActions: {
+                   explore: { label: 'Explorer', cost: { wood: 50, gold: 100 }, description: "Révèle les détails de la case." },
+                   colonize: { label: 'Coloniser', cost: { wood: 1000, gold: 500 }, description: "Fonde une nouvelle colonie." },
+                   attack: { label: 'Attaquer', cost: { sulfur: 200 }, description: "Lance une attaque contre l'île ciblée." }
                }
            };
 
@@ -340,9 +376,12 @@
            let gameState;
            const defaultGameState = {
                resources: { wood: 1000, wine: 100, marble: 100, crystal: 100, sulfur: 100, gold: 5000, research: 0 },
-               buildings: { "townHall": { type: "Hôtel de Ville", level: 1 }, "plot1": { type: "Caserne", level: 1 }, "plot2": { type: null, level: 0 }, "plot3": { type: null, level: 0 }, "academy": { type: "Académie", level: 1 } },
+               buildings: { "townHall": { type: "Hôtel de Ville", level: 1 }, "plot1": { type: "Caserne", level: 1 }, "plot2": { type: null, level: 0 }, "plot3": { type: null, level: 0 }, "academy": { type: "Académie", level: 1 }, "plot4": { type: null, level: 0 }, "plot5": { type: null, level: 0 }, "plot6": { type: null, level: 0 }, "plot7": { type: null, level: 0 }, "plot8": { type: null, level: 0 } },
                researchCompleted: [],
                queues: { build: [], research: [], military: [] },
+
+               cooldowns: { build: 0, research: 0, military: 0 },
+
                lastUpdate: Date.now()
            };
 
@@ -357,21 +396,27 @@
                modalCost: document.getElementById('modal-cost'), modalConfirmBtn: document.getElementById('modalConfirmBtn'),
                modalCancelBtn: document.getElementById('modalCancelBtn'), navLinks: document.querySelectorAll('.main-nav a'),
                mainViews: document.querySelectorAll('.main-view'), researchGrid: document.getElementById('research-grid'),
-               militaryGrid: document.getElementById('military-grid'), diplomacyGrid: document.getElementById('diplomacy-grid'),
+
+               militaryGrid: document.getElementById('military-grid'), battleGrid: document.getElementById('battle-grid'),
+               diplomacyGrid: document.getElementById('diplomacy-grid'),
+
            };
 
            let selectedPlotId = null;
            let currentAction = null;
+           const ACTION_COOLDOWNS = { build: 5, research: 5, military: 5 };
+           function isCooldownActive(type) { return gameState.cooldowns[type] && Date.now() < gameState.cooldowns[type]; }
 
            // --- PERSISTANCE DES DONNÉES ---
            function saveState() { localStorage.setItem('empireGameState', JSON.stringify(gameState)); }
-           function loadState() {
-               const savedState = localStorage.getItem('empireGameState');
+          function loadState() {
+              const savedState = localStorage.getItem('empireGameState');
                gameState = savedState ? JSON.parse(savedState) : JSON.parse(JSON.stringify(defaultGameState));
-               const offlineTime = (Date.now() - gameState.lastUpdate) / 1000;
-               produceResources(offlineTime);
-               gameState.lastUpdate = Date.now();
-           }
+               if (!gameState.cooldowns) gameState.cooldowns = { build: 0, research: 0, military: 0 };
+              const offlineTime = (Date.now() - gameState.lastUpdate) / 1000;
+              produceResources(offlineTime);
+              gameState.lastUpdate = Date.now();
+          }
 
            // --- NAVIGATION & VUES ---
            function switchView(viewId) {
@@ -403,6 +448,7 @@
                renderWorldMap();
                renderResearchTree();
                renderMilitaryUnits();
+               renderBattle();
                renderDiplomacy();
                updateAllUI();
            }
@@ -451,7 +497,8 @@
                }
            }
            
-           function startAction(type, id, name, level) {
+          function startAction(type, id, name, level) {
+               if (isCooldownActive(type)) { showModal("Action impossible", "Cette action est encore en cooldown."); return; }
                const queue = gameState.queues[type];
                let spec, cost, time;
                if (type === 'build') { spec = config.buildings[name].levels[level - 1]; }
@@ -462,9 +509,31 @@
                for(const res in cost) gameState.resources[res] -= cost[res];
                const endTime = Date.now() + time * 1000;
                queue.push({ id, name, level, endTime });
+               gameState.cooldowns[type] = Date.now() + ACTION_COOLDOWNS[type] * 1000;
                logEvent(`Lancement: ${name}.`);
                updateAllUI();
                if (selectedPlotId) updateContextPanel(selectedPlotId);
+          }
+
+           function startWorldAction(action, coords, name) {
+               const [x, y] = coords.split(',').map(Number);
+               const spec = config.worldActions[action];
+               const cost = spec.cost || {};
+               for (const res in cost) { if (gameState.resources[res] < cost[res]) { showModal("Action impossible", "Ressources insuffisantes."); return; } }
+               for (const res in cost) gameState.resources[res] -= cost[res];
+               if (action === 'explore') {
+                   gameState.exploredIslands.push({ x, y });
+                   logEvent(`Exploration de [${x},${y}] terminée.`);
+               } else if (action === 'colonize') {
+                   gameState.colonizedIslands.push({ x, y, type: 'player', name: name || 'Nouvelle Colonie' });
+                   if (!gameState.exploredIslands.some(p => p.x === x && p.y === y)) gameState.exploredIslands.push({ x, y });
+                   logEvent(`Vous avez colonisé [${x},${y}].`);
+               } else if (action === 'attack') {
+                   logEvent(`Vous attaquez ${name} [${x},${y}].`);
+               }
+               updateAllUI();
+               renderWorldMap();
+               saveState();
            }
 
            // --- FONCTIONS D'AFFICHAGE ---
@@ -490,22 +559,48 @@
                });
            }
 
-           function renderWorldMap() {
-               dom.worldMapGrid.innerHTML = '';
-               const mapSize = config.worldMap.size;
-               const islands = config.worldMap.islands;
-               for (let i = 0; i < mapSize * mapSize; i++) {
-                   const tile = document.createElement('div');
-                   tile.className = 'map-tile world-tile';
-                   const x = i % mapSize;
-                   const y = Math.floor(i / mapSize);
-                   const island = islands.find(isl => isl.x === x && isl.y === y);
-                   if (island) {
-                       tile.classList.add(island.type);
-                       tile.innerHTML = `<span class="tooltip">${island.name} [${x},${y}]</span>`;
-                   }
-                   dom.worldMapGrid.appendChild(tile);
-               }
+          function renderWorldMap() {
+              dom.worldMapGrid.innerHTML = '';
+              const mapSize = config.worldMap.size;
+              const islands = [...config.worldMap.islands, ...(gameState.colonizedIslands || [])];
+              for (let i = 0; i < mapSize * mapSize; i++) {
+                  const tile = document.createElement('div');
+                  tile.className = 'map-tile world-tile';
+                  const x = i % mapSize;
+                  const y = Math.floor(i / mapSize);
+                  const island = islands.find(isl => isl.x === x && isl.y === y);
+                  const explored = gameState.exploredIslands.some(p => p.x === x && p.y === y);
+                  if (!explored) {
+                      tile.classList.add('unexplored');
+                      tile.textContent = '?';
+                  } else {
+                      tile.classList.add('explored');
+                      if (island) {
+                          tile.classList.add(island.type);
+                          tile.innerHTML = `<span class="tooltip">${island.name} [${x},${y}]</span>`;
+                      }
+                  }
+                  tile.addEventListener('click', () => handleWorldTileClick(x, y, island, explored));
+                  dom.worldMapGrid.appendChild(tile);
+              }
+           }
+
+           function handleWorldTileClick(x, y, island, explored) {
+              if (!explored) {
+                  showModal('explore', `${x},${y}`, `Case [${x},${y}]`);
+                  return;
+              }
+              if (!island) {
+                  showModal('Océan', `Emplacement [${x},${y}]`);
+                  return;
+              }
+              if (island.type === 'enemy') {
+                  showModal('attack', `${x},${y}`, island.name);
+              } else if (island.type === 'island') {
+                  showModal('colonize', `${x},${y}`, island.name);
+              } else {
+                  showModal(island.name, `Type: ${island.type}`);
+              }
            }
            
            function renderIslandView() {
@@ -540,16 +635,22 @@
                        const { type, level } = building; const spec = config.buildings[type]; const nextLevel = level < spec.levels.length ? level + 1 : null;
                        html = `<h3>${type} (Niv ${level})</h3><p>${spec.description}</p>`;
                        if (gameState.queues.build.some(item => item.id === plotId)) { html += `<p style="color: var(--color-primary); margin-top: 1rem;">Amélioration en cours...</p>`; }
+                       else if (isCooldownActive('build')) { html += `<button class="action-btn" disabled>Cooldown...</button>`; }
                        else if (nextLevel) { html += `<button class="action-btn" data-action="build" data-id="${plotId}" data-name="${type}" data-level="${nextLevel}">Améliorer</button>`; }
                        else { html += `<p style="color: var(--color-primary); margin-top: 1rem;">Niveau maximum</p>`; }
                    } else {
+
                        html = `<h3>Emplacement Vide</h3><p>Cliquez pour construire :</p><div style="display:flex; flex-direction:column; gap:0.5rem;">`;
-                       for (const type in config.buildings) { html += `<button class="action-btn" data-action="build" data-id="${plotId}" data-name="${type}" data-level="1">${config.buildings[type].icon} ${type}</button>`; }
+                       for (const type in config.buildings) { html += isCooldownActive('build') ? `<button class="action-btn" disabled>${config.buildings[type].icon} ${type}</button>` : `<button class="action-btn" data-action="build" data-id="${plotId}" data-name="${type}" data-level="1">${config.buildings[type].icon} ${type}</button>`; }
                        html += `</div>`;
+
                    }
                }
                dom.contextPanel.innerHTML = html;
-               updateActionAvailability();
+
+               const chooseBtn = dom.contextPanel.querySelector('#chooseBuildingBtn');
+               if (chooseBtn) chooseBtn.addEventListener('click', () => showBuildSelection(plotId));
+
            }
 
            function showContextModalForBuilding(plotId) {
@@ -564,9 +665,23 @@
                        showModal(type, `Niveau ${level}. ${spec.description}`);
                     }
                } else {
-                   logEvent("Sélectionnez un bâtiment à construire.");
+                   showBuildSelection(plotId);
                }
            }
+
+           function showBuildSelection(plotId) {
+               dom.buildSelectList.innerHTML = '';
+               for (const type in config.buildings) {
+                   const spec = config.buildings[type];
+                   const cost = Object.entries(spec.levels[0].cost).map(([res, val]) => `${res}: ${val}`).join(' ');
+                   dom.buildSelectList.innerHTML += `<div class="build-option"><div>${spec.icon} ${type}</div><div class="cost">${cost}</div><button class="action-btn" data-action="build" data-id="${plotId}" data-name="${type}" data-level="1">Construire</button></div>`;
+               }
+               dom.buildSelectModal.style.display = 'flex';
+           }
+           dom.buildSelectCancel.addEventListener('click', () => { dom.buildSelectModal.style.display = 'none'; });
+           dom.buildSelectModal.addEventListener('click', e => {
+               if (e.target.dataset.action === 'build') dom.buildSelectModal.style.display = 'none';
+           });
 
            function renderResearchTree() {
                dom.researchGrid.innerHTML = '';
@@ -578,6 +693,7 @@
                        branchHtml += `<div class="card"><h4>${techKey}</h4><p>${tech.description}</p><p class="cost">Coût: 🔬${tech.cost.research}</p>`;
                        if (isCompleted) { branchHtml += `<button class="action-btn" disabled>Terminé</button>`; }
                        else if (isResearching) { branchHtml += `<button class="action-btn" disabled>En cours...</button>`; }
+                       else if (isCooldownActive('research')) { branchHtml += `<button class="action-btn" disabled>Cooldown...</button>`; }
                        else { branchHtml += `<button class="action-btn" data-action="research" data-name="${techKey}" data-level="1">Rechercher</button>`; }
                        branchHtml += `</div>`;
                    }
@@ -590,8 +706,27 @@
                    const unit = config.units[unitKey]; const isRecruiting = gameState.queues.military.some(u => u.name === unitKey);
                    let html = `<div class="card"><h4>${unitKey} ${unit.icon}</h4><p>${unit.description}</p><p class="cost">Coût: 🌲${unit.cost.wood || 0} 🔥${unit.cost.sulfur || 0} 💰${unit.cost.gold || 0}</p>`;
                    if (isRecruiting) { html += `<button class="action-btn" disabled>En formation...</button>`; }
+                   else if (isCooldownActive('military')) { html += `<button class="action-btn" disabled>Cooldown...</button>`; }
                    else { html += `<button class="action-btn" data-action="military" data-name="${unitKey}" data-level="1">Recruter</button>`; }
                    html += `</div>`; dom.militaryGrid.innerHTML += html;
+               }
+           }
+           function renderBattle() {
+               dom.battleGrid.innerHTML = `
+                   <div class="card">
+                       <h3>Simuler une bataille</h3>
+                       <button class="action-btn" id="simulateBattleBtn">Lancer un combat</button>
+                       <div id="battleResult" class="battle-result"></div>
+                   </div>`;
+               const btn = document.getElementById('simulateBattleBtn');
+               if (btn) {
+                   btn.addEventListener('click', () => {
+                       const attacker = { units: [{ type: 'hoplite', count: 10 }, { type: 'archer', count: 5 }], resources: {} };
+                       const defender = { units: [{ type: 'hoplite', count: 8 }], wallDefense: 0, resources: { wood: 100, gold: 100 } };
+                       const result = resolveBattle(attacker, defender);
+                       const lootText = Object.keys(result.loot).length ? Object.entries(result.loot).map(([r,v]) => `${r}: ${v}`).join(', ') : 'aucun';
+                       document.getElementById('battleResult').textContent = `Vainqueur: ${result.winner}. Butin: ${lootText}.`;
+                   });
                }
            }
            function renderDiplomacy() {
@@ -642,9 +777,10 @@
            }
            function showModal(action, id, name, level) {
                let spec, cost, time, title, message;
-               if (action === 'build') { spec = config.buildings[name].levels[level - 1]; title = `${level > 1 ? 'Améliorer' : 'Construire'} ${name}`; }
-               else if (action === 'research') { const branch = Object.keys(config.research).find(br => config.research[br].techs[name]); spec = config.research[branch].techs[name]; title = `Rechercher ${name}`; }
-               else if (action === 'military') { spec = config.units[name]; title = `Recruter ${name}`; }
+               if (action === 'build') { spec = config.buildings[name].levels[level - 1]; title = `${level > 1 ? 'Améliorer' : 'Construire'} ${name}`; currentAction = () => startAction(action, id, name, level); }
+               else if (action === 'research') { const branch = Object.keys(config.research).find(br => config.research[br].techs[name]); spec = config.research[branch].techs[name]; title = `Rechercher ${name}`; currentAction = () => startAction(action, id, name, level); }
+               else if (action === 'military') { spec = config.units[name]; title = `Recruter ${name}`; currentAction = () => startAction(action, id, name, level); }
+               else if (config.worldActions && config.worldActions[action]) { spec = config.worldActions[action]; title = `${spec.label} ${name}`; currentAction = () => startWorldAction(action, id, name); }
                else if (typeof action === 'string') { // For simple messages
                    dom.modalTitle.textContent = action;
                    dom.modalMessage.textContent = id || '';
@@ -656,12 +792,12 @@
                    return;
                }
                else { showModal("Action inconnue", "Cette action n'est pas encore implémentée."); return; }
-               
-               message = `Voulez-vous vraiment lancer cette action ?`;
+
+               message = spec.description || `Voulez-vous vraiment lancer cette action ?`;
                cost = spec.cost; time = spec.buildTime || spec.time;
-               currentAction = () => startAction(action, id, name, level);
                dom.modalTitle.textContent = title; dom.modalMessage.textContent = message;
-               dom.modalCost.innerHTML = `Coût: ${Object.entries(cost || {}).map(([res, val]) => `${res}: ${val}`).join(', ')} - Temps: ${time}s`;
+               const costText = Object.entries(cost || {}).map(([res, val]) => `${res}: ${val}`).join(', ');
+               dom.modalCost.innerHTML = `Coût: ${costText}${time ? ` - Temps: ${time}s` : ''}`;
                dom.modalConfirmBtn.style.display = 'inline-block';
                dom.modalCancelBtn.textContent = 'Annuler';
                dom.modal.style.display = 'flex';
@@ -673,6 +809,7 @@
                const target = e.target.closest('button[data-action]');
                if (!target) return;
                const { action, id, name, level } = target.dataset;
+               if (isCooldownActive(action)) { showModal('Action en cooldown', 'Veuillez patienter avant de relancer cette action.'); return; }
                showModal(action, id, name, parseInt(level));
            });
            dom.modalConfirmBtn.addEventListener('click', () => { if (currentAction) currentAction(); dom.modal.style.display = 'none'; });
