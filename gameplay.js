@@ -153,7 +153,48 @@ function calculateBattle(attacker, defender) {
     let atkPower = sumAttack(attacker.units);
     let defPower = sumDefense(defender.units) + (defender.wallDefense || 0);
     let winner = atkPower > defPower ? "attacker" : "defender";
-    return { winner, loot: calculateLoot(attacker, defender) };
+
+    // Calculate proportional losses based on opposing power.
+    const totalPower = atkPower + defPower || 1;
+    const atkLossRatio = defPower / totalPower;
+    const defLossRatio = atkPower / totalPower;
+
+    const attackerLosses = attacker.units.map(u => ({
+        type: u.type,
+        lost: Math.ceil(u.count * atkLossRatio)
+    }));
+    const defenderLosses = defender.units.map(u => ({
+        type: u.type,
+        lost: Math.ceil(u.count * defLossRatio)
+    }));
+
+    return {
+        winner,
+        loot: winner === "attacker" ? calculateLoot(attacker, defender) : {},
+        casualties: { attacker: attackerLosses, defender: defenderLosses }
+    };
+}
+
+// Apply battle results by removing lost units and distributing loot.
+function resolveBattle(attacker, defender) {
+    const result = calculateBattle(attacker, defender);
+
+    result.casualties.attacker.forEach(loss => {
+        const unit = attacker.units.find(u => u.type === loss.type);
+        if (unit) unit.count = Math.max(0, unit.count - loss.lost);
+    });
+    result.casualties.defender.forEach(loss => {
+        const unit = defender.units.find(u => u.type === loss.type);
+        if (unit) unit.count = Math.max(0, unit.count - loss.lost);
+    });
+
+    if (result.winner === "attacker") {
+        defender.resources = subtractResources(defender.resources, result.loot);
+        for (let [res, amt] of Object.entries(result.loot)) {
+            player.resources[res] = (player.resources[res] || 0) + amt;
+        }
+    }
+    return result;
 }
 
 // ====== 9. NIVEAU JOUEUR ======
