@@ -2903,6 +2903,521 @@
                saveState();
            }
 
+           // --- SYSTÈME DE QUÊTES ET ÉVÉNEMENTS ---
+           function renderQuestsView() {
+               let html = `
+                   <div class="card" style="grid-column: 1 / -1;">
+                       <div style="display: flex; justify-content: space-between; align-items: center;">
+                           <h3>📋 Centre de Missions</h3>
+                           <div style="display: flex; gap: 1rem;">
+                               <div>Quêtes actives: ${gameState.activeQuests.length}</div>
+                               <div>Quêtes terminées: ${gameState.completedQuests.length}</div>
+                               <div>Points de quête: ${gameState.questPoints}</div>
+                           </div>
+                       </div>
+                   </div>
+               `;
+               
+               // Quêtes actives
+               if (gameState.activeQuests.length > 0) {
+                   html += `
+                       <div class="card" style="grid-column: 1 / -1;">
+                           <h3>🎯 Quêtes Actives</h3>
+                           <div style="display: grid; gap: 1rem; margin-top: 1rem;">
+                   `;
+                   
+                   gameState.activeQuests.forEach((quest, index) => {
+                       const progress = calculateQuestProgress(quest);
+                       const progressPercent = Math.min(100, (progress.current / progress.required) * 100);
+                       
+                       html += `
+                           <div style="background: var(--color-panel-light); padding: 1rem; border-radius: 0.5rem; border-left: 4px solid var(--color-primary);">
+                               <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                                   <div>
+                                       <h4 style="margin: 0; color: var(--color-primary);">${quest.icon} ${quest.title}</h4>
+                                       <p style="margin: 0.25rem 0; font-size: 0.9rem; color: var(--color-text-muted);">${quest.description}</p>
+                                   </div>
+                                   <div style="text-align: right;">
+                                       <div style="font-size: 0.8rem; color: var(--color-warning);">
+                                           ${quest.difficulty} | ${quest.timeLimit ? `⏰ ${Math.ceil((quest.deadline - Date.now()) / 60000)}min` : '∞'}
+                                       </div>
+                                   </div>
+                               </div>
+                               
+                               <div style="margin: 0.5rem 0;">
+                                   <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 0.25rem;">
+                                       <span>Progression</span>
+                                       <span>${progress.current}/${progress.required}</span>
+                                   </div>
+                                   <div style="background: var(--color-panel); border-radius: 0.25rem; height: 8px; overflow: hidden;">
+                                       <div style="background: var(--color-primary); height: 100%; width: ${progressPercent}%; transition: width 0.3s;"></div>
+                                   </div>
+                               </div>
+                               
+                               <div style="display: flex; justify-content: space-between; align-items: center;">
+                                   <div style="font-size: 0.9rem;">
+                                       <strong>Récompenses:</strong> ${formatQuestRewards(quest.rewards)}
+                                   </div>
+                                   ${progressPercent >= 100 ? 
+                                       `<button onclick="completeQuest(${index})" class="action-btn" style="background: var(--color-success);">Terminer</button>` :
+                                       `<button onclick="abandonQuest(${index})" class="action-btn" style="background: var(--color-danger); font-size: 0.8rem;">Abandonner</button>`
+                                   }
+                               </div>
+                           </div>
+                       `;
+                   });
+                   
+                   html += `
+                           </div>
+                       </div>
+                   `;
+               }
+               
+               // Nouvelles quêtes disponibles
+               const availableQuests = generateAvailableQuests();
+               if (availableQuests.length > 0) {
+                   html += `
+                       <div class="card" style="grid-column: 1 / -1;">
+                           <h3>📜 Nouvelles Missions Disponibles</h3>
+                           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                   `;
+                   
+                   availableQuests.forEach((quest, index) => {
+                       html += `
+                           <div style="background: var(--color-panel-light); padding: 1rem; border-radius: 0.5rem; border: 2px solid var(--color-border);">
+                               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                   <h4 style="margin: 0;">${quest.icon} ${quest.title}</h4>
+                                   <span style="font-size: 0.8rem; color: var(--color-warning);">${quest.difficulty}</span>
+                               </div>
+                               <p style="margin: 0.5rem 0; font-size: 0.9rem;">${quest.description}</p>
+                               <div style="margin: 0.5rem 0; font-size: 0.8rem; color: var(--color-text-muted);">
+                                   Objectif: ${quest.objective}<br>
+                                   ${quest.timeLimit ? `Temps limite: ${quest.timeLimit} minutes` : 'Pas de limite de temps'}
+                               </div>
+                               <div style="margin: 0.5rem 0; font-size: 0.9rem;">
+                                   <strong>Récompenses:</strong> ${formatQuestRewards(quest.rewards)}
+                               </div>
+                               <button onclick="acceptQuest(${index})" class="action-btn" ${canAcceptQuest(quest) ? '' : 'disabled'}>
+                                   Accepter la mission
+                               </button>
+                           </div>
+                       `;
+                   });
+                   
+                   html += `
+                           </div>
+                       </div>
+                   `;
+               }
+               
+               // Événements mondiaux actifs
+               const activeEvents = getActiveWorldEvents();
+               if (activeEvents.length > 0) {
+                   html += `
+                       <div class="card" style="grid-column: 1 / -1;">
+                           <h3>🌟 Événements Spéciaux</h3>
+                           <div style="margin-top: 1rem;">
+                   `;
+                   
+                   activeEvents.forEach(event => {
+                       const timeLeft = Math.max(0, event.endTime - Date.now());
+                       const hoursLeft = Math.floor(timeLeft / 3600000);
+                       const minutesLeft = Math.floor((timeLeft % 3600000) / 60000);
+                       
+                       html += `
+                           <div style="background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; color: white;">
+                               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                   <h4 style="margin: 0;">${event.icon} ${event.title}</h4>
+                                   <div style="font-size: 0.9rem;">⏰ ${hoursLeft}h ${minutesLeft}m restantes</div>
+                               </div>
+                               <p style="margin: 0.5rem 0; opacity: 0.9;">${event.description}</p>
+                               <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                                   ${event.actions.map(action => 
+                                       `<button onclick="participateInEvent('${event.id}', '${action.id}')" class="action-btn" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                                           ${action.name}
+                                       </button>`
+                                   ).join('')}
+                               </div>
+                           </div>
+                       `;
+                   });
+                   
+                   html += `
+                           </div>
+                       </div>
+                   `;
+               }
+               
+               // Historique des quêtes terminées (dernières 10)
+               if (gameState.completedQuests.length > 0) {
+                   html += `
+                       <div class="card" style="grid-column: 1 / -1;">
+                           <h3>✅ Missions Récemment Terminées</h3>
+                           <div style="max-height: 300px; overflow-y: auto; margin-top: 1rem;">
+                   `;
+                   
+                   gameState.completedQuests.slice(-10).reverse().forEach(quest => {
+                       const timeAgo = Math.floor((Date.now() - quest.completedAt) / 60000);
+                       const timeText = timeAgo < 1 ? 'À l\'instant' : `Il y a ${timeAgo} min`;
+                       
+                       html += `
+                           <div style="background: var(--color-panel-light); padding: 0.75rem; border-radius: 0.25rem; margin-bottom: 0.5rem; border-left: 3px solid var(--color-success);">
+                               <div style="display: flex; justify-content: space-between; align-items: center;">
+                                   <div>
+                                       <strong>${quest.icon} ${quest.title}</strong>
+                                       <div style="font-size: 0.8rem; color: var(--color-text-muted); margin-top: 0.25rem;">
+                                           Récompenses reçues: ${formatQuestRewards(quest.rewards)}
+                                       </div>
+                                   </div>
+                                   <span style="font-size: 0.8rem; color: var(--color-text-muted);">${timeText}</span>
+                               </div>
+                           </div>
+                       `;
+                   });
+                   
+                   html += `
+                           </div>
+                       </div>
+                   `;
+               }
+               
+               dom.questsGrid.innerHTML = html;
+           }
+           
+           function generateAvailableQuests() {
+               const questTemplates = [
+                   {
+                       id: 'build_structures',
+                       icon: '🏗️',
+                       title: 'Expansion Urbaine',
+                       description: 'Votre ville a besoin de nouveaux bâtiments pour prospérer.',
+                       objective: 'Construire 3 bâtiments',
+                       difficulty: 'Facile',
+                       type: 'build',
+                       target: 3,
+                       rewards: { gold: 500, xp: 100, questPoints: 10 },
+                       requirements: { level: 1 }
+                   },
+                   {
+                       id: 'explore_islands',
+                       icon: '🗺️',
+                       title: 'Explorateur des Mers',
+                       description: 'Les océans regorgent d\'îles mystérieuses à découvrir.',
+                       objective: 'Explorer 5 nouvelles îles',
+                       difficulty: 'Moyen',
+                       type: 'explore',
+                       target: 5,
+                       rewards: { gold: 1000, wood: 500, xp: 200, questPoints: 25 },
+                       requirements: { level: 3, exploredIslands: 2 }
+                   },
+                   {
+                       id: 'establish_colonies',
+                       icon: '🏝️',
+                       title: 'Fondateur d\'Empire',
+                       description: 'Étendez votre influence en établissant de nouvelles colonies.',
+                       objective: 'Coloniser 2 îles',
+                       difficulty: 'Difficile',
+                       type: 'colonize',
+                       target: 2,
+                       rewards: { gold: 2000, research: 100, xp: 300, questPoints: 50 },
+                       requirements: { level: 5, colonizedIslands: 0 }
+                   },
+                   {
+                       id: 'trade_routes',
+                       icon: '🚢',
+                       title: 'Maître Marchand',
+                       description: 'Le commerce est la clé de la prospérité.',
+                       objective: 'Établir 3 routes commerciales',
+                       difficulty: 'Moyen',
+                       type: 'trade',
+                       target: 3,
+                       rewards: { gold: 1500, wine: 200, xp: 250, questPoints: 30 },
+                       requirements: { level: 4, colonizedIslands: 1 }
+                   },
+                   {
+                       id: 'research_tech',
+                       icon: '🔬',
+                       title: 'Savant Érudit',
+                       description: 'La connaissance est le pouvoir ultime.',
+                       objective: 'Rechercher 5 technologies',
+                       difficulty: 'Moyen',
+                       type: 'research',
+                       target: 5,
+                       rewards: { research: 500, crystal: 100, xp: 200, questPoints: 35 },
+                       requirements: { level: 3, researchCompleted: 2 }
+                   },
+                   {
+                       id: 'military_power',
+                       icon: '⚔️',
+                       title: 'Seigneur de Guerre',
+                       description: 'Une armée puissante protège votre empire.',
+                       objective: 'Entraîner 50 unités militaires',
+                       difficulty: 'Difficile',
+                       type: 'military',
+                       target: 50,
+                       rewards: { gold: 1000, sulfur: 200, xp: 300, questPoints: 40 },
+                       requirements: { level: 6, militaryUnits: 10 }
+                   },
+                   {
+                       id: 'resource_master',
+                       icon: '💎',
+                       title: 'Maître des Ressources',
+                       description: 'Accumulez des richesses pour votre empire.',
+                       objective: 'Posséder 10000 or et 5000 de chaque ressource',
+                       difficulty: 'Très Difficile',
+                       type: 'resources',
+                       target: { gold: 10000, wood: 5000, wine: 5000, marble: 5000, crystal: 5000, sulfur: 5000 },
+                       rewards: { gold: 5000, research: 200, xp: 500, questPoints: 100 },
+                       requirements: { level: 8 }
+                   }
+               ];
+               
+               // Filtrer les quêtes disponibles selon les prérequis
+               return questTemplates.filter(quest => {
+                   if (gameState.activeQuests.some(active => active.id === quest.id)) return false;
+                   if (gameState.completedQuests.some(completed => completed.id === quest.id)) return false;
+                   
+                   const reqs = quest.requirements;
+                   if (reqs.level && gameState.playerStats.level < reqs.level) return false;
+                   if (reqs.exploredIslands && gameState.exploredIslands.length < reqs.exploredIslands) return false;
+                   if (reqs.colonizedIslands && gameState.colonizedIslands.length < reqs.colonizedIslands) return false;
+                   if (reqs.researchCompleted && gameState.researchCompleted.length < reqs.researchCompleted) return false;
+                   if (reqs.militaryUnits && gameState.militaryUnits.length < reqs.militaryUnits) return false;
+                   
+                   return true;
+               }).slice(0, 6); // Limiter à 6 quêtes disponibles
+           }
+           
+           function calculateQuestProgress(quest) {
+               let current = 0;
+               const required = quest.target;
+               
+               switch (quest.type) {
+                   case 'build':
+                       current = gameState.playerStats.totalBuildings;
+                       break;
+                   case 'explore':
+                       current = gameState.exploredIslands.length;
+                       break;
+                   case 'colonize':
+                       current = gameState.colonizedIslands.length;
+                       break;
+                   case 'trade':
+                       current = gameState.tradeRoutes.length;
+                       break;
+                   case 'research':
+                       current = gameState.researchCompleted.length;
+                       break;
+                   case 'military':
+                       current = gameState.militaryUnits.length;
+                       break;
+                   case 'resources':
+                       // Pour les quêtes de ressources, vérifier si toutes les conditions sont remplies
+                       current = Object.entries(required).every(([resource, amount]) => 
+                           gameState.resources[resource] >= amount
+                       ) ? 1 : 0;
+                       return { current: current, required: 1 };
+               }
+               
+               return { current: Math.min(current, required), required: required };
+           }
+           
+           function formatQuestRewards(rewards) {
+               return Object.entries(rewards).map(([resource, amount]) => {
+                   const icons = {
+                       gold: '💰', wood: '🌲', wine: '🍇', marble: '🏛️',
+                       crystal: '💎', sulfur: '🔥', research: '🔬', xp: '⭐', questPoints: '🏆'
+                   };
+                   return `${amount} ${icons[resource] || resource}`;
+               }).join(', ');
+           }
+           
+           function canAcceptQuest(quest) {
+               return gameState.activeQuests.length < 5; // Limite de 5 quêtes actives
+           }
+           
+           function acceptQuest(questIndex) {
+               const availableQuests = generateAvailableQuests();
+               const quest = availableQuests[questIndex];
+               
+               if (!quest || !canAcceptQuest(quest)) {
+                   logEvent('❌ Impossible d\'accepter cette quête');
+                   return;
+               }
+               
+               const activeQuest = {
+                   ...quest,
+                   acceptedAt: Date.now(),
+                   deadline: quest.timeLimit ? Date.now() + (quest.timeLimit * 60000) : null
+               };
+               
+               gameState.activeQuests.push(activeQuest);
+               logEvent(`📋 Quête acceptée: ${quest.title}`);
+               
+               renderQuestsView();
+               saveState();
+           }
+           
+           function completeQuest(questIndex) {
+               const quest = gameState.activeQuests[questIndex];
+               if (!quest) return;
+               
+               const progress = calculateQuestProgress(quest);
+               if (progress.current < progress.required) {
+                   logEvent('❌ Quête pas encore terminée');
+                   return;
+               }
+               
+               // Donner les récompenses
+               Object.entries(quest.rewards).forEach(([resource, amount]) => {
+                   if (resource === 'xp') {
+                       addXP(amount);
+                   } else if (resource === 'questPoints') {
+                       gameState.questPoints = (gameState.questPoints || 0) + amount;
+                   } else {
+                       gameState.resources[resource] = (gameState.resources[resource] || 0) + amount;
+                   }
+               });
+               
+               // Marquer comme terminée
+               const completedQuest = {
+                   ...quest,
+                   completedAt: Date.now()
+               };
+               
+               gameState.completedQuests.push(completedQuest);
+               gameState.activeQuests.splice(questIndex, 1);
+               
+               logEvent(`✅ Quête terminée: ${quest.title}`);
+               showNotification(`Quête terminée ! Récompenses: ${formatQuestRewards(quest.rewards)}`, 'success');
+               
+               renderQuestsView();
+               updateAllUI();
+               saveState();
+           }
+           
+           function abandonQuest(questIndex) {
+               const quest = gameState.activeQuests[questIndex];
+               if (!quest) return;
+               
+               gameState.activeQuests.splice(questIndex, 1);
+               logEvent(`❌ Quête abandonnée: ${quest.title}`);
+               
+               renderQuestsView();
+               saveState();
+           }
+           
+           function getActiveWorldEvents() {
+               const now = Date.now();
+               
+               // Générer des événements dynamiques
+               const eventTemplates = [
+                   {
+                       id: 'pirate_raid',
+                       icon: '🏴‍☠️',
+                       title: 'Raid de Pirates',
+                       description: 'Des pirates menacent vos routes commerciales ! Défendez-vous ou négociez.',
+                       duration: 2 * 60 * 60 * 1000, // 2 heures
+                       actions: [
+                           { id: 'fight', name: 'Combattre', cost: { sulfur: 100 }, reward: { gold: 1000, xp: 150 } },
+                           { id: 'negotiate', name: 'Négocier', cost: { gold: 500 }, reward: { wine: 200, xp: 50 } }
+                       ]
+                   },
+                   {
+                       id: 'merchant_festival',
+                       icon: '🎪',
+                       title: 'Festival des Marchands',
+                       description: 'Un grand festival commercial offre des opportunités d\'échange exceptionnelles.',
+                       duration: 3 * 60 * 60 * 1000, // 3 heures
+                       actions: [
+                           { id: 'participate', name: 'Participer', cost: { gold: 200 }, reward: { wine: 300, marble: 150, xp: 100 } },
+                           { id: 'sponsor', name: 'Sponsoriser', cost: { gold: 1000 }, reward: { gold: 1500, crystal: 100, xp: 200 } }
+                       ]
+                   },
+                   {
+                       id: 'ancient_ruins',
+                       icon: '🏛️',
+                       title: 'Ruines Antiques Découvertes',
+                       description: 'Des ruines mystérieuses ont été découvertes. Explorez-les pour des trésors anciens.',
+                       duration: 4 * 60 * 60 * 1000, // 4 heures
+                       actions: [
+                           { id: 'explore', name: 'Explorer', cost: { wood: 200 }, reward: { research: 200, crystal: 100, xp: 250 } },
+                           { id: 'excavate', name: 'Excaver', cost: { gold: 800, marble: 100 }, reward: { gold: 2000, research: 300, xp: 400 } }
+                       ]
+                   }
+               ];
+               
+               // Vérifier s'il faut générer de nouveaux événements
+               if (!gameState.worldEvents) gameState.worldEvents = [];
+               
+               const activeEvents = gameState.worldEvents.filter(event => event.endTime > now);
+               
+               // Générer un nouvel événement si nécessaire (10% de chance toutes les 30 minutes)
+               const lastEventCheck = gameState.lastEventCheck || 0;
+               if (now - lastEventCheck > 30 * 60 * 1000) { // 30 minutes
+                   gameState.lastEventCheck = now;
+                   
+                   if (Math.random() < 0.1 && activeEvents.length < 2) { // 10% de chance, max 2 événements
+                       const template = eventTemplates[Math.floor(Math.random() * eventTemplates.length)];
+                       const newEvent = {
+                           ...template,
+                           startTime: now,
+                           endTime: now + template.duration
+                       };
+                       
+                       gameState.worldEvents.push(newEvent);
+                       activeEvents.push(newEvent);
+                       
+                       showNotification(`Nouvel événement: ${newEvent.title}`, 'info');
+                   }
+               }
+               
+               return activeEvents;
+           }
+           
+           function participateInEvent(eventId, actionId) {
+               const event = gameState.worldEvents.find(e => e.id === eventId);
+               if (!event || event.endTime < Date.now()) {
+                   logEvent('❌ Événement expiré ou introuvable');
+                   return;
+               }
+               
+               const action = event.actions.find(a => a.id === actionId);
+               if (!action) return;
+               
+               // Vérifier les coûts
+               for (const [resource, cost] of Object.entries(action.cost)) {
+                   if (gameState.resources[resource] < cost) {
+                       logEvent(`❌ Ressources insuffisantes pour ${action.name}`);
+                       return;
+                   }
+               }
+               
+               // Déduire les coûts
+               Object.entries(action.cost).forEach(([resource, cost]) => {
+                   gameState.resources[resource] -= cost;
+               });
+               
+               // Donner les récompenses
+               Object.entries(action.reward).forEach(([resource, amount]) => {
+                   if (resource === 'xp') {
+                       addXP(amount);
+                   } else {
+                       gameState.resources[resource] = (gameState.resources[resource] || 0) + amount;
+                   }
+               });
+               
+               logEvent(`🌟 Participation à l'événement: ${action.name}`);
+               showNotification(`Événement réussi ! Récompenses: ${formatQuestRewards(action.reward)}`, 'success');
+               
+               // Marquer l'événement comme terminé pour ce joueur
+               event.participated = true;
+               
+               renderQuestsView();
+               updateAllUI();
+               saveState();
+           }
+
            // --- SYSTÈME DE TUTORIEL ---
            function showTutorial() {
                if (gameState.playerStats.level === 1 && gameState.playerStats.totalBuildings <= 2) {
