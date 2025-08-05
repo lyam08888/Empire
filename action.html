@@ -853,8 +853,8 @@
                });
            }
 
-          function renderWorldMap() {
-              dom.worldGrid.innerHTML = '';
+         function renderWorldMap() {
+             dom.worldMapGrid.innerHTML = '';
               
               let html = `
                   <div class="card" style="grid-column: 1 / -1;">
@@ -1028,8 +1028,8 @@
                   `;
               }
               
-              dom.worldGrid.innerHTML = html;
-           }
+             dom.worldMapGrid.innerHTML = html;
+         }
 
            function handleWorldTileClick(x, y, island, explored) {
               if (!explored) {
