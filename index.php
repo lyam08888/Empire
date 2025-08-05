@@ -72,7 +72,7 @@ empire</p>
  </tr>
  <tr>
  <td>
- <select id="universe" class="uni" size="1">
+ <select id="universe" name="universe" class="uni" size="1">
  <option selected="selected" value="localhost/empire">Alpha</option>
  <option value="localhost/empire">Beta</option>
  </select> </td>
