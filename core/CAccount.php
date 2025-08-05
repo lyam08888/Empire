@@ -135,11 +135,12 @@ class CAccount {
 		}
 	}
 	
-	private function Login() {
-		global $database,$session,$form;
-		if(!isset($_POST['user']) || $_POST['user'] == "") {
-			$form->addError("user",LOGIN_USR_EMPTY);
-		}
+        private function Login() {
+                global $database,$session,$form;
+                error_log("CAccount::Login attempt for user: ".(isset($_POST['user'])?$_POST['user']:'undefined'));
+                if(!isset($_POST['user']) || $_POST['user'] == "") {
+                        $form->addError("user",LOGIN_USR_EMPTY);
+                }
 		else if(!$database->checkExist($_POST['user'],0)) {
 			$form->addError("user",USR_NT_FOUND);
 		}
@@ -149,18 +150,20 @@ class CAccount {
 		else if(!$database->login($_POST['user'],$_POST['pw'])) {
 			$form->addError("pw",LOGIN_PW_ERROR);
 		}
-		if($form->returnErrors() > 0) {
-			$_SESSION['errorarray'] = $form->getErrors();
-			$_SESSION['valuearray'] = $_POST;
-			
-			header("Location: index.php");
-		}
-		else {
-			setcookie("COOKUSR",$_POST['user'],time()+COOKIE_EXPIRE,COOKIE_PATH);
-			$session->login($_POST['user']);
-			header("Location: action.php?action=loginAvatar&function=login");
-		}
-	}
+                if($form->returnErrors() > 0) {
+                        error_log("CAccount::Login failed for user: ".(isset($_POST['user'])?$_POST['user']:'undefined'));
+                        $_SESSION['errorarray'] = $form->getErrors();
+                        $_SESSION['valuearray'] = $_POST;
+
+                        header("Location: index.php");
+                }
+                else {
+                        error_log("CAccount::Login successful for user: ".$_POST['user']);
+                        setcookie("COOKUSR",$_POST['user'],time()+COOKIE_EXPIRE,COOKIE_PATH);
+                        $session->login($_POST['user']);
+                        header("Location: action.php?action=loginAvatar&function=login");
+                }
+        }
 	
 	private function Logout() {
 		global $session,$database;
