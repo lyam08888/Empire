@@ -25,7 +25,7 @@ include("core/CAccount.php");
 <meta name="Description" content="empire est un jeu de navigateur gratuit. Le défi du joueur est de guider son peuple à travers le monde antique, construire des villes, commercer et triompher sur les îles.">
 <meta name="robots" content="index,follow">
 <meta name="Revisit" content="After 14 days"> 
-<title>ikariama - jeu de navigateur gratuit</title>
+<title>Empire - jeu de navigateur gratuit</title>
 
 
 <link href="css/istyle.css" rel="stylesheet" type="text/css" media="screen">
@@ -42,7 +42,7 @@ include("core/CAccount.php");
 <nav id="links">
  <a href="index.php" title="vers la connexion">Connexion</a>
  <a href="register.php" title="Inscris-toi ici !">Inscription</a>
- <a href="tour_step1.php" title="Courte visite d'ikariama">Visite du jeu</a>
+ <a href="tour_step1.php" title="Courte visite d'Empire">Visite du jeu</a>
  <a href="/board" target="_blank" title="vers les forums">Forum</a> </nav>
 <section id="text">
  <img class="bild1" src="img/bild1.jpg" height="85" width="173">
@@ -54,7 +54,7 @@ Sous votre direction commencera une nouvelle ère de découvertes et de prospér
 
 Bienvenue sur Ikariam
 
-empire</p>
+Empire</p>
  <div class="joinbutton">
  <a href="register.php" title="Inscription">Joue maintenant gratuitement !</a> </div>
 

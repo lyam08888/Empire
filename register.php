@@ -18,7 +18,7 @@ include("core/CAccount.php");
 <meta name="Description" content="empire est un jeu de navigateur gratuit. Le défi du joueur est de guider son peuple à travers le monde antique, construire des villes, commercer et triompher sur les îles.">
 <meta name="robots" content="index,follow">
 <meta name="Revisit" content="After 14 days"> 
-<title>ikariama - jeu de navigateur gratuit</title>
+<title>Empire - jeu de navigateur gratuit</title>
 
 <link href="css/rstyle.css" rel="stylesheet" type="text/css" media="screen">
 <script src="common.js" defer></script>

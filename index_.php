@@ -25,7 +25,7 @@ header('Pragma: no-cache');*/
 <meta name="Description" content="empire لعبة متصفح مجانية. يتمثل التحدي للاعب في قيادة شعبه من خلال العالم القديم. لبناء المدن والتجارة والانتصار على الجزر.">  
 <meta name="robots" content="index,follow">
 <meta name="Revisit" content="After 14 days"> 
-<title>ikariama - لعبة المتصفح المجانية</title>
+<title>Empire - لعبة المتصفح المجانية</title>
 <link href="css/istyle.css" rel="stylesheet" type="text/css" media="screen">
 <script src="common.js" defer></script>
 </head>

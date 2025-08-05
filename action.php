@@ -34,7 +34,7 @@ else{
 <meta name="robots" content="index,follow">
 <meta name="Revisit" content="After 14 days"> 
 <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
-<title>ikariama - لعبة المتصفح المجانية</title>
+<title>Empire - لعبة المتصفح المجانية</title>
 <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 <script src="complete-0.3.5.js" defer></script>
 <?php
