@@ -33,8 +33,8 @@ include("core/CAccount.php");
  <div id="links">
  <a href="index.php" title="vers la connexion">Connexion</a>
  <a href="register.php" title="Inscris-toi ici !">Inscription</a>
- <a href="tour_step1.php" title="Courte visite d'empire">Visite du jeu</a>
- <a href="board.php" target="_blank" title="vers les forums">Forum</a> </div>
+ <a href="tour_step1.php" title="Courte visite d'ikariama">Visite du jeu</a>
+ <a href="/board" target="_blank" title="vers les forums">Forum</a> </div>
 
 </div>
 <div id="text">
