@@ -166,8 +166,25 @@
 
        /* --- BUILDING SELECTION --- */
        .build-select-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.5rem; max-height: 300px; overflow-y: auto; }
-       .build-option { background: var(--color-panel-light); padding: 0.5rem; border-radius: 0.5rem; display: flex; flex-direction: column; align-items: center; }
+       .build-option { background: var(--color-panel-light); padding: 0.5rem; border-radius: 0.5rem; display: flex; flex-direction: column; align-items: center; transition: all 0.3s; border: 1px solid transparent; }
+       .build-option:hover { border-color: var(--color-primary); transform: translateY(-2px); }
        .build-option .cost { font-size: 0.8rem; color: var(--color-text-muted); margin-top: 0.25rem; }
+       
+       /* --- ANIMATIONS ET EFFETS --- */
+       @keyframes slideIn { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+       @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.05); } 70% { transform: scale(0.9); } 100% { transform: scale(1); opacity: 1; } }
+       @keyframes glow { 0%, 100% { box-shadow: 0 0 5px var(--color-primary); } 50% { box-shadow: 0 0 20px var(--color-primary), 0 0 30px var(--color-primary); } }
+       
+       .achievement-notification { position: fixed; top: 20px; right: 20px; background: linear-gradient(135deg, var(--color-success), #16a34a); color: white; padding: 1rem; border-radius: 0.5rem; z-index: 1001; animation: slideIn 0.5s ease-out; max-width: 300px; }
+       .level-up-notification { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, var(--color-primary), #f59e0b); color: var(--color-dark-1); padding: 2rem; border-radius: 1rem; z-index: 1002; animation: bounceIn 0.8s ease-out; text-align: center; font-weight: bold; font-size: 1.2rem; }
+       
+       .resource-gain { animation: glow 1s ease-in-out; }
+       .building-completed { animation: bounceIn 0.6s ease-out; }
+       
+       /* --- TOOLTIPS AMÉLIORÉS --- */
+       .enhanced-tooltip { position: relative; }
+       .enhanced-tooltip::after { content: attr(data-tooltip); position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%); background: var(--color-dark-1); color: white; padding: 0.5rem; border-radius: 0.25rem; white-space: nowrap; opacity: 0; visibility: hidden; transition: all 0.3s; font-size: 0.8rem; z-index: 100; }
+       .enhanced-tooltip:hover::after { opacity: 1; visibility: visible; }
 
        /* --- NAVIGATION MOBILE --- */
        .mobile-nav { display: none; }
@@ -225,7 +242,12 @@
        <!-- HEADER -->
        <header class="game-header">
            <div class="header-content">
-               <div class="player-info"><a href="#" title="Voir le profil du champion">Joueur_01</a></div>
+               <div class="player-info">
+                   <a href="#" title="Voir le profil du champion">Joueur_01</a>
+                   <div style="font-size: 0.8rem; color: var(--color-primary);">
+                       Niv. <span id="playerLevel">1</span> | XP: <span id="playerXP">0</span>/<span id="playerXPNeeded">100</span>
+                   </div>
+               </div>
                <div class="resources">
                    <div class="resource-item" title="Bois">🌲 <span id="resWood">0</span></div>
                    <div class="resource-item" title="Vin">🍇 <span id="resWine">0</span></div>
@@ -235,7 +257,12 @@
                    <div class="resource-item" title="Or">💰 <span id="resGold">0</span></div>
                    <div class="resource-item" title="Points de Recherche">🔬 <span id="resResearch">0</span></div>
                </div>
-               <div class="player-info"><a href="#" title="Quitter la bataille en douce">Déconnexion</a></div>
+               <div class="player-info">
+                   <div style="font-size: 0.8rem; margin-bottom: 0.25rem;">
+                       🏆 <span id="achievementCount">0</span> achievements
+                   </div>
+                   <a href="#" title="Quitter la bataille en douce">Déconnexion</a>
+               </div>
            </div>
        </header>
 
@@ -251,6 +278,7 @@
                    <li><a data-view="research" title="Traquer les savants fous">🔬 <span>Recherche</span></a></li>
                    <li><a data-view="military" title="Armez-vous, ça va piquer">⚔️ <span>Militaire</span></a></li>
                    <li><a data-view="diplomacy" title="Serrer des mains virtuelles">🤝 <span>Diplomatie</span></a></li>
+                   <li><a data-view="achievements" title="Vos exploits héroïques">🏆 <span>Achievements</span></a></li>
 
                </ul>
            </nav>
@@ -264,6 +292,7 @@
                <section id="view-military" class="main-view hidden"><h2>Militaire</h2><div id="military-grid" class="management-grid"></div></section>
                <section id="view-battle" class="main-view hidden"><h2>Bataille</h2><div id="battle-grid" class="management-grid"></div></section>
                <section id="view-diplomacy" class="main-view hidden"><h2>Diplomatie</h2><div id="diplomacy-grid" class="management-grid"></div></section>
+               <section id="view-achievements" class="main-view hidden"><h2>Achievements & Statistiques</h2><div id="achievements-grid" class="management-grid"></div></section>
            </div>
            
            <!-- PANNEAU DROIT (Desktop) -->
@@ -290,6 +319,7 @@
            <a href="#" data-view="research" title="Science express">🔬</a>
            <a href="#" data-view="military" title="Prêt pour l'assaut miniature">⚔️</a>
            <a href="#" data-view="diplomacy" title="Diplomatie de poche">🤝</a>
+           <a href="#" data-view="achievements" title="Vos trophées">🏆</a>
 
        </nav>
    </div>
@@ -379,9 +409,11 @@
                buildings: { "townHall": { type: "Hôtel de Ville", level: 1 }, "plot1": { type: "Caserne", level: 1 }, "plot2": { type: null, level: 0 }, "plot3": { type: null, level: 0 }, "academy": { type: "Académie", level: 1 }, "plot4": { type: null, level: 0 }, "plot5": { type: null, level: 0 }, "plot6": { type: null, level: 0 }, "plot7": { type: null, level: 0 }, "plot8": { type: null, level: 0 } },
                researchCompleted: [],
                queues: { build: [], research: [], military: [] },
-
                cooldowns: { build: 0, research: 0, military: 0 },
-
+               exploredIslands: [{ x: 7, y: 7 }], // Île de départ explorée
+               colonizedIslands: [],
+               playerStats: { level: 1, xp: 0, totalBuildings: 2, totalUnits: 0 },
+               achievements: [],
                lastUpdate: Date.now()
            };
 
@@ -396,10 +428,8 @@
                modalCost: document.getElementById('modal-cost'), modalConfirmBtn: document.getElementById('modalConfirmBtn'),
                modalCancelBtn: document.getElementById('modalCancelBtn'), navLinks: document.querySelectorAll('.main-nav a'),
                mainViews: document.querySelectorAll('.main-view'), researchGrid: document.getElementById('research-grid'),
-
                militaryGrid: document.getElementById('military-grid'), battleGrid: document.getElementById('battle-grid'),
                diplomacyGrid: document.getElementById('diplomacy-grid'),
-
            };
 
            let selectedPlotId = null;
@@ -412,10 +442,22 @@
           function loadState() {
               const savedState = localStorage.getItem('empireGameState');
                gameState = savedState ? JSON.parse(savedState) : JSON.parse(JSON.stringify(defaultGameState));
+               
+               // Migration des anciennes sauvegardes
                if (!gameState.cooldowns) gameState.cooldowns = { build: 0, research: 0, military: 0 };
+               if (!gameState.exploredIslands) gameState.exploredIslands = [{ x: 7, y: 7 }];
+               if (!gameState.colonizedIslands) gameState.colonizedIslands = [];
+               if (!gameState.playerStats) gameState.playerStats = { level: 1, xp: 0, totalBuildings: 2, totalUnits: 0 };
+               if (!gameState.achievements) gameState.achievements = [];
+               
               const offlineTime = (Date.now() - gameState.lastUpdate) / 1000;
               produceResources(offlineTime);
               gameState.lastUpdate = Date.now();
+              
+              // Afficher les gains hors ligne si significatifs
+              if (offlineTime > 60) {
+                  logEvent(`Bienvenue ! Vous avez gagné des ressources pendant votre absence (${Math.floor(offlineTime/60)} min).`);
+              }
           }
 
            // --- NAVIGATION & VUES ---
@@ -450,6 +492,7 @@
                renderMilitaryUnits();
                renderBattle();
                renderDiplomacy();
+               renderAchievements();
                updateAllUI();
            }
 
@@ -461,11 +504,41 @@
            }
 
            function produceResources(seconds) {
-               const townHallLevel = gameState.buildings.townHall.level;
-               gameState.resources.gold += townHallLevel * 2 * seconds / 3600;
-               gameState.resources.wood += 5 * seconds / 3600;
+               const townHallLevel = gameState.buildings.townHall?.level || 1;
                const academyLevel = gameState.buildings.academy?.level || 0;
-               if (academyLevel > 0) gameState.resources.research += academyLevel * 2 * seconds / 3600;
+               
+               // Production de base
+               let goldProduction = townHallLevel * 2 * seconds / 3600;
+               let woodProduction = 5 * seconds / 3600;
+               let researchProduction = academyLevel > 0 ? academyLevel * 2 * seconds / 3600 : 0;
+               
+               // Bonus des bâtiments spécialisés
+               Object.entries(gameState.buildings).forEach(([id, building]) => {
+                   if (!building.type) return;
+                   const level = building.level || 0;
+                   
+                   switch(building.type) {
+                       case "Foresterie":
+                           woodProduction += level * 1.5 * seconds / 3600;
+                           break;
+                       case "Cave à Vin":
+                           gameState.resources.wine += level * 1 * seconds / 3600;
+                           break;
+                       case "Carrière de Pierre":
+                           gameState.resources.marble += level * 0.8 * seconds / 3600;
+                           break;
+                       case "Verrerie":
+                           gameState.resources.crystal += level * 0.6 * seconds / 3600;
+                           break;
+                       case "Alchimiste":
+                           gameState.resources.sulfur += level * 0.5 * seconds / 3600;
+                           break;
+                   }
+               });
+               
+               gameState.resources.gold += goldProduction;
+               gameState.resources.wood += woodProduction;
+               gameState.resources.research += researchProduction;
                gameState.lastUpdate = Date.now();
            }
 
@@ -477,12 +550,22 @@
                    gameState.queues[qType].forEach((item, index) => {
                        if (now >= item.endTime) {
                            finished.push(index);
-                           logEvent(`${item.name} terminé.`);
+                           logEvent(`${item.name} terminé !`);
+                           
                            if (qType === 'build') {
                                if (item.level === 1) gameState.buildings[item.id].type = item.name;
                                gameState.buildings[item.id].level = item.level;
+                               gameState.playerStats.totalBuildings++;
+                               addXP(item.level * 10);
+                               checkAchievements();
                            } else if (qType === 'research') {
                                gameState.researchCompleted.push(item.name);
+                               addXP(50);
+                               checkAchievements();
+                           } else if (qType === 'military') {
+                               gameState.playerStats.totalUnits += item.count || 1;
+                               addXP(item.count * 5);
+                               checkAchievements();
                            }
                            stateChanged = true;
                        }
@@ -537,8 +620,24 @@
            }
 
            // --- FONCTIONS D'AFFICHAGE ---
-           function updateAllUI() { updateResourceUI(); updateQueueUI(); updateActionAvailability(); }
-           function updateResourceUI() { for (const res in dom.res) { if(dom.res[res]) dom.res[res].textContent = Math.floor(gameState.resources[res]); } }
+           function updateAllUI() { updateResourceUI(); updatePlayerUI(); updateQueueUI(); updateActionAvailability(); }
+           function updateResourceUI() { 
+               for (const res in dom.res) { 
+                   if(dom.res[res]) dom.res[res].textContent = Math.floor(gameState.resources[res]); 
+               } 
+           }
+           
+           function updatePlayerUI() {
+               const levelEl = document.getElementById('playerLevel');
+               const xpEl = document.getElementById('playerXP');
+               const xpNeededEl = document.getElementById('playerXPNeeded');
+               const achievementEl = document.getElementById('achievementCount');
+               
+               if (levelEl) levelEl.textContent = gameState.playerStats.level;
+               if (xpEl) xpEl.textContent = gameState.playerStats.xp;
+               if (xpNeededEl) xpNeededEl.textContent = gameState.playerStats.level * 100;
+               if (achievementEl) achievementEl.textContent = gameState.achievements.length;
+           }
            
            function renderCityLayout() {
                dom.cityGrid.innerHTML = '';
@@ -670,18 +769,117 @@
            }
 
            function showBuildSelection(plotId) {
-               dom.buildSelectList.innerHTML = '';
+               // Créer une modal simple pour la sélection de bâtiments sur mobile
+               let html = '<h4>Choisir un bâtiment</h4><div class="build-select-grid">';
                for (const type in config.buildings) {
                    const spec = config.buildings[type];
-                   const cost = Object.entries(spec.levels[0].cost).map(([res, val]) => `${res}: ${val}`).join(' ');
-                   dom.buildSelectList.innerHTML += `<div class="build-option"><div>${spec.icon} ${type}</div><div class="cost">${cost}</div><button class="action-btn" data-action="build" data-id="${plotId}" data-name="${type}" data-level="1">Construire</button></div>`;
+                   const cost = Object.entries(spec.levels[0].cost).map(([res, val]) => `${res}: ${val}`).join(', ');
+                   html += `<div class="build-option">
+                       <div>${spec.icon}</div>
+                       <div style="font-size: 0.8rem; margin: 0.25rem 0;">${type}</div>
+                       <div class="cost">${cost}</div>
+                       <button class="action-btn" data-action="build" data-id="${plotId}" data-name="${type}" data-level="1" style="font-size: 0.7rem; padding: 0.25rem;">Construire</button>
+                   </div>`;
                }
-               dom.buildSelectModal.style.display = 'flex';
+               html += '</div>';
+               
+               dom.modalTitle.textContent = 'Construction';
+               dom.modalMessage.innerHTML = html;
+               dom.modalCost.innerHTML = '';
+               dom.modalConfirmBtn.style.display = 'none';
+               dom.modalCancelBtn.textContent = 'Fermer';
+               dom.modal.style.display = 'flex';
            }
-           dom.buildSelectCancel.addEventListener('click', () => { dom.buildSelectModal.style.display = 'none'; });
-           dom.buildSelectModal.addEventListener('click', e => {
-               if (e.target.dataset.action === 'build') dom.buildSelectModal.style.display = 'none';
-           });
+           
+           // --- SYSTÈME D'XP ET ACHIEVEMENTS ---
+           function addXP(amount) {
+               gameState.playerStats.xp += amount;
+               const xpNeeded = gameState.playerStats.level * 100;
+               if (gameState.playerStats.xp >= xpNeeded) {
+                   const oldLevel = gameState.playerStats.level;
+                   gameState.playerStats.level++;
+                   gameState.playerStats.xp -= xpNeeded;
+                   
+                   // Notification de niveau
+                   showLevelUpNotification(oldLevel, gameState.playerStats.level);
+                   
+                   // Bonus de niveau : +10% de production
+                   Object.keys(gameState.resources).forEach(res => {
+                       if (res !== 'research') {
+                           const bonus = Math.floor(gameState.resources[res] * 0.1);
+                           gameState.resources[res] += bonus;
+                           if (bonus > 0) animateResourceGain(res);
+                       }
+                   });
+               }
+           }
+           
+           function showLevelUpNotification(oldLevel, newLevel) {
+               const notification = document.createElement('div');
+               notification.className = 'level-up-notification';
+               notification.innerHTML = `
+                   <div>🎉 NIVEAU SUPÉRIEUR ! 🎉</div>
+                   <div>Niveau ${oldLevel} → ${newLevel}</div>
+                   <div style="font-size: 0.9rem; margin-top: 0.5rem;">Bonus de ressources accordé !</div>
+               `;
+               document.body.appendChild(notification);
+               
+               setTimeout(() => {
+                   notification.remove();
+               }, 3000);
+           }
+           
+           function showAchievementNotification(achievement) {
+               const notification = document.createElement('div');
+               notification.className = 'achievement-notification';
+               notification.innerHTML = `
+                   <div style="font-weight: bold;">🏆 Achievement Débloqué !</div>
+                   <div>${achievement.name}</div>
+                   <div style="font-size: 0.8rem; opacity: 0.9;">${achievement.desc}</div>
+               `;
+               document.body.appendChild(notification);
+               
+               setTimeout(() => {
+                   notification.remove();
+               }, 4000);
+           }
+           
+           function animateResourceGain(resourceType) {
+               const element = document.getElementById(`res${resourceType.charAt(0).toUpperCase() + resourceType.slice(1)}`);
+               if (element) {
+                   element.parentElement.classList.add('resource-gain');
+                   setTimeout(() => {
+                       element.parentElement.classList.remove('resource-gain');
+                   }, 1000);
+               }
+           }
+           
+           function checkAchievements() {
+               const achievements = [
+                   { id: 'builder1', name: 'Premier Constructeur', desc: 'Construire 5 bâtiments', condition: () => gameState.playerStats.totalBuildings >= 5 },
+                   { id: 'builder2', name: 'Architecte', desc: 'Construire 15 bâtiments', condition: () => gameState.playerStats.totalBuildings >= 15 },
+                   { id: 'builder3', name: 'Maître Bâtisseur', desc: 'Construire 30 bâtiments', condition: () => gameState.playerStats.totalBuildings >= 30 },
+                   { id: 'researcher1', name: 'Érudit', desc: 'Terminer 3 recherches', condition: () => gameState.researchCompleted.length >= 3 },
+                   { id: 'researcher2', name: 'Savant', desc: 'Terminer 8 recherches', condition: () => gameState.researchCompleted.length >= 8 },
+                   { id: 'military1', name: 'Général', desc: 'Recruter 20 unités', condition: () => gameState.playerStats.totalUnits >= 20 },
+                   { id: 'military2', name: 'Conquérant', desc: 'Recruter 50 unités', condition: () => gameState.playerStats.totalUnits >= 50 },
+                   { id: 'rich1', name: 'Riche Marchand', desc: 'Posséder 10000 or', condition: () => gameState.resources.gold >= 10000 },
+                   { id: 'rich2', name: 'Empereur Doré', desc: 'Posséder 50000 or', condition: () => gameState.resources.gold >= 50000 },
+                   { id: 'explorer1', name: 'Explorateur', desc: 'Explorer 10 îles', condition: () => gameState.exploredIslands.length >= 10 },
+                   { id: 'colonizer1', name: 'Colonisateur', desc: 'Coloniser 3 îles', condition: () => gameState.colonizedIslands.length >= 3 },
+                   { id: 'level5', name: 'Vétéran', desc: 'Atteindre le niveau 5', condition: () => gameState.playerStats.level >= 5 },
+                   { id: 'level10', name: 'Expert', desc: 'Atteindre le niveau 10', condition: () => gameState.playerStats.level >= 10 }
+               ];
+               
+               achievements.forEach(achievement => {
+                   if (!gameState.achievements.includes(achievement.id) && achievement.condition()) {
+                       gameState.achievements.push(achievement.id);
+                       showAchievementNotification(achievement);
+                       logEvent(`🏆 Achievement débloqué : ${achievement.name}`);
+                       addXP(100);
+                   }
+               });
+           }
 
            function renderResearchTree() {
                dom.researchGrid.innerHTML = '';
@@ -714,20 +912,101 @@
            function renderBattle() {
                dom.battleGrid.innerHTML = `
                    <div class="card">
-                       <h3>Simuler une bataille</h3>
-                       <button class="action-btn" id="simulateBattleBtn">Lancer un combat</button>
-                       <div id="battleResult" class="battle-result"></div>
+                       <h3>Simulateur de Bataille</h3>
+                       <p>Testez vos stratégies militaires !</p>
+                       <div style="margin: 1rem 0;">
+                           <h4>Votre Armée</h4>
+                           <div>Hoplites: <input type="number" id="attackerHoplites" value="10" min="0" max="100" style="width: 60px;"></div>
+                           <div>Archers: <input type="number" id="attackerArchers" value="5" min="0" max="100" style="width: 60px;"></div>
+                       </div>
+                       <div style="margin: 1rem 0;">
+                           <h4>Armée Ennemie</h4>
+                           <div>Hoplites: <input type="number" id="defenderHoplites" value="8" min="0" max="100" style="width: 60px;"></div>
+                           <div>Défense Muraille: <input type="number" id="wallDefense" value="20" min="0" max="200" style="width: 60px;"></div>
+                       </div>
+                       <button class="action-btn" id="simulateBattleBtn">⚔️ Lancer le Combat</button>
+                       <div id="battleResult" class="battle-result" style="margin-top: 1rem; padding: 1rem; background: var(--color-panel-light); border-radius: 0.5rem;"></div>
                    </div>`;
                const btn = document.getElementById('simulateBattleBtn');
                if (btn) {
                    btn.addEventListener('click', () => {
-                       const attacker = { units: [{ type: 'hoplite', count: 10 }, { type: 'archer', count: 5 }], resources: {} };
-                       const defender = { units: [{ type: 'hoplite', count: 8 }], wallDefense: 0, resources: { wood: 100, gold: 100 } };
-                       const result = resolveBattle(attacker, defender);
+                       const attackerHoplites = parseInt(document.getElementById('attackerHoplites').value) || 0;
+                       const attackerArchers = parseInt(document.getElementById('attackerArchers').value) || 0;
+                       const defenderHoplites = parseInt(document.getElementById('defenderHoplites').value) || 0;
+                       const wallDef = parseInt(document.getElementById('wallDefense').value) || 0;
+                       
+                       const attacker = { 
+                           units: [
+                               { type: 'hoplite', count: attackerHoplites }, 
+                               { type: 'archer', count: attackerArchers }
+                           ].filter(u => u.count > 0),
+                           resources: {} 
+                       };
+                       const defender = { 
+                           units: [{ type: 'hoplite', count: defenderHoplites }].filter(u => u.count > 0), 
+                           wallDefense: wallDef, 
+                           resources: { wood: 100, gold: 150, wine: 50 } 
+                       };
+                       
+                       const result = simulateBattle(attacker, defender);
+                       const resultEl = document.getElementById('battleResult');
                        const lootText = Object.keys(result.loot).length ? Object.entries(result.loot).map(([r,v]) => `${r}: ${v}`).join(', ') : 'aucun';
-                       document.getElementById('battleResult').textContent = `Vainqueur: ${result.winner}. Butin: ${lootText}.`;
+                       
+                       resultEl.innerHTML = `
+                           <h4>Résultat du Combat</h4>
+                           <p><strong>Vainqueur:</strong> ${result.winner === 'attacker' ? '🎉 Vous' : '💀 Défenseur'}</p>
+                           <p><strong>Butin récupéré:</strong> ${lootText}</p>
+                           <div style="margin-top: 0.5rem;">
+                               <div><strong>Pertes Attaquant:</strong> ${result.casualties.attacker.map(c => `${c.lost} ${c.type}`).join(', ') || 'aucune'}</div>
+                               <div><strong>Pertes Défenseur:</strong> ${result.casualties.defender.map(c => `${c.lost} ${c.type}`).join(', ') || 'aucune'}</div>
+                           </div>
+                       `;
                    });
                }
+           }
+           
+           // Fonction de simulation de bataille améliorée
+           function simulateBattle(attacker, defender) {
+               const unitStats = {
+                   hoplite: { attack: 10, defense: 20 },
+                   archer: { attack: 8, defense: 10 }
+               };
+               
+               let atkPower = attacker.units.reduce((total, unit) => 
+                   total + (unitStats[unit.type]?.attack || 0) * unit.count, 0);
+               let defPower = defender.units.reduce((total, unit) => 
+                   total + (unitStats[unit.type]?.defense || 0) * unit.count, 0) + (defender.wallDefense || 0);
+               
+               const winner = atkPower > defPower ? "attacker" : "defender";
+               
+               // Calcul des pertes proportionnelles
+               const totalPower = atkPower + defPower || 1;
+               const atkLossRatio = Math.min(0.8, defPower / totalPower);
+               const defLossRatio = Math.min(0.8, atkPower / totalPower);
+               
+               const attackerLosses = attacker.units.map(u => ({
+                   type: u.type,
+                   lost: Math.ceil(u.count * atkLossRatio * (0.5 + Math.random() * 0.5))
+               }));
+               
+               const defenderLosses = defender.units.map(u => ({
+                   type: u.type,
+                   lost: Math.ceil(u.count * defLossRatio * (0.5 + Math.random() * 0.5))
+               }));
+               
+               // Calcul du butin
+               const loot = {};
+               if (winner === "attacker") {
+                   for (let [res, amt] of Object.entries(defender.resources || {})) {
+                       loot[res] = Math.floor(amt * (0.3 + Math.random() * 0.4));
+                   }
+               }
+               
+               return {
+                   winner,
+                   loot,
+                   casualties: { attacker: attackerLosses, defender: defenderLosses }
+               };
            }
            function renderDiplomacy() {
                dom.diplomacyGrid.innerHTML = '';
