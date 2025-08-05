@@ -52,7 +52,7 @@ var woodCounter = getResourceCounter({
     });
 if(woodCounter) {
     woodCounter.subscribe("update", function() {
-        ikariam.currentCity.resources.wood = woodCounter.currentRes;
+        empire.currentCity.resources.wood = woodCounter.currentRes;
         });
     }
 //...one for the tradegood...
@@ -67,7 +67,7 @@ var tradegoodCounter = getResourceCounter({
 
 if(tradegoodCounter) {
     tradegoodCounter.subscribe("update", function() {
-        ikariam.currentCity.resources.marble = tradegoodCounter.currentRes;
+        empire.currentCity.resources.marble = tradegoodCounter.currentRes;
         });
     }
 var localTime = new Date();
@@ -82,7 +82,7 @@ Event.onDOMReady(function() {
 function updateServerTime() {
     var currTime = new Date();
 
-    currTime.setTime((ikariam.phpSet.serverTime*1000-startServerTime)+ currTime.getTime()) ;
+    currTime.setTime((empire.phpSet.serverTime*1000-startServerTime)+ currTime.getTime()) ;
     str = getFormattedDate(currTime.getTime(), 'd.m.Y G:i:s');
     obj_ServerTime.innerHTML = str;
 }
@@ -93,14 +93,14 @@ function jsTitleTag(nextETA) {
     var cnt = new Timer(nextETA, <?php echo time();?>, 1);
     cnt.subscribe("update", function() {
         var timeargs = this.enddate - Math.floor(this.currenttime/1000) *1000;
-        var title = " ikariam - ";
+        var title = " empire - ";
         if (timeargs != "")
             title += getTimestring(timeargs, 3, undefined, undefined, undefined, true) + " - ";
         title += " Alpha";
         top.document.title = title;
     })
     cnt.subscribe("finished", function() {
-        top.document.title = " ikariam" + " -  Alpha";
+        top.document.title = " empire" + " -  Alpha";
     });
     cnt.startTimer();
     return cnt;
@@ -132,8 +132,8 @@ function updateNoteLayer(responseText) {
     noteLayer.innerHTML = responseText;
             var panel = new YAHOO.widget.Panel("resizablepanel", {
                 draggable: true,
-                width: getCookie("ikariam_notes_width", "470px"), 
-                height: getCookie("ikariam_notes_height", "320px"), 
+                width: getCookie("empire_notes_width", "470px"), 
+                height: getCookie("empire_notes_height", "320px"), 
                 autofillheight: "body",
                 constraintoviewport:true,
                 context: ["tl", "bl"]
@@ -167,17 +167,17 @@ function updateNoteLayer(responseText) {
             avatarNotes = new Notes();
             avatarNotes.setMaxChars(200);
             avatarNotes.init(Dom.get("message"), Dom.get("chars"));
-            Dom.get("resizablepanel_c").style.top = getCookie("ikariam_notes_y", "80px");
-            Dom.get("resizablepanel_c").style.left = getCookie("ikariam_notes_x", "-375px");
-            Dom.get("message").style.height = (parseInt(getCookie("ikariam_notes_height", "320px")) - 75 ) + "px";
+            Dom.get("resizablepanel_c").style.top = getCookie("empire_notes_y", "80px");
+            Dom.get("resizablepanel_c").style.left = getCookie("empire_notes_x", "-375px");
+            Dom.get("message").style.height = (parseInt(getCookie("empire_notes_height", "320px")) - 75 ) + "px";
 }
 
 window.onunload = function() { 
     if (avatarNotes instanceof Notes) {
-        setCookie( 'ikariam_notes_x', Dom.get("resizablepanel_c").style.left, '9999', '', '', '' );
-        setCookie( 'ikariam_notes_y', Dom.get("resizablepanel_c").style.top, '9999', '', '', '' );
-        setCookie( 'ikariam_notes_width', Dom.get("resizablepanel").style.width, '9999', '', '', '' );
-        setCookie( 'ikariam_notes_height', Dom.get("resizablepanel").style.height, '9999', '', '', '' );
+        setCookie( 'empire_notes_x', Dom.get("resizablepanel_c").style.left, '9999', '', '', '' );
+        setCookie( 'empire_notes_y', Dom.get("resizablepanel_c").style.top, '9999', '', '', '' );
+        setCookie( 'empire_notes_width', Dom.get("resizablepanel").style.width, '9999', '', '', '' );
+        setCookie( 'empire_notes_height', Dom.get("resizablepanel").style.height, '9999', '', '', '' );
         avatarNotes.save();
     }
 }

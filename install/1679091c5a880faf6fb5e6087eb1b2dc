@@ -10,8 +10,8 @@
 <meta name="page-topic" content="لعبة متصفح ، لعبة استراتيجية ، لعبة على الانترنت ، لعبة اونلاين">
 <meta name="audience" content="all">
 <meta name="Expires" content="never">
-<meta name="Keywords" content="ikariama, لعبة استراتيجية , العب مجانا , لعبة على الاننرنت , لعبة حربية , ار بي جي, لعبة متصفح , لعبة على الشبكة, لعب">
-<meta name="Description" content="ikariama لعبة متصفح مجانية. يتمثل التحدي للاعب في قيادة شعبه من خلال العالم القديم. لبناء المدن والتجارة والانتصار على الجزر.">  
+<meta name="Keywords" content="empire, لعبة استراتيجية , العب مجانا , لعبة على الاننرنت , لعبة حربية , ار بي جي, لعبة متصفح , لعبة على الشبكة, لعب">
+<meta name="Description" content="empire لعبة متصفح مجانية. يتمثل التحدي للاعب في قيادة شعبه من خلال العالم القديم. لبناء المدن والتجارة والانتصار على الجزر.">  
 <meta name="robots" content="index,follow">
 <meta name="Revisit" content="After 14 days"> 
 <title>ikariama - لعبة المتصفح المجانية</title>
@@ -26,10 +26,10 @@
 <div>
 </div>
 <div id="text">
- <h1>IKARIAMA,إيكارياما:سكربت التثبيت.</h1>
+ <h1>EMPIRE,إيكارياما:سكربت التثبيت.</h1>
 <?php if(!isset($_GET['o'])){?>
  <ul class="desc">
- <li>إيكارياما ليس لها أي علاقة مع اللعبة <a title="prince 3" id="gflink" target="_blank" href="http://ae.ikariam.com">إيكاريام</a>, هي مجرد محاكاة للعبة الأصلية.</li>
+ <li>إيكارياما ليس لها أي علاقة مع اللعبة <a title="prince 3" id="gflink" target="_blank" href="http://ae.empire.com">إيكاريام</a>, هي مجرد محاكاة للعبة الأصلية.</li>
  <li>عند إستعمالك إيكارياما أنت وحدك المسؤول عن النتائج القانونية لهذا الاستعمال.</li>
  <li>تمت برمجة اللعبة لأهداف أكاديمية لا غير, فريق البرمجة غير مسؤول عن النشر الغير قانوني للعبة.</li>
  <li style="color:#0000FF">للإستعمال الأمثل للعبة يرجى إستخدام google chrome.</li>

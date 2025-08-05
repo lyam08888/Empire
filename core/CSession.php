@@ -6,7 +6,7 @@
 //║Version  : 0.1                                      ║
 //║Author   : Prince 3                                 ║
 //║E-MAIL   : khatibe_30@hotmail.fr                    ║
-//║Copyright: Ikariama(c) 2010. All rights reserved.   ║
+//║Copyright: Empire(c) 2010. All rights reserved.   ║
 //╚════════════════════════════════════════════════════╝
 ?>
 <?php
@@ -33,42 +33,46 @@ class CSession {
 	public $IsAdvMilitaryActive = false;
 	public $IsAdvDiplomacyActive = false;
 
-	function CSession() {
-		session_start();
-		global $database,$log;
-		$this->logged_in = $this->checkLogin();
-		if($this->logged_in && TRACK_USR) {
-		  $database->updateActiveUser($_SESSION['username'],time());
-		  $this->barbarian = $database->getBarbarianRow($this->uid);
-		 }	  
-		if(isset($_SESSION['url'])){
+        function CSession() {
+                error_log("CSession::__construct start");
+                session_start();
+                global $database,$log;
+                $this->logged_in = $this->checkLogin();
+                if($this->logged_in && TRACK_USR) {
+                  $database->updateActiveUser($_SESSION['username'],time());
+                  $this->barbarian = $database->getBarbarianRow($this->uid);
+                 }
+                if(isset($_SESSION['url'])){
          $this->referrer = $_SESSION['url'];
-		 }else{
-			 $this->referrer = "/";
-		}
-		$this->url = $_SESSION['url'] = $_SERVER['PHP_SELF'];
-		if($this->logged_in){
-		 $this->updateBuildings();
-		 $this->MakeGlobalUpdates();
-		 global $log;
-		 $log->loadAvatarLogs($this->uid);
-		}
-	}
+                 }else{
+                         $this->referrer = "/";
+                }
+                $this->url = $_SESSION['url'] = $_SERVER['PHP_SELF'];
+                if($this->logged_in){
+                 $this->updateBuildings();
+                 $this->MakeGlobalUpdates();
+                 global $log;
+                 $log->loadAvatarLogs($this->uid);
+                }
+                error_log("CSession::__construct completed");
+        }
 	
-	public function Login($user) {
-		global $database,$generator,$log;
-		$this->logged_in = true;
-		$_SESSION['sessid'] = $generator->generateRandID();
-		$_SESSION['username'] = $user;	
-		$_SESSION['checker'] = $generator->generateRandStr(20);
-		$_SESSION['mchecker'] = $generator->generateRandStr(5);
-		$_SESSION['userid'] = $database->getUserField($user,"id",true);
-		$this->PopulateVar();
-		
-		$database->addActiveUser($_SESSION['username'],time());
-		$database->updateUserField($_SESSION['username'],"sessid",$_SESSION['sessid'],0);
-		$log->AddLoginLog($_SESSION['username'],$_SERVER['REMOTE_ADDR'],date("F j, Y, g:i a"));
-	}
+        public function Login($user) {
+                global $database,$generator,$log;
+                error_log("CSession::Login start for user: ".$user);
+                $this->logged_in = true;
+                $_SESSION['sessid'] = $generator->generateRandID();
+                $_SESSION['username'] = $user;
+                $_SESSION['checker'] = $generator->generateRandStr(20);
+                $_SESSION['mchecker'] = $generator->generateRandStr(5);
+                $_SESSION['userid'] = $database->getUserField($user,"id",true);
+                $this->PopulateVar();
+
+                $database->addActiveUser($_SESSION['username'],time());
+                $database->updateUserField($_SESSION['username'],"sessid",$_SESSION['sessid'],0);
+                $log->AddLoginLog($_SESSION['username'],$_SERVER['REMOTE_ADDR'],date("F j, Y, g:i a"));
+                error_log("CSession::Login completed for user: ".$user);
+        }
 	
 	public function Logout() {
 		global $database;

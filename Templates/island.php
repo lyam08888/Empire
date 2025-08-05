@@ -17,7 +17,7 @@ Event.onDOMReady(function() {selectCity(<?php echo $_GET['cityId'];?>, <?php ech
 <div id="container">
  <div id="container2">
   <div id="header">
-   <h1>إيكارياما ikariam</h1>
+   <h1>إيكارياما empire</h1>
    <h2>عش في العصور القديمة!</h2>
   </div>
   <div id="avatarNotes"></div>
