@@ -9,7 +9,7 @@ include("core/CAccount.php");
 
 ?>
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8" />
 <meta name="language" content="ar">
@@ -25,22 +25,21 @@ include("core/CAccount.php");
 <meta name="robots" content="index,follow">
 <meta name="Revisit" content="After 14 days"> 
 <title>ikariama - لعبة المتصفح المجانية</title>
+
 <link href="css/istyle.css" rel="stylesheet" type="text/css" media="screen">
 <script src="common.js" defer></script>
+<script src="login.js" defer></script>
 </head>
-<body dir="rtl">
+<body>
 <div id="headback">
-<div id="headlogo"></div>
-<!--Main div-->
-<div id="main">
-<div>
- <div id="links">
- <a href="index.php" title="الى تسجيل الدخول">تسجيل الدخول</a> 
- <a href="register.php" title="سجل هنا !">سجل هنا</a> 
- <a href="tour_step1.php" title="جولة بسيطة على empire">جولة في اللعبة</a> 
- <a href="/board" target="_blank" title="الى المنتديات">المنتدى</a> </div>
-</div>
-<div id="text">
+<header id="headlogo"></header>
+<main id="main">
+<nav id="links">
+ <a href="index.php" title="الى تسجيل الدخول">تسجيل الدخول</a>
+ <a href="register.php" title="سجل هنا !">سجل هنا</a>
+ <a href="tour_step1.php" title="جولة بسيطة على ikariama">جولة في اللعبة</a>
+ <a href="/board" target="_blank" title="الى المنتديات">المنتدى</a> </nav>
+<section id="text">
  <img class="bild1" src="img/bild1.jpg" height="85" width="173">
  <img class="bild2" src="img/bild2.jpg" height="85" width="173">
  <h1>عش فى العالم القديم !</h1>
@@ -56,6 +55,7 @@ empire</p>
  <form id="loginForm" name="loginForm" action="#" onsubmit="changeAction('login');" method="post"> 
  <input type="hidden" name="ft" value="a4" />
  <table id="logindata" cellpadding="0" cellspacing="0">
+
  <tbody><tr>
  <td><label for="welt" class="labelwelt">عَالَم</label></td>
  <td><label for="login" class="labellogin">اسم الاعب</label></td>
@@ -79,12 +79,12 @@ empire</p>
  <tr style="height: 15px;">
  <td colspan="3"></td>
  </tr>
- </tbody></table>
- </form>
-</div><br/>
-</div>
-<!--Main div ends-->
-<div id="footer"></div>
+
+</tbody></table>
+</form>
+</section>
+</main>
+<footer id="footer"></footer>
 </div>
 </body>
 </html>
