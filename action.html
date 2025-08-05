@@ -68,17 +68,83 @@
        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
        .main-view h2 { color: var(--color-primary); margin-bottom: 1rem; font-size: 1.8rem; }
        
-       /* --- VUE VILLE --- */
-       .city-view-content { position: relative; width: 100%; height: 100%; min-height: 400px; }
-       .building-plot {
-           position: absolute; background: rgba(30, 64, 175, 0.3); border: 2px dashed rgba(59, 130, 246, 0.5);
-           border-radius: 0.5rem; cursor: pointer; transition: all 0.3s; display: flex; justify-content: center;
-           align-items: center; font-size: 2rem; color: rgba(255, 255, 255, 0.5);
+       /* --- VUE VILLE AMÉLIORÉE --- */
+       .city-view-content { 
+           position: relative; width: 100%; height: 100%; min-height: 500px;
+           background: linear-gradient(135deg, #2d5016, #3d6b1f), url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grass" patternUnits="userSpaceOnUse" width="20" height="20"><rect width="20" height="20" fill="%23355e3b"/><circle cx="5" cy="5" r="1" fill="%234a7c59"/><circle cx="15" cy="15" r="1" fill="%234a7c59"/></pattern></defs><rect width="100" height="100" fill="url(%23grass)"/></svg>');
+           border-radius: 1rem;
+           overflow: hidden;
        }
-       .building-plot:hover, .building-plot.selected { background: rgba(251, 191, 36, 0.3); border-color: var(--color-primary); }
-       .building-plot.constructing::after { content: '⏳'; position: absolute; top: 5px; right: 5px; font-size: 1rem; animation: pulse 1.5s infinite; }
-       @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-       .building-plot .level { position: absolute; bottom: 2px; right: 5px; font-size: 0.8rem; font-weight: bold; color: white; background: rgba(0,0,0,0.5); padding: 0 4px; border-radius: 3px; }
+       
+       .city-districts {
+           position: absolute; top: 10px; left: 10px; right: 10px; height: 60px;
+           display: flex; gap: 10px; background: rgba(0,0,0,0.7); border-radius: 8px; padding: 8px;
+       }
+       
+       .district-indicator {
+           flex: 1; text-align: center; padding: 4px; border-radius: 4px;
+           background: var(--color-panel-light); font-size: 0.8rem;
+           display: flex; flex-direction: column; justify-content: center;
+       }
+       
+       .district-indicator.residential { border-left: 3px solid #22c55e; }
+       .district-indicator.commercial { border-left: 3px solid #fbbf24; }
+       .district-indicator.industrial { border-left: 3px solid #ef4444; }
+       .district-indicator.cultural { border-left: 3px solid #8b5cf6; }
+       
+       .building-plot {
+           position: absolute; background: rgba(30, 64, 175, 0.2); 
+           border: 2px dashed rgba(59, 130, 246, 0.4);
+           border-radius: 0.8rem; cursor: pointer; transition: all 0.4s ease;
+           display: flex; flex-direction: column; justify-content: center;
+           align-items: center; font-size: 2.5rem; color: rgba(255, 255, 255, 0.6);
+           backdrop-filter: blur(2px);
+       }
+       
+       .building-plot:hover, .building-plot.selected { 
+           background: rgba(251, 191, 36, 0.3); border-color: var(--color-primary);
+           transform: scale(1.05); box-shadow: 0 8px 25px rgba(251, 191, 36, 0.3);
+       }
+       
+       .building-plot.built {
+           background: linear-gradient(135deg, rgba(30, 64, 175, 0.8), rgba(59, 130, 246, 0.6));
+           border: 2px solid rgba(59, 130, 246, 0.8);
+           box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+       }
+       
+       .building-plot.constructing::after { 
+           content: '⏳'; position: absolute; top: 5px; right: 5px; 
+           font-size: 1.2rem; animation: pulse 1.5s infinite;
+           background: rgba(251, 191, 36, 0.9); padding: 2px 6px; border-radius: 50%;
+       }
+       
+       @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.1); } }
+       
+       .building-plot .level { 
+           position: absolute; bottom: 5px; right: 8px; font-size: 0.9rem; 
+           font-weight: bold; color: white; background: linear-gradient(135deg, #1e40af, #3b82f6);
+           padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.3);
+       }
+       
+       .building-plot .building-name {
+           position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%);
+           font-size: 0.7rem; color: var(--color-text); background: rgba(0,0,0,0.8);
+           padding: 2px 6px; border-radius: 4px; white-space: nowrap;
+           opacity: 0; transition: opacity 0.3s;
+       }
+       
+       .building-plot:hover .building-name { opacity: 1; }
+       
+       .city-roads {
+           position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+           pointer-events: none; z-index: 1;
+       }
+       
+       .road-connection {
+           position: absolute; background: linear-gradient(90deg, #8b7355, #a0845c);
+           height: 4px; border-radius: 2px; opacity: 0.7;
+           box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+       }
 
        /* --- GRILLES DE CARTE (Monde & Île) --- */
        .map-grid-container {
@@ -110,22 +176,236 @@
        }
        .map-tile:hover .tooltip { visibility: visible; }
 
-       /* --- VUE MONDE --- */
-       #world-map-grid { grid-template-columns: repeat(15, 1fr); }
-       .world-tile { background-color: var(--color-secondary); opacity: 0.3; }
-       .world-tile.island { background-color: var(--color-secondary); opacity: 0.8; }
-       .world-tile.player { background-color: var(--color-primary); opacity: 1; }
-       .world-tile.ally { background-color: var(--color-success); opacity: 1; }
-       .world-tile.enemy { background-color: var(--color-danger); opacity: 1; }
-       .world-tile.unexplored { opacity: 0.1; }
+       /* --- VUE MONDE AMÉLIORÉE --- */
+       .world-view-container {
+           display: flex; flex-direction: column; height: 100%; gap: 1rem;
+       }
+       
+       .world-header {
+           background: var(--color-panel-light); border-radius: 0.5rem; padding: 1rem;
+           display: flex; justify-content: space-between; align-items: center;
+       }
+       
+       .world-stats {
+           display: flex; gap: 2rem; font-size: 0.9rem;
+       }
+       
+       .world-main {
+           display: flex; gap: 1rem; flex: 1;
+       }
+       
+       .world-map-section {
+           flex: 2; background: var(--color-panel-light); border-radius: 0.5rem; padding: 1rem;
+           position: relative;
+       }
+       
+       #world-map-grid { 
+           display: grid; grid-template-columns: repeat(20, 1fr); gap: 2px;
+           background: linear-gradient(135deg, #0f172a, #1e293b);
+           border-radius: 1rem; padding: 1rem; aspect-ratio: 1.2;
+           position: relative; overflow: hidden;
+       }
+       
+       #world-map-grid::before {
+           content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+           background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="stars" patternUnits="userSpaceOnUse" width="50" height="50"><circle cx="10" cy="10" r="0.5" fill="white" opacity="0.3"/><circle cx="30" cy="25" r="0.3" fill="white" opacity="0.2"/><circle cx="45" cy="5" r="0.4" fill="white" opacity="0.4"/></pattern></defs><rect width="100" height="100" fill="url(%23stars)"/></svg>');
+           pointer-events: none; opacity: 0.3;
+       }
+       
+       .world-tile { 
+           background: linear-gradient(135deg, #1e40af, #3b82f6);
+           border-radius: 3px; transition: all 0.3s ease;
+           cursor: pointer; position: relative; display: flex;
+           justify-content: center; align-items: center; font-size: 1rem;
+           opacity: 0.4; border: 1px solid rgba(255,255,255,0.1);
+       }
+       
+       .world-tile:hover {
+           transform: scale(1.2); z-index: 10;
+           box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+       }
+       
+       .world-tile.ocean { 
+           background: linear-gradient(135deg, #1e40af, #2563eb);
+           opacity: 0.2;
+       }
+       
+       .world-tile.island { 
+           background: linear-gradient(135deg, #16a34a, #22c55e);
+           opacity: 0.8; border: 1px solid rgba(34, 197, 94, 0.5);
+       }
+       
+       .world-tile.player { 
+           background: linear-gradient(135deg, var(--color-primary), #f59e0b);
+           opacity: 1; border: 2px solid #fbbf24;
+           animation: playerGlow 2s infinite alternate;
+       }
+       
+       .world-tile.ally { 
+           background: linear-gradient(135deg, var(--color-success), #16a34a);
+           opacity: 1; border: 2px solid #22c55e;
+       }
+       
+       .world-tile.enemy { 
+           background: linear-gradient(135deg, var(--color-danger), #dc2626);
+           opacity: 1; border: 2px solid #ef4444;
+           animation: enemyPulse 1.5s infinite;
+       }
+       
+       .world-tile.unexplored { 
+           background: linear-gradient(135deg, #374151, #4b5563);
+           opacity: 0.1;
+       }
+       
+       .world-tile.trade-route {
+           border: 2px solid #fbbf24;
+           box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+       }
+       
+       @keyframes playerGlow {
+           0% { box-shadow: 0 0 10px rgba(251, 191, 36, 0.5); }
+           100% { box-shadow: 0 0 20px rgba(251, 191, 36, 0.8); }
+       }
+       
+       @keyframes enemyPulse {
+           0%, 100% { opacity: 1; }
+           50% { opacity: 0.7; }
+       }
+       
+       .world-details {
+           flex: 1; background: var(--color-panel-light); border-radius: 0.5rem; 
+           padding: 1rem; display: flex; flex-direction: column; gap: 1rem;
+       }
+       
+       .world-events {
+           background: var(--color-panel); border-radius: 0.5rem; padding: 0.75rem;
+           max-height: 200px; overflow-y: auto;
+       }
+       
+       .world-diplomacy {
+           background: var(--color-panel); border-radius: 0.5rem; padding: 0.75rem;
+       }
+       
+       .trade-routes-display {
+           background: var(--color-panel); border-radius: 0.5rem; padding: 0.75rem;
+       }
+       
+       .weather-system {
+           position: absolute; top: 10px; right: 10px;
+           background: rgba(0,0,0,0.7); border-radius: 8px; padding: 8px;
+           font-size: 0.8rem; color: var(--color-text);
+       }
 
-       /* --- VUE ÎLE --- */
-       #island-grid { grid-template-columns: repeat(7, 1fr); background: #0c4a6e; border-radius: 1rem; padding: 1rem; }
-       .island-tile { background-color: #0891b2; }
-       .island-tile.playerCity { background-color: var(--color-primary); }
-       .island-tile.otherCity { background-color: var(--color-danger); }
-       .island-tile.resource { background-color: #a16207; }
-       .island-tile.wonder { background-color: #be185d; }
+       /* --- VUE ÎLE AMÉLIORÉE --- */
+       .island-view-container {
+           display: flex; flex-direction: column; height: 100%; gap: 1rem;
+       }
+       
+       .island-header {
+           background: var(--color-panel-light); border-radius: 0.5rem; padding: 1rem;
+           display: flex; justify-content: space-between; align-items: center;
+       }
+       
+       .island-stats {
+           display: flex; gap: 2rem; font-size: 0.9rem;
+       }
+       
+       .island-stat {
+           display: flex; align-items: center; gap: 0.5rem;
+       }
+       
+       .island-main {
+           display: flex; gap: 1rem; flex: 1;
+       }
+       
+       .island-map-section {
+           flex: 2; background: var(--color-panel-light); border-radius: 0.5rem; padding: 1rem;
+           position: relative; overflow: hidden;
+       }
+       
+       #island-grid { 
+           display: grid; grid-template-columns: repeat(9, 1fr); gap: 3px;
+           background: linear-gradient(135deg, #0c4a6e, #1e40af); 
+           border-radius: 1rem; padding: 1.5rem; aspect-ratio: 1;
+           position: relative;
+       }
+       
+       .island-tile { 
+           background: linear-gradient(135deg, #0891b2, #0ea5e9);
+           border-radius: 6px; transition: all 0.3s ease;
+           cursor: pointer; position: relative; display: flex;
+           justify-content: center; align-items: center; font-size: 1.5rem;
+           border: 1px solid rgba(255,255,255,0.1);
+       }
+       
+       .island-tile:hover {
+           transform: scale(1.1); z-index: 10;
+           box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+       }
+       
+       .island-tile.water { 
+           background: linear-gradient(135deg, #1e40af, #3b82f6);
+           opacity: 0.6;
+       }
+       
+       .island-tile.land { 
+           background: linear-gradient(135deg, #16a34a, #22c55e);
+       }
+       
+       .island-tile.mountain { 
+           background: linear-gradient(135deg, #6b7280, #9ca3af);
+       }
+       
+       .island-tile.forest { 
+           background: linear-gradient(135deg, #166534, #15803d);
+       }
+       
+       .island-tile.playerCity { 
+           background: linear-gradient(135deg, var(--color-primary), #f59e0b);
+           border: 2px solid #fbbf24; animation: cityGlow 2s infinite alternate;
+       }
+       
+       .island-tile.otherCity { 
+           background: linear-gradient(135deg, var(--color-danger), #dc2626);
+           border: 2px solid #ef4444;
+       }
+       
+       .island-tile.resource { 
+           background: linear-gradient(135deg, #a16207, #ca8a04);
+           border: 2px solid #eab308;
+       }
+       
+       .island-tile.wonder { 
+           background: linear-gradient(135deg, #be185d, #db2777);
+           border: 2px solid #ec4899; animation: wonderGlow 3s infinite alternate;
+       }
+       
+       @keyframes cityGlow {
+           0% { box-shadow: 0 0 10px rgba(251, 191, 36, 0.5); }
+           100% { box-shadow: 0 0 20px rgba(251, 191, 36, 0.8); }
+       }
+       
+       @keyframes wonderGlow {
+           0% { box-shadow: 0 0 15px rgba(236, 72, 153, 0.5); }
+           100% { box-shadow: 0 0 25px rgba(236, 72, 153, 0.8); }
+       }
+       
+       .island-details {
+           flex: 1; background: var(--color-panel-light); border-radius: 0.5rem; 
+           padding: 1rem; display: flex; flex-direction: column; gap: 1rem;
+       }
+       
+       .terrain-info {
+           background: var(--color-panel); border-radius: 0.5rem; padding: 0.75rem;
+       }
+       
+       .resource-deposits {
+           background: var(--color-panel); border-radius: 0.5rem; padding: 0.75rem;
+       }
+       
+       .island-actions {
+           display: flex; flex-direction: column; gap: 0.5rem;
+       }
 
        /* --- VUE RECHERCHE, ETC. --- */
        .management-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));}
@@ -285,9 +565,94 @@
 
            <!-- VUE CENTRALE (Conteneur pour toutes les vues) -->
            <div class="main-view-container">
-               <section id="view-city" class="main-view"><div class="city-view-content" id="city-grid"></div></section>
-               <section id="view-island" class="main-view hidden"><h2>Vue de l'Île</h2><div id="island-grid" class="map-grid-container"></div></section>
-               <section id="view-world" class="main-view hidden"><h2>Carte du Monde</h2><div id="world-map-grid" class="map-grid-container"></div></section>
+               <section id="view-city" class="main-view">
+                   <div class="city-view-content" id="city-grid">
+                       <div class="city-districts">
+                           <div class="district-indicator residential">
+                               <div>🏠 Résidentiel</div>
+                               <div id="residential-level">Niv. 1</div>
+                           </div>
+                           <div class="district-indicator commercial">
+                               <div>🏪 Commercial</div>
+                               <div id="commercial-level">Niv. 1</div>
+                           </div>
+                           <div class="district-indicator industrial">
+                               <div>🏭 Industriel</div>
+                               <div id="industrial-level">Niv. 1</div>
+                           </div>
+                           <div class="district-indicator cultural">
+                               <div>🎭 Culturel</div>
+                               <div id="cultural-level">Niv. 1</div>
+                           </div>
+                       </div>
+                       <div class="city-roads" id="city-roads"></div>
+                   </div>
+               </section>
+               
+               <section id="view-island" class="main-view hidden">
+                   <div class="island-view-container">
+                       <div class="island-header">
+                           <h2>🏝️ <span id="current-island-name">Île Capitale</span></h2>
+                           <div class="island-stats">
+                               <div class="island-stat">👥 <span id="island-population">1000</span></div>
+                               <div class="island-stat">😊 <span id="island-happiness">75%</span></div>
+                               <div class="island-stat">🏗️ <span id="island-development">Niv. 1</span></div>
+                           </div>
+                       </div>
+                       <div class="island-main">
+                           <div class="island-map-section">
+                               <div id="island-grid"></div>
+                           </div>
+                           <div class="island-details">
+                               <div class="terrain-info">
+                                   <h4>🌍 Terrain</h4>
+                                   <div id="terrain-types">Plaines, Forêts, Collines</div>
+                               </div>
+                               <div class="resource-deposits">
+                                   <h4>⛏️ Ressources</h4>
+                                   <div id="natural-resources">Bois, Vin, Marbre</div>
+                               </div>
+                               <div class="island-actions">
+                                   <button class="action-btn" onclick="developIsland()">🏗️ Développer l'île</button>
+                                   <button class="action-btn" onclick="exploreIsland()">🔍 Explorer davantage</button>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+               </section>
+               
+               <section id="view-world" class="main-view hidden">
+                   <div class="world-view-container">
+                       <div class="world-header">
+                           <h2>🌍 Empire Mondial</h2>
+                           <div class="world-stats">
+                               <div>🏝️ Îles: <span id="world-islands-count">1</span></div>
+                               <div>🚢 Routes: <span id="world-routes-count">0</span></div>
+                               <div>👑 Influence: <span id="world-influence">50</span></div>
+                           </div>
+                       </div>
+                       <div class="world-main">
+                           <div class="world-map-section">
+                               <div class="weather-system" id="weather-display">☀️ Temps clair</div>
+                               <div id="world-map-grid"></div>
+                           </div>
+                           <div class="world-details">
+                               <div class="world-events">
+                                   <h4>📰 Événements Mondiaux</h4>
+                                   <div id="world-events-list">Aucun événement récent</div>
+                               </div>
+                               <div class="world-diplomacy">
+                                   <h4>🤝 Relations Diplomatiques</h4>
+                                   <div id="diplomacy-status">Relations neutres</div>
+                               </div>
+                               <div class="trade-routes-display">
+                                   <h4>🚢 Routes Commerciales</h4>
+                                   <div id="trade-routes-list">Aucune route active</div>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+               </section>
                <section id="view-research" class="main-view hidden"><h2>Recherche</h2><div id="research-grid" class="management-grid"></div></section>
                <section id="view-military" class="main-view hidden"><h2>Militaire</h2><div id="military-grid" class="management-grid"></div></section>
                <section id="view-battle" class="main-view hidden"><h2>Bataille</h2><div id="battle-grid" class="management-grid"></div></section>
@@ -841,13 +1206,38 @@
            }
            
            function renderCityLayout() {
-               dom.cityGrid.innerHTML = '';
+               // Nettoyer la grille existante mais garder les districts et routes
+               const existingDistricts = dom.cityGrid.querySelector('.city-districts');
+               const existingRoads = dom.cityGrid.querySelector('.city-roads');
+               
+               // Supprimer seulement les building-plot
+               dom.cityGrid.querySelectorAll('.building-plot').forEach(el => el.remove());
+               
+               // Mettre à jour les indicateurs de districts
+               updateDistrictIndicators();
+               
                config.cityLayout.forEach(plot => {
-                   const el = document.createElement('div'); el.className = 'building-plot'; el.dataset.plotId = plot.id;
+                   const el = document.createElement('div'); 
+                   el.className = 'building-plot'; 
+                   el.dataset.plotId = plot.id;
                    el.style.cssText = `top:${plot.top}; left:${plot.left}; width:${plot.width}; height:${plot.height};`;
+                   
                    const building = gameState.buildings[plot.id];
-                   if (building && building.type) { el.innerHTML = `${config.buildings[building.type].icon}<div class="level">Niv. ${building.level}</div>`; } else { el.innerHTML = '➕'; }
-                   if (gameState.queues.build.some(item => item.id === plot.id)) el.classList.add('constructing');
+                   if (building && building.type) { 
+                       el.classList.add('built');
+                       el.innerHTML = `
+                           ${config.buildings[building.type].icon}
+                           <div class="level">Niv. ${building.level}</div>
+                           <div class="building-name">${building.type}</div>
+                       `; 
+                   } else { 
+                       el.innerHTML = '➕'; 
+                   }
+                   
+                   if (gameState.queues.build.some(item => item.id === plot.id)) {
+                       el.classList.add('constructing');
+                   }
+                   
                    el.addEventListener('click', () => {
                        selectedPlotId = plot.id;
                        document.querySelectorAll('.building-plot.selected').forEach(p => p.classList.remove('selected'));
@@ -855,7 +1245,60 @@
                        if (window.innerWidth > 900) updateContextPanel(plot.id);
                        else showContextModalForBuilding(plot.id);
                    });
+                   
                    dom.cityGrid.appendChild(el);
+               });
+               
+               // Générer les routes entre bâtiments
+               generateCityRoads();
+           }
+           
+           function updateDistrictIndicators() {
+               const currentIslandKey = `${gameState.currentIsland.x}-${gameState.currentIsland.y}`;
+               const islandData = gameState.islandDetails[currentIslandKey];
+               
+               if (islandData && islandData.districts) {
+                   const districts = islandData.districts;
+                   document.getElementById('residential-level').textContent = `Niv. ${districts.residential.level}`;
+                   document.getElementById('commercial-level').textContent = `Niv. ${districts.commercial.level}`;
+                   document.getElementById('industrial-level').textContent = `Niv. ${districts.industrial.level}`;
+                   document.getElementById('cultural-level').textContent = `Niv. ${districts.cultural?.level || 1}`;
+               }
+           }
+           
+           function generateCityRoads() {
+               const roadsContainer = document.getElementById('city-roads');
+               if (!roadsContainer) return;
+               
+               roadsContainer.innerHTML = '';
+               
+               // Créer des routes entre l'hôtel de ville et les autres bâtiments
+               const townHall = config.cityLayout.find(plot => plot.id === 'townHall');
+               if (!townHall) return;
+               
+               config.cityLayout.forEach(plot => {
+                   if (plot.id !== 'townHall' && gameState.buildings[plot.id]?.type) {
+                       const road = document.createElement('div');
+                       road.className = 'road-connection';
+                       
+                       // Calculer la position et l'angle de la route
+                       const x1 = parseFloat(townHall.left) + parseFloat(townHall.width) / 2;
+                       const y1 = parseFloat(townHall.top) + parseFloat(townHall.height) / 2;
+                       const x2 = parseFloat(plot.left) + parseFloat(plot.width) / 2;
+                       const y2 = parseFloat(plot.top) + parseFloat(plot.height) / 2;
+                       
+                       const distance = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+                       const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+                       
+                       road.style.cssText = `
+                           left: ${x1}%; top: ${y1}%;
+                           width: ${distance}px; 
+                           transform: rotate(${angle}deg);
+                           transform-origin: 0 50%;
+                       `;
+                       
+                       roadsContainer.appendChild(road);
+                   }
                });
            }
 
@@ -1062,33 +1505,158 @@
                const currentIslandKey = `${gameState.currentIsland.x}-${gameState.currentIsland.y}`;
                const islandData = gameState.islandDetails[currentIslandKey] || createDefaultIslandData(gameState.currentIsland);
                
+               // Mettre à jour les informations de l'île dans l'en-tête
+               updateIslandHeader(islandData);
+               
+               // Nettoyer et reconstruire la grille de l'île
                dom.islandGrid.innerHTML = '';
                
-               let html = `
-                   <div class="card" style="grid-column: 1 / -1;">
-                       <div style="display: flex; justify-content: space-between; align-items: center;">
-                           <div>
-                               <h3>🏝️ ${islandData.name}</h3>
-                               <p>Population: ${islandData.population.toLocaleString()} | Bonheur: ${islandData.happiness}% | Développement: Niveau ${islandData.development}</p>
-                           </div>
-                           <div style="text-align: right;">
-                               <div>Climat: ${getClimateIcon(islandData.climate)} ${islandData.climate}</div>
-                               <div>Réputation: ${gameState.diplomacy.reputation}/100</div>
-                           </div>
-                       </div>
-                   </div>
-                   
-                   <div class="card" style="grid-column: 1 / -1;">
-                       <h3>🗺️ Carte de l'Île</h3>
-                       <div id="island-map" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.25rem; margin: 1rem 0;">
-               `;
-               
-               // Générer la carte de l'île 6x6
-               for (let y = 0; y < 6; y++) {
-                   for (let x = 0; x < 6; x++) {
-                       const tileId = `tile-${x}-${y}`;
+               // Générer la carte de l'île 9x9 avec différents terrains
+               for (let y = 0; y < 9; y++) {
+                   for (let x = 0; x < 9; x++) {
+                       const tile = document.createElement('div');
+                       tile.className = 'island-tile';
+                       tile.dataset.x = x;
+                       tile.dataset.y = y;
+                       
                        const terrain = getTerrainForTile(x, y, islandData);
-                       const building = getBuildingOnTile(x, y);
+                       const building = getBuildingOnTile(x, y, islandData);
+                       const resource = getResourceOnTile(x, y, islandData);
+                       
+                       // Appliquer le type de terrain
+                       tile.classList.add(terrain.type);
+                       
+                       // Ajouter le contenu de la tuile
+                       if (building) {
+                           tile.classList.add(building.type);
+                           tile.innerHTML = building.icon;
+                           tile.title = `${building.name} - ${building.description || ''}`;
+                       } else if (resource) {
+                           tile.classList.add('resource');
+                           tile.innerHTML = resource.icon;
+                           tile.title = `${resource.name} - Cliquez pour exploiter`;
+                       } else {
+                           tile.innerHTML = terrain.icon;
+                           tile.title = `${terrain.name} - ${terrain.description || ''}`;
+                       }
+                       
+                       // Ajouter les événements de clic
+                       tile.addEventListener('click', () => handleIslandTileClick(x, y, terrain, building, resource));
+                       
+                       dom.islandGrid.appendChild(tile);
+                   }
+               }
+               
+               // Mettre à jour les détails de l'île
+               updateIslandDetails(islandData);
+           }
+           
+           function updateIslandHeader(islandData) {
+               const nameEl = document.getElementById('current-island-name');
+               const populationEl = document.getElementById('island-population');
+               const happinessEl = document.getElementById('island-happiness');
+               const developmentEl = document.getElementById('island-development');
+               
+               if (nameEl) nameEl.textContent = islandData.name;
+               if (populationEl) populationEl.textContent = islandData.population.toLocaleString();
+               if (happinessEl) happinessEl.textContent = `${islandData.happiness}%`;
+               if (developmentEl) developmentEl.textContent = `Niv. ${islandData.development}`;
+           }
+           
+           function updateIslandDetails(islandData) {
+               const terrainEl = document.getElementById('terrain-types');
+               const resourcesEl = document.getElementById('natural-resources');
+               
+               if (terrainEl) {
+                   terrainEl.textContent = islandData.terrain.join(', ');
+               }
+               
+               if (resourcesEl) {
+                   resourcesEl.textContent = islandData.naturalResources.join(', ');
+               }
+           }
+           
+           function getTerrainForTile(x, y, islandData) {
+               // Génération procédurale du terrain basée sur la position
+               const seed = x * 7 + y * 11 + (islandData.name.length * 3);
+               const terrainRandom = (seed % 100) / 100;
+               
+               // Zones d'eau autour des bords
+               if (x === 0 || x === 8 || y === 0 || y === 8) {
+                   if (terrainRandom < 0.8) {
+                       return { type: 'water', name: 'Eau', icon: '🌊', description: 'Eaux côtières' };
+                   }
+               }
+               
+               // Centre de l'île - plus de chances d'avoir des montagnes
+               if (x >= 3 && x <= 5 && y >= 3 && y <= 5) {
+                   if (terrainRandom < 0.3) {
+                       return { type: 'mountain', name: 'Montagne', icon: '⛰️', description: 'Terrain montagneux riche en minerais' };
+                   }
+               }
+               
+               // Forêts
+               if (terrainRandom < 0.4) {
+                   return { type: 'forest', name: 'Forêt', icon: '🌲', description: 'Forêt dense, source de bois' };
+               }
+               
+               // Plaines par défaut
+               return { type: 'land', name: 'Plaines', icon: '🌾', description: 'Terres fertiles pour l\'agriculture' };
+           }
+           
+           function getBuildingOnTile(x, y, islandData) {
+               // Vérifier s'il y a un bâtiment spécial sur cette tuile
+               if (x === 4 && y === 4) {
+                   return { type: 'playerCity', name: 'Votre Ville', icon: '🏛️', description: 'Votre capitale sur cette île' };
+               }
+               
+               // Autres bâtiments basés sur les données de l'île
+               const buildings = islandData.specialBuildings || [];
+               const building = buildings.find(b => b.x === x && b.y === y);
+               
+               return building || null;
+           }
+           
+           function getResourceOnTile(x, y, islandData) {
+               // Ressources naturelles dispersées
+               const seed = x * 13 + y * 17;
+               const resourceRandom = (seed % 100) / 100;
+               
+               if (resourceRandom < 0.1) { // 10% de chance
+                   const resources = [
+                       { name: 'Mine de Fer', icon: '⛏️', type: 'iron' },
+                       { name: 'Carrière de Pierre', icon: '🪨', type: 'stone' },
+                       { name: 'Gisement d\'Or', icon: '💰', type: 'gold' },
+                       { name: 'Source de Cristal', icon: '💎', type: 'crystal' }
+                   ];
+                   
+                   return resources[seed % resources.length];
+               }
+               
+               return null;
+           }
+           
+           function handleIslandTileClick(x, y, terrain, building, resource) {
+               if (building && building.type === 'playerCity') {
+                   // Retourner à la vue ville
+                   document.querySelector('[data-view="city"]').click();
+                   return;
+               }
+               
+               if (resource) {
+                   // Exploiter la ressource
+                   harvestResource(x, y, resource.type);
+                   return;
+               }
+               
+               if (terrain.type === 'land' || terrain.type === 'forest') {
+                   // Possibilité de construire
+                   showBuildingOptions(x, y, terrain);
+               } else {
+                   // Afficher les informations du terrain
+                   showModal(terrain.name, terrain.description || 'Terrain non constructible');
+               }
+           }
                        const isCenter = (x === 2 || x === 3) && (y === 2 || y === 3);
                        
                        html += `
@@ -3517,535 +4085,4 @@
                                </div>
                                <div style="display: flex; justify-content: space-between; align-items: center;">
                                    <div style="font-size: 0.8rem; color: var(--color-text-muted);">
-                                       Réputation requise: ${contract.reputationRequired}
-                                   </div>
-                                   <button onclick="acceptContract(${index})" class="action-btn" ${canAcceptContract(contract) ? '' : 'disabled'}>
-                                       Accepter
-                                   </button>
-                               </div>
-                           </div>
-                       `;
-                   });
-                   
-                   html += `
-                           </div>
-                       </div>
-                   `;
-               }
-               
-               // Contrats actifs
-               if (gameState.activeContracts && gameState.activeContracts.length > 0) {
-                   html += `
-                       <div class="card" style="grid-column: 1 / -1;">
-                           <h3>⏳ Contrats en Cours</h3>
-                           <div style="margin-top: 1rem;">
-                   `;
-                   
-                   gameState.activeContracts.forEach((contract, index) => {
-                       const timeLeft = contract.deadline - Date.now();
-                       const daysLeft = Math.max(0, Math.ceil(timeLeft / (24 * 60 * 60 * 1000)));
-                       const canComplete = gameState.resources[contract.demand.resource] >= contract.demand.amount;
-                       
-                       html += `
-                           <div style="background: var(--color-panel-light); padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.5rem; border-left: 4px solid var(--color-primary);">
-                               <div style="display: flex; justify-content: space-between; align-items: center;">
-                                   <div>
-                                       <strong>${contract.icon} ${contract.client}</strong><br>
-                                       <span style="font-size: 0.9rem;">
-                                           Livrer ${contract.demand.amount} ${contract.demand.resource} 
-                                           pour ${contract.payment.amount} ${contract.payment.resource}
-                                       </span>
-                                   </div>
-                                   <div style="text-align: right;">
-                                       <div style="color: ${daysLeft <= 1 ? 'var(--color-danger)' : 'var(--color-warning)'};">
-                                           ⏰ ${daysLeft} jour${daysLeft > 1 ? 's' : ''}
-                                       </div>
-                                       <div style="margin-top: 0.5rem;">
-                                           ${canComplete ? 
-                                               `<button onclick="completeContract(${index})" class="action-btn" style="background: var(--color-success);">Livrer</button>` :
-                                               `<button onclick="cancelContract(${index})" class="action-btn" style="background: var(--color-danger);">Annuler</button>`
-                                           }
-                                       </div>
-                                   </div>
-                               </div>
-                           </div>
-                       `;
-                   });
-                   
-                   html += `
-                           </div>
-                       </div>
-                   `;
-               }
-               
-               // Négociateur de ressources
-               html += `
-                   <div class="card" style="grid-column: 1 / -1;">
-                       <h3>🤝 Négociateur de Ressources</h3>
-                       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1rem;">
-                           <div>
-                               <h4>Vous Offrez</h4>
-                               <select id="offer-resource" style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem;">
-                                   ${resources.map(r => `<option value="${r}">${r.charAt(0).toUpperCase() + r.slice(1)}</option>`).join('')}
-                               </select>
-                               <input type="number" id="offer-amount" placeholder="Quantité" min="1" style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem;">
-                               <div id="offer-value" style="font-size: 0.9rem; color: var(--color-text-muted);">Valeur: 0 or</div>
-                           </div>
-                           <div>
-                               <h4>Vous Demandez</h4>
-                               <select id="request-resource" style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem;">
-                                   ${resources.map(r => `<option value="${r}">${r.charAt(0).toUpperCase() + r.slice(1)}</option>`).join('')}
-                               </select>
-                               <input type="number" id="request-amount" placeholder="Quantité" min="1" style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem;">
-                               <div id="request-value" style="font-size: 0.9rem; color: var(--color-text-muted);">Valeur: 0 or</div>
-                           </div>
-                       </div>
-                       <div style="text-align: center; margin-top: 1rem;">
-                           <div id="trade-fairness" style="margin-bottom: 1rem; font-weight: bold;"></div>
-                           <button onclick="proposeResourceTrade()" class="action-btn">Proposer l'Échange</button>
-                       </div>
-                   </div>
-               `;
-               
-               // Historique des transactions
-               if (gameState.tradeHistory && gameState.tradeHistory.length > 0) {
-                   html += `
-                       <div class="card" style="grid-column: 1 / -1;">
-                           <h3>📊 Historique des Transactions</h3>
-                           <div style="max-height: 300px; overflow-y: auto; margin-top: 1rem;">
-                   `;
-                   
-                   gameState.tradeHistory.slice(-20).reverse().forEach(trade => {
-                       const timeAgo = Math.floor((Date.now() - trade.timestamp) / 60000);
-                       const timeText = timeAgo < 1 ? 'À l\'instant' : `Il y a ${timeAgo} min`;
-                       
-                       html += `
-                           <div style="background: var(--color-panel-light); padding: 0.5rem; border-radius: 0.25rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
-                               <div>
-                                   <strong>${trade.type === 'buy' ? '📈 Achat' : '📉 Vente'}</strong>
-                                   ${trade.amount} ${trade.resource} 
-                                   ${trade.type === 'buy' ? 'pour' : 'à'} ${trade.totalPrice} or
-                               </div>
-                               <span style="font-size: 0.8rem; color: var(--color-text-muted);">${timeText}</span>
-                           </div>
-                       `;
-                   });
-                   
-                   html += `
-                           </div>
-                       </div>
-                   `;
-               }
-               
-               dom.tradeGrid.innerHTML = html;
-               
-               // Ajouter les event listeners pour le négociateur
-               setTimeout(() => {
-                   const offerResource = document.getElementById('offer-resource');
-                   const offerAmount = document.getElementById('offer-amount');
-                   const requestResource = document.getElementById('request-resource');
-                   const requestAmount = document.getElementById('request-amount');
-                   
-                   if (offerResource && offerAmount && requestResource && requestAmount) {
-                       [offerResource, offerAmount, requestResource, requestAmount].forEach(element => {
-                           element.addEventListener('input', updateTradeCalculation);
-                       });
-                   }
-               }, 100);
-           }
-           
-           function getResourceIcon(resource) {
-               const icons = {
-                   wood: '🌲', wine: '🍇', marble: '🏛️', 
-                   crystal: '💎', sulfur: '🔥', gold: '💰'
-               };
-               return icons[resource] || '📦';
-           }
-           
-           function getMarketPrices() {
-               const now = Date.now();
-               const baseDay = Math.floor(now / (24 * 60 * 60 * 1000));
-               
-               // Prix de base avec fluctuations basées sur le jour
-               const basePrices = {
-                   wood: 2.5,
-                   wine: 4.0,
-                   marble: 6.0,
-                   crystal: 8.5,
-                   sulfur: 7.0
-               };
-               
-               const prices = {};
-               Object.entries(basePrices).forEach(([resource, basePrice]) => {
-                   // Utiliser le jour et la ressource pour créer une fluctuation pseudo-aléatoire
-                   const seed = baseDay * resource.length + resource.charCodeAt(0);
-                   const fluctuation = (Math.sin(seed) * 0.3) + (Math.cos(seed * 1.5) * 0.2);
-                   prices[resource] = Math.max(0.5, basePrice * (1 + fluctuation));
-               });
-               
-               return prices;
-           }
-           
-           function getMarketTrend(resource) {
-               const now = Date.now();
-               const currentDay = Math.floor(now / (24 * 60 * 60 * 1000));
-               const previousDay = currentDay - 1;
-               
-               const currentPrice = getMarketPrices()[resource];
-               
-               // Calculer le prix d'hier
-               const seed = previousDay * resource.length + resource.charCodeAt(0);
-               const basePrices = { wood: 2.5, wine: 4.0, marble: 6.0, crystal: 8.5, sulfur: 7.0 };
-               const fluctuation = (Math.sin(seed) * 0.3) + (Math.cos(seed * 1.5) * 0.2);
-               const previousPrice = Math.max(0.5, basePrices[resource] * (1 + fluctuation));
-               
-               return ((currentPrice - previousPrice) / previousPrice) * 100;
-           }
-           
-           function calculateTotalTradeProfit() {
-               return gameState.tradeRoutes.reduce((total, route) => {
-                   return total + calculateTradeRouteProfit(route);
-               }, 0);
-           }
-           
-           function quickTrade(type, resource, amount) {
-               const prices = getMarketPrices();
-               const price = prices[resource];
-               const totalCost = price * amount;
-               
-               if (type === 'buy') {
-                   if (gameState.resources.gold < totalCost) {
-                       logEvent('❌ Pas assez d\'or pour cet achat');
-                       return;
-                   }
-                   
-                   gameState.resources.gold -= totalCost;
-                   gameState.resources[resource] = (gameState.resources[resource] || 0) + amount;
-                   
-                   logEvent(`📈 Acheté ${amount} ${resource} pour ${totalCost.toFixed(2)} or`);
-               } else {
-                   if ((gameState.resources[resource] || 0) < amount) {
-                       logEvent('❌ Pas assez de ressources pour cette vente');
-                       return;
-                   }
-                   
-                   gameState.resources[resource] -= amount;
-                   gameState.resources.gold += totalCost;
-                   
-                   logEvent(`📉 Vendu ${amount} ${resource} pour ${totalCost.toFixed(2)} or`);
-               }
-               
-               // Ajouter à l'historique
-               if (!gameState.tradeHistory) gameState.tradeHistory = [];
-               gameState.tradeHistory.push({
-                   type: type,
-                   resource: resource,
-                   amount: amount,
-                   price: price,
-                   totalPrice: totalCost.toFixed(2),
-                   timestamp: Date.now()
-               });
-               
-               // Améliorer légèrement la réputation commerciale
-               gameState.tradeReputation = Math.min(100, (gameState.tradeReputation || 50) + 0.1);
-               
-               renderTradeView();
-               updateAllUI();
-               saveState();
-           }
-           
-           function generateTradeContracts() {
-               const contractTemplates = [
-                   {
-                       client: 'Marchands Atlantes',
-                       icon: '🔱',
-                       description: 'Les Atlantes ont besoin de bois pour leurs constructions navales.',
-                       demand: { resource: 'wood', amount: 500 },
-                       payment: { resource: 'gold', amount: 1500 },
-                       deadline: 7,
-                       reputationRequired: 20
-                   },
-                   {
-                       client: 'Nobles du Désert',
-                       icon: '🐪',
-                       description: 'Les nobles recherchent du vin fin pour leurs banquets.',
-                       demand: { resource: 'wine', amount: 300 },
-                       payment: { resource: 'gold', amount: 1800 },
-                       deadline: 5,
-                       reputationRequired: 30
-                   },
-                   {
-                       client: 'Architectes Royaux',
-                       icon: '🏛️',
-                       description: 'Un grand projet architectural nécessite du marbre de qualité.',
-                       demand: { resource: 'marble', amount: 200 },
-                       payment: { resource: 'gold', amount: 1600 },
-                       deadline: 10,
-                       reputationRequired: 40
-                   },
-                   {
-                       client: 'Mages de Cristal',
-                       icon: '🔮',
-                       description: 'Les mages ont besoin de cristaux pour leurs rituels.',
-                       demand: { resource: 'crystal', amount: 150 },
-                       payment: { resource: 'gold', amount: 2000 },
-                       deadline: 3,
-                       reputationRequired: 50
-                   },
-                   {
-                       client: 'Alchimistes Militaires',
-                       icon: '⚗️',
-                       description: 'Production d\'armes alchimiques pour l\'armée.',
-                       demand: { resource: 'sulfur', amount: 250 },
-                       payment: { resource: 'gold', amount: 2200 },
-                       deadline: 4,
-                       reputationRequired: 35
-                   }
-               ];
-               
-               // Générer des contrats aléatoires basés sur le niveau et la réputation
-               const playerLevel = gameState.playerStats.level;
-               const reputation = gameState.tradeReputation || 50;
-               
-               return contractTemplates
-                   .filter(contract => contract.reputationRequired <= reputation)
-                   .filter(() => Math.random() < 0.6) // 60% de chance d'apparaître
-                   .slice(0, 4); // Maximum 4 contrats
-           }
-           
-           function calculateContractProfitability(contract) {
-               const marketPrices = getMarketPrices();
-               const demandValue = marketPrices[contract.demand.resource] * contract.demand.amount;
-               const paymentValue = contract.payment.resource === 'gold' ? 
-                   contract.payment.amount : 
-                   marketPrices[contract.payment.resource] * contract.payment.amount;
-               
-               return ((paymentValue - demandValue) / demandValue) * 100;
-           }
-           
-           function canAcceptContract(contract) {
-               const reputation = gameState.tradeReputation || 50;
-               const activeContracts = gameState.activeContracts || [];
-               
-               return reputation >= contract.reputationRequired && activeContracts.length < 3;
-           }
-           
-           function acceptContract(contractIndex) {
-               const availableContracts = generateTradeContracts();
-               const contract = availableContracts[contractIndex];
-               
-               if (!contract || !canAcceptContract(contract)) {
-                   logEvent('❌ Impossible d\'accepter ce contrat');
-                   return;
-               }
-               
-               if (!gameState.activeContracts) gameState.activeContracts = [];
-               
-               const activeContract = {
-                   ...contract,
-                   acceptedAt: Date.now(),
-                   deadline: Date.now() + (contract.deadline * 24 * 60 * 60 * 1000)
-               };
-               
-               gameState.activeContracts.push(activeContract);
-               logEvent(`📋 Contrat accepté: ${contract.client}`);
-               
-               renderTradeView();
-               saveState();
-           }
-           
-           function completeContract(contractIndex) {
-               const contract = gameState.activeContracts[contractIndex];
-               if (!contract) return;
-               
-               // Vérifier les ressources
-               if (gameState.resources[contract.demand.resource] < contract.demand.amount) {
-                   logEvent('❌ Ressources insuffisantes pour terminer le contrat');
-                   return;
-               }
-               
-               // Effectuer l'échange
-               gameState.resources[contract.demand.resource] -= contract.demand.amount;
-               
-               if (contract.payment.resource === 'gold') {
-                   gameState.resources.gold += contract.payment.amount;
-               } else {
-                   gameState.resources[contract.payment.resource] = 
-                       (gameState.resources[contract.payment.resource] || 0) + contract.payment.amount;
-               }
-               
-               // Améliorer la réputation
-               gameState.tradeReputation = Math.min(100, (gameState.tradeReputation || 50) + 5);
-               
-               // Supprimer le contrat
-               gameState.activeContracts.splice(contractIndex, 1);
-               
-               logEvent(`✅ Contrat terminé avec ${contract.client}`);
-               addXP(50);
-               
-               renderTradeView();
-               updateAllUI();
-               saveState();
-           }
-           
-           function cancelContract(contractIndex) {
-               const contract = gameState.activeContracts[contractIndex];
-               if (!contract) return;
-               
-               // Pénalité de réputation
-               gameState.tradeReputation = Math.max(0, (gameState.tradeReputation || 50) - 10);
-               
-               gameState.activeContracts.splice(contractIndex, 1);
-               logEvent(`❌ Contrat annulé avec ${contract.client} (réputation -10)`);
-               
-               renderTradeView();
-               saveState();
-           }
-           
-           function updateTradeCalculation() {
-               const offerResource = document.getElementById('offer-resource')?.value;
-               const offerAmount = parseInt(document.getElementById('offer-amount')?.value) || 0;
-               const requestResource = document.getElementById('request-resource')?.value;
-               const requestAmount = parseInt(document.getElementById('request-amount')?.value) || 0;
-               
-               if (!offerResource || !requestResource) return;
-               
-               const prices = getMarketPrices();
-               const offerValue = prices[offerResource] * offerAmount;
-               const requestValue = prices[requestResource] * requestAmount;
-               
-               const offerValueEl = document.getElementById('offer-value');
-               const requestValueEl = document.getElementById('request-value');
-               const fairnessEl = document.getElementById('trade-fairness');
-               
-               if (offerValueEl) offerValueEl.textContent = `Valeur: ${offerValue.toFixed(2)} or`;
-               if (requestValueEl) requestValueEl.textContent = `Valeur: ${requestValue.toFixed(2)} or`;
-               
-               if (fairnessEl && offerAmount > 0 && requestAmount > 0) {
-                   const fairness = (offerValue / requestValue) * 100;
-                   let fairnessText = '';
-                   let fairnessColor = '';
-                   
-                   if (fairness > 120) {
-                       fairnessText = 'Très favorable pour vous';
-                       fairnessColor = 'var(--color-success)';
-                   } else if (fairness > 105) {
-                       fairnessText = 'Favorable pour vous';
-                       fairnessColor = 'var(--color-success)';
-                   } else if (fairness > 95) {
-                       fairnessText = 'Échange équitable';
-                       fairnessColor = 'var(--color-warning)';
-                   } else if (fairness > 80) {
-                       fairnessText = 'Légèrement défavorable';
-                       fairnessColor = 'var(--color-warning)';
-                   } else {
-                       fairnessText = 'Très défavorable pour vous';
-                       fairnessColor = 'var(--color-danger)';
-                   }
-                   
-                   fairnessEl.textContent = fairnessText;
-                   fairnessEl.style.color = fairnessColor;
-               }
-           }
-           
-           function proposeResourceTrade() {
-               const offerResource = document.getElementById('offer-resource')?.value;
-               const offerAmount = parseInt(document.getElementById('offer-amount')?.value) || 0;
-               const requestResource = document.getElementById('request-resource')?.value;
-               const requestAmount = parseInt(document.getElementById('request-amount')?.value) || 0;
-               
-               if (!offerResource || !requestResource || offerAmount <= 0 || requestAmount <= 0) {
-                   logEvent('❌ Veuillez remplir tous les champs correctement');
-                   return;
-               }
-               
-               if (gameState.resources[offerResource] < offerAmount) {
-                   logEvent('❌ Vous n\'avez pas assez de ressources à offrir');
-                   return;
-               }
-               
-               // Calculer la probabilité d'acceptation basée sur l'équité
-               const prices = getMarketPrices();
-               const offerValue = prices[offerResource] * offerAmount;
-               const requestValue = prices[requestResource] * requestAmount;
-               const fairness = offerValue / requestValue;
-               
-               let acceptanceChance = 0;
-               if (fairness >= 1.2) acceptanceChance = 0.9;
-               else if (fairness >= 1.1) acceptanceChance = 0.7;
-               else if (fairness >= 1.0) acceptanceChance = 0.5;
-               else if (fairness >= 0.9) acceptanceChance = 0.3;
-               else acceptanceChance = 0.1;
-               
-               // Bonus de réputation
-               const reputationBonus = (gameState.tradeReputation || 50) / 200;
-               acceptanceChance = Math.min(0.95, acceptanceChance + reputationBonus);
-               
-               if (Math.random() < acceptanceChance) {
-                   // Échange accepté
-                   gameState.resources[offerResource] -= offerAmount;
-                   gameState.resources[requestResource] = (gameState.resources[requestResource] || 0) + requestAmount;
-                   
-                   gameState.tradeReputation = Math.min(100, (gameState.tradeReputation || 50) + 2);
-                   
-                   logEvent(`✅ Échange réussi ! ${offerAmount} ${offerResource} contre ${requestAmount} ${requestResource}`);
-                   showNotification('Échange accepté !', 'success');
-               } else {
-                   // Échange refusé
-                   logEvent(`❌ Échange refusé. Proposez des conditions plus équitables.`);
-                   showNotification('Échange refusé', 'error');
-               }
-               
-               // Ajouter à l'historique
-               if (!gameState.tradeHistory) gameState.tradeHistory = [];
-               gameState.tradeHistory.push({
-                   type: 'exchange',
-                   offered: `${offerAmount} ${offerResource}`,
-                   requested: `${requestAmount} ${requestResource}`,
-                   success: Math.random() < acceptanceChance,
-                   timestamp: Date.now()
-               });
-               
-               renderTradeView();
-               updateAllUI();
-               saveState();
-           }
-
-           // --- SYSTÈME DE TUTORIEL ---
-           function showTutorial() {
-               if (gameState.playerStats.level === 1 && gameState.playerStats.totalBuildings <= 2) {
-                   setTimeout(() => {
-                       showModal('🎓 Bienvenue dans Empire !', 
-                           `Bienvenue, noble dirigeant ! Voici quelques conseils pour débuter :
-                           
-                           • Cliquez sur les emplacements vides (➕) pour construire des bâtiments
-                           • Surveillez vos ressources en haut de l'écran
-                           • Explorez les différentes vues : Ville, Île, Monde, Recherche...
-                           • Construisez des bâtiments de production pour générer plus de ressources
-                           • Recherchez de nouvelles technologies pour débloquer du contenu
-                           
-                           Bonne chance dans votre conquête !`);
-                   }, 2000);
-               }
-           }
-           
-           // --- SYSTÈME D'AIDE CONTEXTUELLE ---
-           function showHelp(topic) {
-               const helpTopics = {
-                   buildings: 'Les bâtiments sont la base de votre empire. Chaque type a des effets spécifiques : production de ressources, défense, recherche, etc.',
-                   resources: 'Gérez 7 types de ressources : Bois, Vin, Marbre, Cristal, Soufre, Or et Points de Recherche. Chacune a ses utilisations spécifiques.',
-                   research: 'La recherche débloque de nouvelles technologies et améliorations. Construisez une Académie pour générer des points de recherche.',
-                   military: 'Recrutez différents types d\'unités pour défendre votre empire et attaquer vos ennemis. Chaque unité a ses forces et faiblesses.',
-                   world: 'Explorez le monde pour découvrir de nouvelles îles, ressources et opportunités de colonisation.'
-               };
-               
-               showModal(`💡 Aide : ${topic}`, helpTopics[topic] || 'Sujet d\'aide non trouvé.');
-           }
-
-           // --- INITIALISATION ---
-           init();
-           showTutorial();
-       });
-   </script>
-</body>
-</html>
+                         
