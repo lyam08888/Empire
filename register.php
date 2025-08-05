@@ -1,11 +1,13 @@
 <?php 
 include("core/CAccount.php");
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="ar">
 <head>
+
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />               
 <meta name="language" content="fr">
+
 <meta name="author" content="prince 3">
 <meta name="publisher" content="prince 3">
 <meta name="copyright" content="prince 3">
@@ -13,26 +15,29 @@ include("core/CAccount.php");
 <meta name="page-topic" content="jeu de navigateur, jeu de stratégie, jeu en ligne, jeu en réseau">
 <meta name="audience" content="all">
 <meta name="Expires" content="never">
+
 <meta name="Keywords" content="ikariama, jeu de stratégie, jouer gratuitement, jeu en ligne, jeu de guerre, RPG, jeu navigateur, jeu en réseau, jeu">
 <meta name="Description" content="ikariama est un jeu de navigateur gratuit. Le défi pour le joueur est de guider son peuple à travers le monde antique, de construire des villes, de commercer et de conquérir des îles.">
+
 <meta name="robots" content="index,follow">
 <meta name="Revisit" content="After 14 days"> 
 <title>ikariama - jeu de navigateur gratuit</title>
 <link href="css/rstyle.css" rel="stylesheet" type="text/css" media="screen">
-<script src="common.js" type="text/javascript"></script>
+<script src="common.js" defer></script>
 </head>
-
 <body>
 <div id="headback">
 <div id="headlogo"></div>
 <!--Main div-->
 <div id="main">
 <div>
+
  <div id="links">
  <a href="index.php" title="vers la connexion">Connexion</a>
  <a href="register.php" title="Inscris-toi ici !">Inscris-toi ici</a>
  <a href="tour_step1.php" title="Aperçu simple d'ikariama">Tour du jeu</a>
  <a href="board.php" target="_blank" title="vers les forums">Forum</a> </div>
+
 </div>
 <div id="text">
  <img class="bild1" src="img/bild1.jpg" height="85" width="173">

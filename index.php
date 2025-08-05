@@ -8,11 +8,13 @@ include("core/CAccount.php");
 //var_dump(headers_list());
 
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 <head>
+
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />               
 <meta name="language" content="fr">
+
 <meta name="author" content="prince 3">
 <meta name="publisher" content="prince 3">
 <meta name="copyright" content="prince 3">
@@ -20,14 +22,18 @@ include("core/CAccount.php");
 <meta name="page-topic" content="jeu de navigateur, jeu de stratégie, jeu en ligne, jeu en réseau">
 <meta name="audience" content="all">
 <meta name="Expires" content="never">
+
 <meta name="Keywords" content="ikariama, jeu de stratégie, jouer gratuitement, jeu en ligne, jeu de guerre, RPG, jeu navigateur, jeu en réseau, jeu">
 <meta name="Description" content="ikariama est un jeu de navigateur gratuit. Le défi pour le joueur est de guider son peuple à travers le monde antique, de construire des villes, de commercer et de conquérir des îles.">
 <meta name="robots" content="index,follow">
 <meta name="Revisit" content="After 14 days"> 
 <title>ikariama - jeu de navigateur gratuit</title>
+
 <link href="css/istyle.css" rel="stylesheet" type="text/css" media="screen">
-<script src="common.js" type="text/javascript"></script>
+<script src="common.js" defer></script>
+<script src="login.js" defer></script>
 </head>
+
 
 <body dir="ltr">
 <div id="headback">
@@ -52,11 +58,13 @@ Sous votre direction, une nouvelle ère d'exploration et de prospérité commenc
 Bienvenue à Ikariama
 
 ikariama</p>
+
  <div class="joinbutton">
   <a href="register.php" title="Inscription">Jouez maintenant gratuitement !</a> </div>
  <form id="loginForm" name="loginForm" action="#" onsubmit="changeAction('login');" method="post"> 
  <input type="hidden" name="ft" value="a4" />
  <table id="logindata" cellpadding="0" cellspacing="0">
+
  <tbody><tr>
   <td><label for="welt" class="labelwelt">Monde</label></td>
   <td><label for="login" class="labellogin">Nom du joueur</label></td>
@@ -65,9 +73,9 @@ ikariama</p>
  </tr>
  <tr>
  <td>
- <select id="universe" name="universe" class="uni" size="1">
- <option selected="selected" value="localhost/ikariam">Alpha</option>
- <option value="localhost/ikariam">Beta</option>
+ <select id="universe" class="uni" size="1">
+ <option selected="selected" value="localhost/empire">Alpha</option>
+ <option value="localhost/empire">Beta</option>
  </select> </td>
  <td><input id="login" name="user" class="login" type="text" value="<?php echo $form->getDiff("user",$_COOKIE['COOKUSR']); ?>"><span class="error"> <?php echo $form->getError("user"); ?></span></td>
  <td><input id="pwd" name="pw" class="pass" type="password" value="<?php echo $form->getValue("pw");?>" maxlength="20" autocomplete='off' /> <span class="error"><?php echo $form->getError("pw"); ?></span></td>
@@ -80,13 +88,12 @@ ikariama</p>
  <tr style="height: 15px;">
  <td colspan="3"></td>
  </tr>
- </tbody></table>
- </form>
-</div><br/>
-</div>
-<!--Main div ends-->
-<div id="footer"></div>
+
+</tbody></table>
+</form>
+</section>
+</main>
+<footer id="footer"></footer>
 </div>
 </body>
 </html>
-<?php ?>
