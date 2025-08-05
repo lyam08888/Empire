@@ -163,6 +163,11 @@
        .modal-btn.cancel { background: var(--color-panel-light); color: var(--color-text); }
        .modal-btn:hover { opacity: 0.8; }
 
+       /* --- BUILDING SELECTION --- */
+       .build-select-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.5rem; max-height: 300px; overflow-y: auto; }
+       .build-option { background: var(--color-panel-light); padding: 0.5rem; border-radius: 0.5rem; display: flex; flex-direction: column; align-items: center; }
+       .build-option .cost { font-size: 0.8rem; color: var(--color-text-muted); margin-top: 0.25rem; }
+
        /* --- NAVIGATION MOBILE --- */
        .mobile-nav { display: none; }
 
@@ -288,6 +293,7 @@
    
    <!-- MODAL -->
    <div class="modal-overlay" id="actionModal"><div class="modal-content"><h4 id="modalTitle"></h4><p id="modalMessage"></p><div id="modal-cost"></div><div class="modal-actions"><button class="modal-btn cancel" id="modalCancelBtn">Annuler</button><button class="modal-btn confirm" id="modalConfirmBtn">Confirmer</button></div></div></div>
+   <div class="modal-overlay" id="buildSelectModal"><div class="modal-content"><h4>Choisir un bâtiment</h4><div id="buildSelectList" class="build-select-grid"></div><div class="modal-actions"><button class="modal-btn cancel" id="buildSelectCancel">Fermer</button></div></div></div>
    <script src="gameplay.js"></script>
    <script>
        document.addEventListener('DOMContentLoaded', function() {
@@ -297,7 +303,23 @@
                    "Hôtel de Ville": { description: "Augmente la population et le revenu en or.", icon: "🏛️", levels: [ { cost: { wood: 150 }, buildTime: 10 }, { cost: { wood: 350 }, buildTime: 25 } ] },
                    "Caserne": { description: "Permet de recruter des unités.", icon: "⚔️", levels: [ { cost: { wood: 200, gold: 50 }, buildTime: 15 }, { cost: { wood: 450, gold: 120 }, buildTime: 35 } ] },
                    "Entrepôt": { description: "Augmente le stockage.", icon: "🧱", levels: [ { cost: { wood: 250 }, buildTime: 12 }, { cost: { wood: 500 }, buildTime: 30 } ] },
-                   "Académie": { description: "Produit des points de recherche.", icon: "🔬", levels: [ { cost: { wood: 300, crystal: 100 }, buildTime: 20 }, { cost: { wood: 600, crystal: 250 }, buildTime: 45 } ] }
+                   "Académie": { description: "Produit des points de recherche.", icon: "🔬", levels: [ { cost: { wood: 300, crystal: 100 }, buildTime: 20 }, { cost: { wood: 600, crystal: 250 }, buildTime: 45 } ] },
+                   "Taverne": { description: "Augmente le bonheur des habitants.", icon: "🍺", levels: [ { cost: { wood: 220, wine: 40 }, buildTime: 15 }, { cost: { wood: 450, wine: 100 }, buildTime: 35 } ] },
+                   "Musée": { description: "Exhibe des trésors culturels.", icon: "🏺", levels: [ { cost: { wood: 300, marble: 100 }, buildTime: 20 }, { cost: { wood: 600, marble: 250 }, buildTime: 45 } ] },
+                   "Muraille": { description: "Renforce la défense de la ville.", icon: "🛡️", levels: [ { cost: { wood: 250, marble: 150 }, buildTime: 25 }, { cost: { wood: 550, marble: 350 }, buildTime: 60 } ] },
+                   "Port": { description: "Permet les échanges maritimes.", icon: "⚓", levels: [ { cost: { wood: 400 }, buildTime: 30 }, { cost: { wood: 800 }, buildTime: 60 } ] },
+                   "Chantier Naval": { description: "Construit des navires de guerre.", icon: "🚢", levels: [ { cost: { wood: 500, sulfur: 200 }, buildTime: 35 }, { cost: { wood: 900, sulfur: 400 }, buildTime: 70 } ] },
+                   "Marché": { description: "Centre des échanges commerciaux.", icon: "🏬", levels: [ { cost: { wood: 300, gold: 100 }, buildTime: 20 }, { cost: { wood: 650, gold: 250 }, buildTime: 45 } ] },
+                   "Foresterie": { description: "Augmente la production de bois.", icon: "🌲", levels: [ { cost: { wood: 200 }, buildTime: 12 }, { cost: { wood: 450 }, buildTime: 30 } ] },
+                   "Carrière de Pierre": { description: "Augmente la production de marbre.", icon: "🪨", levels: [ { cost: { wood: 200, marble: 50 }, buildTime: 15 }, { cost: { wood: 500, marble: 120 }, buildTime: 35 } ] },
+                   "Verrerie": { description: "Produit du cristal.", icon: "🧪", levels: [ { cost: { wood: 250, crystal: 80 }, buildTime: 18 }, { cost: { wood: 550, crystal: 200 }, buildTime: 40 } ] },
+                   "Cave à Vin": { description: "Produit du vin.", icon: "🍷", levels: [ { cost: { wood: 220, wine: 50 }, buildTime: 18 }, { cost: { wood: 520, wine: 120 }, buildTime: 40 } ] },
+                   "Alchimiste": { description: "Transforme le soufre.", icon: "⚗️", levels: [ { cost: { wood: 240, sulfur: 60 }, buildTime: 18 }, { cost: { wood: 540, sulfur: 150 }, buildTime: 40 } ] },
+                   "Menuiserie": { description: "Réduit le coût en bois des constructions.", icon: "🪵", levels: [ { cost: { wood: 300 }, buildTime: 22 }, { cost: { wood: 650 }, buildTime: 50 } ] },
+                   "Architecte": { description: "Réduit le coût en marbre.", icon: "📐", levels: [ { cost: { wood: 300, marble: 100 }, buildTime: 22 }, { cost: { wood: 650, marble: 220 }, buildTime: 50 } ] },
+                   "Opticien": { description: "Réduit le coût en cristal.", icon: "👓", levels: [ { cost: { wood: 300, crystal: 100 }, buildTime: 22 }, { cost: { wood: 650, crystal: 220 }, buildTime: 50 } ] },
+                   "Vignoble": { description: "Augmente la production de vin.", icon: "🍇", levels: [ { cost: { wood: 240, wine: 40 }, buildTime: 16 }, { cost: { wood: 540, wine: 100 }, buildTime: 38 } ] },
+                   "Artificier": { description: "Améliore les unités spéciales.", icon: "🎇", levels: [ { cost: { wood: 320, sulfur: 80 }, buildTime: 24 }, { cost: { wood: 700, sulfur: 180 }, buildTime: 55 } ] }
                },
                research: {
                    economy: { name: "Économie", icon: "💰", techs: { "Expansion": { description: "Permet de fonder une nouvelle colonie.", cost: { research: 500 }, time: 60 } } },
@@ -314,7 +336,9 @@
                cityLayout: [
                    { id: "townHall", top: "40%", left: "45%", width: "120px", height: "120px" }, { id: "plot1", top: "35%", left: "25%", width: "90px", height: "90px" },
                    { id: "plot2", top: "55%", left: "30%", width: "90px", height: "90px" }, { id: "plot3", top: "50%", left: "60%", width: "90px", height: "90px" },
-                   { id: "academy", top: "20%", left: "60%", width: "90px", height: "90px" }
+                   { id: "academy", top: "20%", left: "60%", width: "90px", height: "90px" }, { id: "plot4", top: "20%", left: "30%", width: "90px", height: "90px" },
+                   { id: "plot5", top: "70%", left: "40%", width: "90px", height: "90px" }, { id: "plot6", top: "75%", left: "65%", width: "90px", height: "90px" },
+                   { id: "plot7", top: "25%", left: "75%", width: "90px", height: "90px" }, { id: "plot8", top: "65%", left: "75%", width: "90px", height: "90px" }
                ],
                islandLayout: {
                    size: 7,
@@ -343,7 +367,7 @@
            let gameState;
            const defaultGameState = {
                resources: { wood: 1000, wine: 100, marble: 100, crystal: 100, sulfur: 100, gold: 5000, research: 0 },
-               buildings: { "townHall": { type: "Hôtel de Ville", level: 1 }, "plot1": { type: "Caserne", level: 1 }, "plot2": { type: null, level: 0 }, "plot3": { type: null, level: 0 }, "academy": { type: "Académie", level: 1 } },
+               buildings: { "townHall": { type: "Hôtel de Ville", level: 1 }, "plot1": { type: "Caserne", level: 1 }, "plot2": { type: null, level: 0 }, "plot3": { type: null, level: 0 }, "academy": { type: "Académie", level: 1 }, "plot4": { type: null, level: 0 }, "plot5": { type: null, level: 0 }, "plot6": { type: null, level: 0 }, "plot7": { type: null, level: 0 }, "plot8": { type: null, level: 0 } },
                researchCompleted: [],
                queues: { build: [], research: [], military: [] },
                cooldowns: { build: 0, research: 0, military: 0 },
@@ -361,8 +385,10 @@
                modalCost: document.getElementById('modal-cost'), modalConfirmBtn: document.getElementById('modalConfirmBtn'),
                modalCancelBtn: document.getElementById('modalCancelBtn'), navLinks: document.querySelectorAll('.main-nav a'),
                mainViews: document.querySelectorAll('.main-view'), researchGrid: document.getElementById('research-grid'),
+
                militaryGrid: document.getElementById('military-grid'), battleGrid: document.getElementById('battle-grid'),
                diplomacyGrid: document.getElementById('diplomacy-grid'),
+
            };
 
            let selectedPlotId = null;
@@ -555,12 +581,16 @@
                        else if (nextLevel) { html += `<button class="action-btn" data-action="build" data-id="${plotId}" data-name="${type}" data-level="${nextLevel}">Améliorer</button>`; }
                        else { html += `<p style="color: var(--color-primary); margin-top: 1rem;">Niveau maximum</p>`; }
                    } else {
+
                        html = `<h3>Emplacement Vide</h3><p>Cliquez pour construire :</p><div style="display:flex; flex-direction:column; gap:0.5rem;">`;
                        for (const type in config.buildings) { html += isCooldownActive('build') ? `<button class="action-btn" disabled>${config.buildings[type].icon} ${type}</button>` : `<button class="action-btn" data-action="build" data-id="${plotId}" data-name="${type}" data-level="1">${config.buildings[type].icon} ${type}</button>`; }
                        html += `</div>`;
+
                    }
                }
                dom.contextPanel.innerHTML = html;
+               const chooseBtn = dom.contextPanel.querySelector('#chooseBuildingBtn');
+               if (chooseBtn) chooseBtn.addEventListener('click', () => showBuildSelection(plotId));
            }
 
            function showContextModalForBuilding(plotId) {
@@ -575,9 +605,23 @@
                        showModal(type, `Niveau ${level}. ${spec.description}`);
                     }
                } else {
-                   logEvent("Sélectionnez un bâtiment à construire.");
+                   showBuildSelection(plotId);
                }
            }
+
+           function showBuildSelection(plotId) {
+               dom.buildSelectList.innerHTML = '';
+               for (const type in config.buildings) {
+                   const spec = config.buildings[type];
+                   const cost = Object.entries(spec.levels[0].cost).map(([res, val]) => `${res}: ${val}`).join(' ');
+                   dom.buildSelectList.innerHTML += `<div class="build-option"><div>${spec.icon} ${type}</div><div class="cost">${cost}</div><button class="action-btn" data-action="build" data-id="${plotId}" data-name="${type}" data-level="1">Construire</button></div>`;
+               }
+               dom.buildSelectModal.style.display = 'flex';
+           }
+           dom.buildSelectCancel.addEventListener('click', () => { dom.buildSelectModal.style.display = 'none'; });
+           dom.buildSelectModal.addEventListener('click', e => {
+               if (e.target.dataset.action === 'build') dom.buildSelectModal.style.display = 'none';
+           });
 
            function renderResearchTree() {
                dom.researchGrid.innerHTML = '';
