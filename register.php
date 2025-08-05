@@ -47,7 +47,9 @@
 </head>
 <body class="text-gray-300">
 
+
     <div id="root" class="min-h-screen flex flex-col hero-background">
+
 
         <!-- En-tête et Navigation -->
         <header class="py-4 px-4 sm:px-6 lg:px-8">
