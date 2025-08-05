@@ -42,8 +42,17 @@ class CIsland {
 		$this->LoadIslandID($this->iid);
 	}
 	
-	public function LoadIslandXY($x,$y){
-	}
+        public function LoadIslandXY($x,$y){
+         global $database;
+         $island = $database->GetIslandArrayByPOS($x,$y);
+         if(isset($island['id'])){
+          $this->iid = $island['id'];
+          $this->UpdateWoodMine($this->iid);
+          $this->LoadIslandID($this->iid);
+          return true;
+         }
+         return false;
+        }
 	
 	public function LoadIslandID($id){
 	 global $database;
@@ -200,8 +209,23 @@ class CIsland {
 	 if($x>$y) return $x*28*60;
 	 else return $y*28*60;
 	}
-	function getJSONIsland($x, $y){
-	}
+        function getJSONIsland($x, $y){
+         global $database;
+         $island = $database->GetIslandArrayByPOS($x,$y);
+         $result = array('request'=>array('x'=>$x,'y'=>$y),'data'=>array());
+         if(isset($island['id'])){
+          for($i=0;$i<16;$i++){
+           $cid = isset($island['p'.$i]) ? $island['p'.$i] : 0;
+           if($cid>0){
+            $cityName = $database->getCityField($cid,'name');
+            $uid = $database->getCityField($cid,'uid');
+            $ownerName = $database->getUserField($uid,'username',0);
+            $result['data'][] = array('name'=>$cityName,'avatar_name'=>$ownerName);
+           }
+          }
+         }
+         print(json_encode($result));
+        }
 	function getJSONArea($data){
 	 global $database;
 	 $x_min = $data['islandX'] - 15;
