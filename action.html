@@ -117,6 +117,7 @@
        .world-tile.player { background-color: var(--color-primary); opacity: 1; }
        .world-tile.ally { background-color: var(--color-success); opacity: 1; }
        .world-tile.enemy { background-color: var(--color-danger); opacity: 1; }
+       .world-tile.unexplored { opacity: 0.1; }
 
        /* --- VUE ÎLE --- */
        #island-grid { grid-template-columns: repeat(7, 1fr); background: #0c4a6e; border-radius: 1rem; padding: 1rem; }
@@ -363,6 +364,11 @@
                        { x: 3, y: 4, type: 'island', name: 'Île sauvage' },
                        { x: 12, y: 5, type: 'island', name: 'Île abandonnée' }
                    ]
+               },
+               worldActions: {
+                   explore: { label: 'Explorer', cost: { wood: 50, gold: 100 }, description: "Révèle les détails de la case." },
+                   colonize: { label: 'Coloniser', cost: { wood: 1000, gold: 500 }, description: "Fonde une nouvelle colonie." },
+                   attack: { label: 'Attaquer', cost: { sulfur: 200 }, description: "Lance une attaque contre l'île ciblée." }
                }
            };
 
@@ -373,7 +379,9 @@
                buildings: { "townHall": { type: "Hôtel de Ville", level: 1 }, "plot1": { type: "Caserne", level: 1 }, "plot2": { type: null, level: 0 }, "plot3": { type: null, level: 0 }, "academy": { type: "Académie", level: 1 }, "plot4": { type: null, level: 0 }, "plot5": { type: null, level: 0 }, "plot6": { type: null, level: 0 }, "plot7": { type: null, level: 0 }, "plot8": { type: null, level: 0 } },
                researchCompleted: [],
                queues: { build: [], research: [], military: [] },
+
                cooldowns: { build: 0, research: 0, military: 0 },
+
                lastUpdate: Date.now()
            };
 
@@ -507,6 +515,27 @@
                if (selectedPlotId) updateContextPanel(selectedPlotId);
           }
 
+           function startWorldAction(action, coords, name) {
+               const [x, y] = coords.split(',').map(Number);
+               const spec = config.worldActions[action];
+               const cost = spec.cost || {};
+               for (const res in cost) { if (gameState.resources[res] < cost[res]) { showModal("Action impossible", "Ressources insuffisantes."); return; } }
+               for (const res in cost) gameState.resources[res] -= cost[res];
+               if (action === 'explore') {
+                   gameState.exploredIslands.push({ x, y });
+                   logEvent(`Exploration de [${x},${y}] terminée.`);
+               } else if (action === 'colonize') {
+                   gameState.colonizedIslands.push({ x, y, type: 'player', name: name || 'Nouvelle Colonie' });
+                   if (!gameState.exploredIslands.some(p => p.x === x && p.y === y)) gameState.exploredIslands.push({ x, y });
+                   logEvent(`Vous avez colonisé [${x},${y}].`);
+               } else if (action === 'attack') {
+                   logEvent(`Vous attaquez ${name} [${x},${y}].`);
+               }
+               updateAllUI();
+               renderWorldMap();
+               saveState();
+           }
+
            // --- FONCTIONS D'AFFICHAGE ---
            function updateAllUI() { updateResourceUI(); updateQueueUI(); }
            function updateResourceUI() { for (const res in dom.res) { if(dom.res[res]) dom.res[res].textContent = Math.floor(gameState.resources[res]); } }
@@ -530,22 +559,48 @@
                });
            }
 
-           function renderWorldMap() {
-               dom.worldMapGrid.innerHTML = '';
-               const mapSize = config.worldMap.size;
-               const islands = config.worldMap.islands;
-               for (let i = 0; i < mapSize * mapSize; i++) {
-                   const tile = document.createElement('div');
-                   tile.className = 'map-tile world-tile';
-                   const x = i % mapSize;
-                   const y = Math.floor(i / mapSize);
-                   const island = islands.find(isl => isl.x === x && isl.y === y);
-                   if (island) {
-                       tile.classList.add(island.type);
-                       tile.innerHTML = `<span class="tooltip">${island.name} [${x},${y}]</span>`;
-                   }
-                   dom.worldMapGrid.appendChild(tile);
-               }
+          function renderWorldMap() {
+              dom.worldMapGrid.innerHTML = '';
+              const mapSize = config.worldMap.size;
+              const islands = [...config.worldMap.islands, ...(gameState.colonizedIslands || [])];
+              for (let i = 0; i < mapSize * mapSize; i++) {
+                  const tile = document.createElement('div');
+                  tile.className = 'map-tile world-tile';
+                  const x = i % mapSize;
+                  const y = Math.floor(i / mapSize);
+                  const island = islands.find(isl => isl.x === x && isl.y === y);
+                  const explored = gameState.exploredIslands.some(p => p.x === x && p.y === y);
+                  if (!explored) {
+                      tile.classList.add('unexplored');
+                      tile.textContent = '?';
+                  } else {
+                      tile.classList.add('explored');
+                      if (island) {
+                          tile.classList.add(island.type);
+                          tile.innerHTML = `<span class="tooltip">${island.name} [${x},${y}]</span>`;
+                      }
+                  }
+                  tile.addEventListener('click', () => handleWorldTileClick(x, y, island, explored));
+                  dom.worldMapGrid.appendChild(tile);
+              }
+           }
+
+           function handleWorldTileClick(x, y, island, explored) {
+              if (!explored) {
+                  showModal('explore', `${x},${y}`, `Case [${x},${y}]`);
+                  return;
+              }
+              if (!island) {
+                  showModal('Océan', `Emplacement [${x},${y}]`);
+                  return;
+              }
+              if (island.type === 'enemy') {
+                  showModal('attack', `${x},${y}`, island.name);
+              } else if (island.type === 'island') {
+                  showModal('colonize', `${x},${y}`, island.name);
+              } else {
+                  showModal(island.name, `Type: ${island.type}`);
+              }
            }
            
            function renderIslandView() {
@@ -700,9 +755,10 @@
            }
            function showModal(action, id, name, level) {
                let spec, cost, time, title, message;
-               if (action === 'build') { spec = config.buildings[name].levels[level - 1]; title = `${level > 1 ? 'Améliorer' : 'Construire'} ${name}`; }
-               else if (action === 'research') { const branch = Object.keys(config.research).find(br => config.research[br].techs[name]); spec = config.research[branch].techs[name]; title = `Rechercher ${name}`; }
-               else if (action === 'military') { spec = config.units[name]; title = `Recruter ${name}`; }
+               if (action === 'build') { spec = config.buildings[name].levels[level - 1]; title = `${level > 1 ? 'Améliorer' : 'Construire'} ${name}`; currentAction = () => startAction(action, id, name, level); }
+               else if (action === 'research') { const branch = Object.keys(config.research).find(br => config.research[br].techs[name]); spec = config.research[branch].techs[name]; title = `Rechercher ${name}`; currentAction = () => startAction(action, id, name, level); }
+               else if (action === 'military') { spec = config.units[name]; title = `Recruter ${name}`; currentAction = () => startAction(action, id, name, level); }
+               else if (config.worldActions && config.worldActions[action]) { spec = config.worldActions[action]; title = `${spec.label} ${name}`; currentAction = () => startWorldAction(action, id, name); }
                else if (typeof action === 'string') { // For simple messages
                    dom.modalTitle.textContent = action;
                    dom.modalMessage.textContent = id || '';
@@ -714,12 +770,12 @@
                    return;
                }
                else { showModal("Action inconnue", "Cette action n'est pas encore implémentée."); return; }
-               
-               message = `Voulez-vous vraiment lancer cette action ?`;
+
+               message = spec.description || `Voulez-vous vraiment lancer cette action ?`;
                cost = spec.cost; time = spec.buildTime || spec.time;
-               currentAction = () => startAction(action, id, name, level);
                dom.modalTitle.textContent = title; dom.modalMessage.textContent = message;
-               dom.modalCost.innerHTML = `Coût: ${Object.entries(cost || {}).map(([res, val]) => `${res}: ${val}`).join(', ')} - Temps: ${time}s`;
+               const costText = Object.entries(cost || {}).map(([res, val]) => `${res}: ${val}`).join(', ');
+               dom.modalCost.innerHTML = `Coût: ${costText}${time ? ` - Temps: ${time}s` : ''}`;
                dom.modalConfirmBtn.style.display = 'inline-block';
                dom.modalCancelBtn.textContent = 'Annuler';
                dom.modal.style.display = 'flex';
