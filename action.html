@@ -537,7 +537,7 @@
            }
 
            // --- FONCTIONS D'AFFICHAGE ---
-           function updateAllUI() { updateResourceUI(); updateQueueUI(); }
+           function updateAllUI() { updateResourceUI(); updateQueueUI(); updateActionAvailability(); }
            function updateResourceUI() { for (const res in dom.res) { if(dom.res[res]) dom.res[res].textContent = Math.floor(gameState.resources[res]); } }
            
            function renderCityLayout() {
@@ -647,8 +647,10 @@
                    }
                }
                dom.contextPanel.innerHTML = html;
+
                const chooseBtn = dom.contextPanel.querySelector('#chooseBuildingBtn');
                if (chooseBtn) chooseBtn.addEventListener('click', () => showBuildSelection(plotId));
+
            }
 
            function showContextModalForBuilding(plotId) {
@@ -751,6 +753,26 @@
                        li.innerHTML = `<div class="name">${item.name} ${item.level ? `(Niv. ${item.level})` : ''}</div><div class="timer">${new Date(remainingTime * 1000).toISOString().substr(14, 5)}</div>`;
                        dom.queueList.appendChild(li);
                    });
+               });
+           }
+           function updateActionAvailability() {
+               document.querySelectorAll('button[data-action]').forEach(btn => {
+                   const action = btn.dataset.action;
+                   const name = btn.dataset.name;
+                   const level = parseInt(btn.dataset.level) || 1;
+                   let spec, cost;
+                   if (action === 'build') { spec = config.buildings[name]?.levels[level - 1]; }
+                   else if (action === 'research') {
+                       const branch = Object.values(config.research).find(br => br.techs[name]);
+                       spec = branch?.techs[name];
+                   }
+                   else if (action === 'military') { spec = config.units[name]; }
+                   else if (action === 'diplomacy') { spec = config.diplomacy.treaties[name]; }
+                   cost = spec?.cost;
+                   if (cost) {
+                       const enough = Object.entries(cost).every(([res, val]) => (gameState.resources[res] || 0) >= val);
+                       btn.disabled = !enough;
+                   }
                });
            }
            function showModal(action, id, name, level) {
