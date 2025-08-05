@@ -1,8 +1,8 @@
 <?php
 if(!isset($_SESSION['sessid']))
-	header("Location: ../index.php");
+	header("Location: ../index.html");
 if(isset($_GET['position'])&&($_GET['position']==13)&&($research->GetResearchStatus("R2")<12))
- header("Location: action.php?view=error");
+ header("Location: action.html?view=error");
 $building = new CBuilding;
 ?>
 <link href="css/common.css" rel="stylesheet" type="text/css" media="screen">

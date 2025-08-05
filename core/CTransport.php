@@ -42,9 +42,9 @@ class CTransport {
 	public function startColonization($post) {
 	 global $database,$session,$city;
 	 if(!isset($post['id'])||!isset($post['cargo_people'])||!isset($post['cargo_gold'])||!isset($post['desiredPosition'])||!isset($post['cargo_resource'])||!isset($post['journeyTime'])||!isset($post['actionRequest'])||($post['actionRequest'] != $session->checker))
-	  header("Location: action.php?view=error");
+	  header("Location: action.html?view=error");
 	 if($database->getIslandField($post['id'],"p".$post['desiredPosition']))
-	  header("Location: action.php?view=error");
+	  header("Location: action.html?view=error");
 	 $uid = $session->uid;
 	 $to_iid = $post['id'];
 	 $cargo_people = $post['cargo_people'];
@@ -79,7 +79,7 @@ class CTransport {
 	 $database->setBuildingsField($cid,"b0",0);
 	 $database->modifyGold($city->uid,$city->gold-9000,0);
 	 $database->modifyResource($from_cid,$cargo_resource,$cargo_tradegood3,$cargo_tradegood2,$cargo_tradegood1,$cargo_tradegood4,$city->pop-40,0);
-	 header("Location: action.php?view=island&id=".$post['id']);
+	 header("Location: action.html?view=island&id=".$post['id']);
     }
 	public function getTransportsCount(){
 	 return $this->transportsCount;
@@ -166,7 +166,7 @@ class CTransport {
 	public function abortFleetOperation($get){
 	 global $database,$city,$session;
 	 if(!isset($get['eventId']))
-	  header("Location: action.php?view=error");
+	  header("Location: action.html?view=error");
 	 $darray = $database->getTransportRow($get['eventId']);
 	 if($darray["type"] =="colonization"){
 	  $database->deleteCity($darray["to_cid"]);
@@ -187,7 +187,7 @@ class CTransport {
 	  $database->modifyResource($darray["from_cid"],$cargo_resource,$cargo_tradegood3,$cargo_tradegood2,$cargo_tradegood1,$cargo_tradegood4,$city->pop+40,1);
 	 }
 	 $database->deleteTransport($get['eventId']);
-	 header("Location: action.php?view=militaryAdvisorMilitaryMovements&oldView=city&id=".$city->cid);
+	 header("Location: action.html?view=militaryAdvisorMilitaryMovements&oldView=city&id=".$city->cid);
 	}
 };
 ?>

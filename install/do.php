@@ -23,7 +23,7 @@ class Action {
 				$this->createDB();
 		}
 		else{
-          header("Location: index.php");
+          header("Location: index.html");
        }
 	}
 
@@ -38,9 +38,9 @@ class Action {
 		$text = preg_replace("'%PREFIX%'",$_POST['prefix'],$text);																		
 		fwrite($fh, $text);
 		if(file_exists("inc/Config.php"))
-		 header("Location: index.php?o=2");
+		 header("Location: index.html?o=2");
 		else
-		 header("Location: index.php?o=1&e=1");
+		 header("Location: index.html?o=1&e=1");
 		fclose($fh);
 	}
 	
@@ -51,10 +51,10 @@ class Action {
 		$database = new CDatabase;
 		$result = $database->mysql_exec_batch($str);
 		if($result) {
-			header("Location: index.php?o=3");
+			header("Location: index.html?o=3");
 		}
 		else {
-			header("Location: index.php?o=2&e=1&db=".$database->db);
+			header("Location: index.html?o=2&e=1&db=".$database->db);
 		}
 	}
 	

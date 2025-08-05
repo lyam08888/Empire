@@ -89,7 +89,7 @@ class CAccount {
 			$_SESSION['errorarray'] = $form->getErrors();
 			$_SESSION['valuearray'] = $_POST;
 			
-			header("Location: register.php");
+			header("Location: register.html");
 		}
 		else {
 			$act = $generator->generateRandStr(10);
@@ -99,10 +99,10 @@ class CAccount {
 				setcookie("COOKEMAIL",$_POST['email'],time()+COOKIE_EXPIRE,COOKIE_PATH);
 				//$mailer->sendActivate($_POST['email'],$_POST['name'],$_POST['pw'],$act);
 				$this->generateCity($uid);
-				header("Location: index.php");
+				header("Location: index.html");
 				//$session->cities = $database->getCitiesID($uid);
 			    //$session->login($_POST['name']);
-				//header("Location: action.php?action=loginAvatar&function=login");
+				//header("Location: action.html?action=loginAvatar&function=login");
 			}
 		}
 	}
@@ -114,10 +114,10 @@ class CAccount {
 			$uid = $database->getUserField($_GET['un'],"id",1);
 			$database->updateUserField($uid,"act","",1);
 			unset($_COOKIE['COOKEMAIL']);
-			header("Location: activate.php?e=2");
+			header("Location: activate.html?e=2");
 		}
 		else {
-			header("Location: activate.php?e=1");
+			header("Location: activate.html?e=1");
 		}
 	}
 	
@@ -128,10 +128,10 @@ class CAccount {
 			$database->unreg($_COOKIE['COOKUSR']);
 			unset($_COOKIE['COOKUSR']);
 			unset($_COOKIE['COOKEMAIL']);
-			header("Location: login.php");
+			header("Location: login.html");
 		}
 		else {
-			header("Location: activate.php?e=3");
+			header("Location: activate.html?e=3");
 		}
 	}
 	
@@ -155,13 +155,13 @@ class CAccount {
                         $_SESSION['errorarray'] = $form->getErrors();
                         $_SESSION['valuearray'] = $_POST;
 
-                        header("Location: index.php");
+                        header("Location: index.html");
                 }
                 else {
                         error_log("CAccount::Login successful for user: ".$_POST['user']);
                         setcookie("COOKUSR",$_POST['user'],time()+COOKIE_EXPIRE,COOKIE_PATH);
                         $session->login($_POST['user']);
-                        header("Location: action.php?action=loginAvatar&function=login");
+                        header("Location: action.html?action=loginAvatar&function=login");
                 }
         }
 	
@@ -169,7 +169,7 @@ class CAccount {
 		global $session,$database;
 		$database->activeModify($session->username,1);
 		$session->Logout();
-		header("Location: index.php");
+		header("Location: index.html");
 	}
 	
 	private function validEmail($email) {
@@ -186,13 +186,13 @@ class CAccount {
 		$citypos = $database->generateCityPos($iid);
 		$cid = $database->addCity($iid,$uid,$citypos,1);
 		//$_SESSION['cid'] = $cid;
-		//header("Location: d.php?r=".$cid);
+		//header("Location: d.html?r=".$cid);
 	}
 	
 	public function changeAvatarValues($post){
 		global $database,$session;
 		if(!isset($post['actionRequest']) || ($post['actionRequest'] != $session->checker))
-		 header("Location: action.php?view=error");
+		 header("Location: action.html?view=error");
 		//Change username
 		if(isset($post['name']) && $post['name']!="")
 		 $database->updateUserField($session->uid,"username",$post['name'],1);
@@ -208,7 +208,7 @@ class CAccount {
 	public function changeEmail($post){
 		global $database,$session;
 		if(!isset($post['actionRequest']) || ($post['actionRequest'] != $session->checker))
-		 header("Location: action.php?view=error");
+		 header("Location: action.html?view=error");
 		//Change password
 		if(isset($post['email']) && isset($post['password'])){
 		  $oldpass = $database->getUserField($session->uid,"password",0);

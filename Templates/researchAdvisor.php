@@ -1,6 +1,6 @@
 <?php
 if(!isset($_SESSION['sessid']))
-	header("Location: ../index.php");
+	header("Location: ../index.html");
 
 $session->changeChecker();
 include("core/research.php");

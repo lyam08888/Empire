@@ -275,13 +275,13 @@ class CCity {
 	public function increaseTransporter($get){
 	 global $session,$database;
 	 if(!isset($get['id']) || ($get['actionRequest'] != $session->checker))
-	  header("Location: action.php?view=error");
+	  header("Location: action.html?view=error");
 	 $price = pow($this->ships,2)*20+600;
 	 $this->ships++;
 	 $this->aships++;
 	 $database->modifyGold($this->uid,$this->gold-$price,0);
 	 $database->updateUserField($this->uid,"ships",$this->ships,true);
-	 header("Location: action.php?view=port&id=".$this->cid."&position=".$get['position']);
+	 header("Location: action.html?view=port&id=".$this->cid."&position=".$get['position']);
 	}
 	public function SetWorkers($workers, $value){
 	 global $database;
@@ -420,7 +420,7 @@ class CCity {
 	public function renameCity($post){
 	 global $database,$session;
 	 if(!isset($post['name'])||!isset($post['id'])||!isset($post['actionRequest'])||($post['actionRequest'] != $session->checker))
-	  header("Location: action.php?view=error");
+	  header("Location: action.html?view=error");
 	 $database->setCityField($post['id'],"name",$post['name']);
 	}
 	public function getLoadSpeed(){
@@ -432,17 +432,17 @@ class CCity {
 	public function changeCurrentCity($post){
 	 global $database,$session;
 	 if(!isset($post['cityId'])||!isset($post['oldView']))
-	  header("Location: action.php?view=error");
+	  header("Location: action.html?view=error");
 	  $_SESSION['cid'] = $post['cityId'];
 	  $_SESSION['iid'] = $database->getCityField($post['cityId'],"iid");
-	  header("Location: action.php?view=city&id=".$_SESSION['cid']);
+	  header("Location: action.html?view=city&id=".$_SESSION['cid']);
 	}
 	public function assignWinePerTick($post){
 	global $database,$session;
 	 if(!isset($post['amount'])||!isset($post['id'])||!isset($post['position'])||!isset($post['actionRequest'])||($post['actionRequest'] != $session->checker))
-	  header("Location: action.php?view=error");
+	  header("Location: action.html?view=error");
 	 $database->setCityField($post['id'],"tavernWine",$post['amount']*4);
-	 header("Location: action.php?view=tavern&id=".$_SESSION['cid']."&position=".$post['position']);
+	 header("Location: action.html?view=tavern&id=".$_SESSION['cid']."&position=".$post['position']);
 	}
 	public function getReqExprCrystal(){
 	 global $database;
@@ -455,7 +455,7 @@ class CCity {
 	public function buyResearch($post){
 	 global $database,$session,$research;
 	 if(!isset($post['id'])||!isset($post['position'])||!isset($post['actionRequest'])||($post['actionRequest'] != $session->checker))
-	  header("Location: action.php?view=error");
+	  header("Location: action.html?view=error");
 	 $reqCrystal = $this->getReqExprCrystal();
 	 $rs = $research->CountResearches();
 	 $rs += round($reqCrystal/2);
@@ -466,14 +466,14 @@ class CCity {
 	 $rscore += round($reqCrystal/2*0.02);
 	 $database->updateUserField($this->uid,"research_score",$rscore,1);
 	 $database->updateUserField($this->uid,"researches",$rs,1);
-	 header("Location: action.php?view=academy&id=".$post['id']."&position=".$post['position']);
+	 header("Location: action.html?view=academy&id=".$post['id']."&position=".$post['position']);
 	}
 	public function buildSpy($post){
 	 global $database,$session,$research;
 	 if(!isset($post['id'])||!isset($post['position'])||!isset($post['actionRequest'])||($post['actionRequest'] != $session->checker))
-	  header("Location: action.php?view=error");
+	  header("Location: action.html?view=error");
 	 
-	 header("Location: action.php?view=safehouse&id=".$post['id']."&position=".$post['position']);
+	 header("Location: action.html?view=safehouse&id=".$post['id']."&position=".$post['position']);
 	}
 };
 ?>
