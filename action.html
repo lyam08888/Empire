@@ -939,6 +939,546 @@
                border-radius: 50%;
            }
        }
+
+       /* --- STYLES ENHANCED POUR LES NOUVELLES INTERFACES --- */
+       
+       /* Interface des Conseillers Enhanced */
+       .advisors-enhanced-container {
+           display: flex;
+           flex-direction: column;
+           height: 100%;
+           gap: 1.5rem;
+           padding: 1.5rem;
+       }
+
+       .advisors-header {
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           background: var(--color-panel-light);
+           padding: 1.5rem;
+           border-radius: 1rem;
+           border: 1px solid var(--color-border);
+       }
+
+       .advisors-header h2 {
+           color: var(--color-primary);
+           margin: 0;
+           font-size: 1.8rem;
+       }
+
+       .empire-status {
+           display: flex;
+           gap: 2rem;
+       }
+
+       .status-item {
+           display: flex;
+           flex-direction: column;
+           align-items: center;
+           gap: 0.25rem;
+       }
+
+       .status-item span:first-child {
+           color: var(--color-text-muted);
+           font-size: 0.8rem;
+       }
+
+       .status-item span:last-child {
+           color: var(--color-text);
+           font-weight: bold;
+       }
+
+       .advisors-grid {
+           display: grid;
+           grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+           gap: 1.5rem;
+           flex: 1;
+       }
+
+       .advisor-card {
+           background: var(--color-panel-light);
+           border-radius: 1rem;
+           border: 1px solid var(--color-border);
+           padding: 1.5rem;
+           transition: all 0.3s ease;
+           cursor: pointer;
+           display: flex;
+           flex-direction: column;
+           gap: 1rem;
+       }
+
+       .advisor-card:hover {
+           transform: translateY(-5px);
+           box-shadow: 0 10px 30px rgba(251, 191, 36, 0.2);
+           border-color: var(--color-primary);
+       }
+
+       .advisor-portrait {
+           width: 80px;
+           height: 80px;
+           border-radius: 50%;
+           background-size: cover;
+           background-position: center;
+           border: 3px solid var(--color-primary);
+           margin: 0 auto;
+       }
+
+       .advisor-info {
+           text-align: center;
+       }
+
+       .advisor-info h3 {
+           color: var(--color-text);
+           margin: 0 0 0.5rem 0;
+           font-size: 1.2rem;
+       }
+
+       .advisor-title {
+           color: var(--color-primary);
+           font-weight: bold;
+           margin-bottom: 0.25rem;
+       }
+
+       .advisor-specialty {
+           color: var(--color-text-muted);
+           font-size: 0.9rem;
+       }
+
+       .advisor-status {
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           gap: 0.5rem;
+           font-size: 0.9rem;
+       }
+
+       .status-indicator {
+           width: 12px;
+           height: 12px;
+           border-radius: 50%;
+           background: var(--color-success);
+       }
+
+       .status-indicator.busy {
+           background: var(--color-danger);
+       }
+
+       .advisor-actions {
+           display: flex;
+           justify-content: center;
+       }
+
+       .advisor-btn {
+           background: linear-gradient(135deg, var(--color-primary), #f59e0b);
+           color: white;
+           border: none;
+           padding: 0.75rem 1.5rem;
+           border-radius: 0.5rem;
+           cursor: pointer;
+           transition: all 0.3s ease;
+           font-weight: bold;
+       }
+
+       .advisor-btn:hover {
+           transform: translateY(-2px);
+           box-shadow: 0 5px 15px rgba(251, 191, 36, 0.4);
+       }
+
+       .advisor-consultation-panel {
+           position: fixed;
+           top: 50%;
+           left: 50%;
+           transform: translate(-50%, -50%);
+           background: var(--color-panel);
+           border-radius: 1rem;
+           border: 1px solid var(--color-border);
+           width: 90%;
+           max-width: 600px;
+           max-height: 80vh;
+           z-index: 1000;
+           backdrop-filter: blur(10px);
+       }
+
+       .consultation-header {
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           padding: 1.5rem;
+           border-bottom: 1px solid var(--color-border);
+       }
+
+       .consultation-header h3 {
+           color: var(--color-primary);
+           margin: 0;
+       }
+
+       .close-consultation {
+           background: none;
+           border: none;
+           color: var(--color-text-muted);
+           font-size: 1.5rem;
+           cursor: pointer;
+           padding: 0.25rem;
+           border-radius: 0.25rem;
+           transition: all 0.2s ease;
+       }
+
+       .close-consultation:hover {
+           background: var(--color-danger);
+           color: white;
+       }
+
+       .consultation-content {
+           padding: 1.5rem;
+           max-height: 60vh;
+           overflow-y: auto;
+       }
+
+       /* Interface de Ville Enhanced */
+       .city-enhanced-container {
+           display: flex;
+           flex-direction: column;
+           height: 100%;
+           gap: 1rem;
+       }
+
+       .city-enhanced-header {
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           background: var(--color-panel-light);
+           padding: 1.5rem;
+           border-radius: 1rem;
+           border: 1px solid var(--color-border);
+       }
+
+       .city-title-section h2 {
+           color: var(--color-primary);
+           margin: 0;
+           font-size: 1.8rem;
+       }
+
+       .city-level {
+           color: var(--color-text-muted);
+           font-size: 0.9rem;
+           margin-top: 0.25rem;
+       }
+
+       .city-quick-actions {
+           display: flex;
+           gap: 1rem;
+       }
+
+       .quick-action-btn {
+           background: linear-gradient(135deg, var(--color-secondary), #1d4ed8);
+           color: white;
+           border: none;
+           padding: 0.75rem 1rem;
+           border-radius: 0.5rem;
+           cursor: pointer;
+           transition: all 0.3s ease;
+           font-size: 0.9rem;
+       }
+
+       .quick-action-btn:hover {
+           transform: translateY(-2px);
+           box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+       }
+
+       .city-enhanced-main {
+           display: flex;
+           gap: 1rem;
+           flex: 1;
+           overflow: hidden;
+       }
+
+       .city-resources-panel {
+           width: 250px;
+           background: var(--color-panel-light);
+           border-radius: 1rem;
+           padding: 1.5rem;
+           border: 1px solid var(--color-border);
+           overflow-y: auto;
+       }
+
+       .city-resources-panel h3 {
+           color: var(--color-primary);
+           margin: 0 0 1rem 0;
+           font-size: 1.2rem;
+       }
+
+       .resource-list {
+           display: flex;
+           flex-direction: column;
+           gap: 0.75rem;
+           margin-bottom: 2rem;
+       }
+
+       .resource-item-enhanced {
+           display: flex;
+           align-items: center;
+           gap: 0.75rem;
+           padding: 0.75rem;
+           background: var(--color-panel);
+           border-radius: 0.5rem;
+           border: 1px solid var(--color-border);
+       }
+
+       .resource-icon {
+           width: 32px;
+           height: 32px;
+           border-radius: 50%;
+           background-size: contain;
+           background-repeat: no-repeat;
+           background-position: center;
+       }
+
+       .resource-icon.wood { background-color: #16a34a; }
+       .resource-icon.marble { background-color: #6b7280; }
+       .resource-icon.crystal { background-color: #3b82f6; }
+       .resource-icon.sulfur { background-color: #f59e0b; }
+       .resource-icon.wine { background-color: #7c2d12; }
+       .resource-icon.gold { background-color: #fbbf24; }
+
+       .resource-name {
+           flex: 1;
+           color: var(--color-text);
+           font-weight: 500;
+       }
+
+       .resource-amount {
+           color: var(--color-primary);
+           font-weight: bold;
+       }
+
+       .population-info {
+           border-top: 1px solid var(--color-border);
+           padding-top: 1rem;
+       }
+
+       .population-info h4 {
+           color: var(--color-primary);
+           margin: 0 0 0.75rem 0;
+       }
+
+       .population-stat {
+           display: flex;
+           justify-content: space-between;
+           margin-bottom: 0.5rem;
+           font-size: 0.9rem;
+       }
+
+       .population-stat span:first-child {
+           color: var(--color-text-muted);
+       }
+
+       .population-stat span:last-child {
+           color: var(--color-text);
+           font-weight: 500;
+       }
+
+       .city-buildings-view {
+           flex: 1;
+           background: var(--color-panel-light);
+           border-radius: 1rem;
+           padding: 1.5rem;
+           border: 1px solid var(--color-border);
+           overflow-y: auto;
+       }
+
+       .city-stats-bar {
+           display: flex;
+           gap: 1rem;
+           margin-bottom: 1.5rem;
+       }
+
+       .stat-card {
+           flex: 1;
+           background: var(--color-panel);
+           padding: 1rem;
+           border-radius: 0.5rem;
+           text-align: center;
+           border: 1px solid var(--color-border);
+       }
+
+       .stat-title {
+           color: var(--color-text-muted);
+           font-size: 0.8rem;
+           margin-bottom: 0.5rem;
+       }
+
+       .stat-value {
+           color: var(--color-primary);
+           font-size: 1.5rem;
+           font-weight: bold;
+       }
+
+       .buildings-grid-enhanced {
+           display: grid;
+           grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+           gap: 1rem;
+       }
+
+       .city-advisor-panel {
+           width: 250px;
+           background: var(--color-panel-light);
+           border-radius: 1rem;
+           padding: 1.5rem;
+           border: 1px solid var(--color-border);
+           overflow-y: auto;
+       }
+
+       .city-advisor-panel h3 {
+           color: var(--color-primary);
+           margin: 0 0 1rem 0;
+           font-size: 1.2rem;
+       }
+
+       .advisor-card-mini {
+           background: var(--color-panel);
+           border-radius: 0.5rem;
+           padding: 1rem;
+           text-align: center;
+           margin-bottom: 1.5rem;
+           border: 1px solid var(--color-border);
+       }
+
+       .advisor-card-mini .advisor-portrait {
+           width: 60px;
+           height: 60px;
+           margin: 0 auto 0.75rem;
+       }
+
+       .advisor-name {
+           color: var(--color-text);
+           font-weight: bold;
+           margin-bottom: 0.25rem;
+       }
+
+       .advisor-title {
+           color: var(--color-primary);
+           font-size: 0.8rem;
+           margin-bottom: 0.75rem;
+       }
+
+       .advisor-btn-mini {
+           background: var(--color-primary);
+           color: white;
+           border: none;
+           padding: 0.5rem 1rem;
+           border-radius: 0.25rem;
+           cursor: pointer;
+           font-size: 0.8rem;
+           transition: all 0.3s ease;
+       }
+
+       .advisor-btn-mini:hover {
+           background: #f59e0b;
+       }
+
+       .construction-queue-mini,
+       .city-events-mini {
+           margin-bottom: 1.5rem;
+       }
+
+       .construction-queue-mini h4,
+       .city-events-mini h4 {
+           color: var(--color-primary);
+           margin: 0 0 0.75rem 0;
+           font-size: 1rem;
+       }
+
+       .queue-item-mini {
+           display: flex;
+           align-items: center;
+           gap: 0.75rem;
+           background: var(--color-panel);
+           padding: 0.75rem;
+           border-radius: 0.5rem;
+           border: 1px solid var(--color-border);
+       }
+
+       .queue-icon {
+           width: 32px;
+           height: 32px;
+           background-size: contain;
+           background-repeat: no-repeat;
+           background-position: center;
+           border-radius: 4px;
+       }
+
+       .queue-info {
+           flex: 1;
+       }
+
+       .queue-name {
+           color: var(--color-text);
+           font-size: 0.9rem;
+           font-weight: 500;
+       }
+
+       .queue-time {
+           color: var(--color-primary);
+           font-size: 0.8rem;
+       }
+
+       .event-item-mini {
+           background: var(--color-panel);
+           padding: 0.75rem;
+           border-radius: 0.5rem;
+           border: 1px solid var(--color-border);
+       }
+
+       .event-text {
+           color: var(--color-text);
+           font-size: 0.9rem;
+           margin-bottom: 0.25rem;
+       }
+
+       .event-time {
+           color: var(--color-text-muted);
+           font-size: 0.7rem;
+       }
+
+       /* Responsive pour les nouvelles interfaces */
+       @media (max-width: 1200px) {
+           .city-enhanced-main {
+               flex-direction: column;
+           }
+           
+           .city-resources-panel,
+           .city-advisor-panel {
+               width: 100%;
+               max-height: 200px;
+           }
+           
+           .advisors-grid {
+               grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+           }
+       }
+
+       @media (max-width: 768px) {
+           .city-quick-actions {
+               flex-wrap: wrap;
+               gap: 0.5rem;
+           }
+           
+           .quick-action-btn {
+               padding: 0.5rem 0.75rem;
+               font-size: 0.8rem;
+           }
+           
+           .advisors-grid {
+               grid-template-columns: 1fr;
+           }
+           
+           .advisor-consultation-panel {
+               width: 95%;
+               max-height: 90vh;
+           }
+       }
+       }
    </style>
 </head>
 <body>
@@ -1265,6 +1805,132 @@
                </section>
                <section id="view-research" class="main-view hidden"><h2>Recherche</h2><div id="research-grid" class="management-grid"></div></section>
                <section id="view-military" class="main-view hidden"><h2>Militaire</h2><div id="military-grid" class="management-grid"></div></section>
+               <section id="view-advisors" class="main-view hidden">
+                   <!-- Interface des Conseillers Enhanced -->
+                   <div class="advisors-enhanced-container">
+                       <div class="advisors-header">
+                           <h2>👑 Conseil Impérial</h2>
+                           <div class="empire-status">
+                               <div class="status-item">
+                                   <span>Stabilité:</span>
+                                   <span class="positive">Excellente</span>
+                               </div>
+                               <div class="status-item">
+                                   <span>Influence:</span>
+                                   <span>Régionale</span>
+                               </div>
+                           </div>
+                       </div>
+
+                       <div class="advisors-grid">
+                           <div class="advisor-card" data-advisor="military">
+                               <div class="advisor-portrait" style="background-image: url('Romain/Quintus_Cornelius_Crassus_asset_pack/legatus_homme_bust.png');"></div>
+                               <div class="advisor-info">
+                                   <h3>Quintus Cornelius</h3>
+                                   <div class="advisor-title">Légat Militaire</div>
+                                   <div class="advisor-specialty">Stratégie & Défense</div>
+                               </div>
+                               <div class="advisor-status">
+                                   <div class="status-indicator active"></div>
+                                   <span>Disponible</span>
+                               </div>
+                               <div class="advisor-actions">
+                                   <button class="advisor-btn" onclick="consultAdvisor('military')">Consulter</button>
+                               </div>
+                           </div>
+
+                           <div class="advisor-card" data-advisor="economic">
+                               <div class="advisor-portrait" style="background-image: url('Romain/Lucius_Cornelius_Crassus_asset_pack/patrician_male_homme_bust.png');"></div>
+                               <div class="advisor-info">
+                                   <h3>Lucius Cornelius</h3>
+                                   <div class="advisor-title">Questeur</div>
+                                   <div class="advisor-specialty">Économie & Commerce</div>
+                               </div>
+                               <div class="advisor-status">
+                                   <div class="status-indicator active"></div>
+                                   <span>Disponible</span>
+                               </div>
+                               <div class="advisor-actions">
+                                   <button class="advisor-btn" onclick="consultAdvisor('economic')">Consulter</button>
+                               </div>
+                           </div>
+
+                           <div class="advisor-card" data-advisor="diplomatic">
+                               <div class="advisor-portrait" style="background-image: url('Romain/Valeria_Drusilla_asset_pack/patrician_female_femme_bust.png');"></div>
+                               <div class="advisor-info">
+                                   <h3>Valeria Drusilla</h3>
+                                   <div class="advisor-title">Ambassadrice</div>
+                                   <div class="advisor-specialty">Diplomatie & Relations</div>
+                               </div>
+                               <div class="advisor-status">
+                                   <div class="status-indicator active"></div>
+                                   <span>Disponible</span>
+                               </div>
+                               <div class="advisor-actions">
+                                   <button class="advisor-btn" onclick="consultAdvisor('diplomatic')">Consulter</button>
+                               </div>
+                           </div>
+
+                           <div class="advisor-card" data-advisor="research">
+                               <div class="advisor-portrait" style="background-image: url('Romain/Fabia_Maxima_asset_pack/vestal_femme_bust.png');"></div>
+                               <div class="advisor-info">
+                                   <h3>Fabia Maxima</h3>
+                                   <div class="advisor-title">Grande Vestale</div>
+                                   <div class="advisor-specialty">Recherche & Savoir</div>
+                               </div>
+                               <div class="advisor-status">
+                                   <div class="status-indicator active"></div>
+                                   <span>Disponible</span>
+                               </div>
+                               <div class="advisor-actions">
+                                   <button class="advisor-btn" onclick="consultAdvisor('research')">Consulter</button>
+                               </div>
+                           </div>
+
+                           <div class="advisor-card" data-advisor="construction">
+                               <div class="advisor-portrait" style="background-image: url('Romain/Titus_Fabius_Scipio_asset_pack/praetorian_homme_bust.png');"></div>
+                               <div class="advisor-info">
+                                   <h3>Titus Fabius</h3>
+                                   <div class="advisor-title">Architecte Impérial</div>
+                                   <div class="advisor-specialty">Construction & Urbanisme</div>
+                               </div>
+                               <div class="advisor-status">
+                                   <div class="status-indicator active"></div>
+                                   <span>Disponible</span>
+                               </div>
+                               <div class="advisor-actions">
+                                   <button class="advisor-btn" onclick="consultAdvisor('construction')">Consulter</button>
+                               </div>
+                           </div>
+
+                           <div class="advisor-card" data-advisor="espionage">
+                               <div class="advisor-portrait" style="background-image: url('Romain/Gaius_Valerius_Maximus_asset_pack/gladiator_homme_bust.png');"></div>
+                               <div class="advisor-info">
+                                   <h3>Gaius Valerius</h3>
+                                   <div class="advisor-title">Maître Espion</div>
+                                   <div class="advisor-specialty">Renseignement & Sécurité</div>
+                               </div>
+                               <div class="advisor-status">
+                                   <div class="status-indicator active"></div>
+                                   <span>Disponible</span>
+                               </div>
+                               <div class="advisor-actions">
+                                   <button class="advisor-btn" onclick="consultAdvisor('espionage')">Consulter</button>
+                               </div>
+                           </div>
+                       </div>
+
+                       <div class="advisor-consultation-panel" id="advisor-consultation" style="display: none;">
+                           <div class="consultation-header">
+                               <h3 id="consultation-title">Consultation</h3>
+                               <button class="close-consultation" onclick="closeConsultation()">✕</button>
+                           </div>
+                           <div class="consultation-content" id="consultation-content">
+                               <!-- Contenu dynamique -->
+                           </div>
+                       </div>
+                   </div>
+               </section>
                <section id="view-battle" class="main-view hidden"><h2>Bataille</h2><div id="battle-grid" class="management-grid"></div></section>
                <section id="view-diplomacy" class="main-view hidden"><h2>Diplomatie</h2><div id="diplomacy-grid" class="management-grid"></div></section>
                <section id="view-achievements" class="main-view hidden"><h2>Achievements & Statistiques</h2><div id="achievements-grid" class="management-grid"></div></section>
@@ -1564,6 +2230,297 @@
                    link.classList.toggle('active', link.dataset.view === viewId);
                });
                updateContextPanel(); // Clear context panel on view switch
+               
+               // Initialiser les nouvelles interfaces enhanced
+               if (viewId === 'advisors') {
+                   initializeAdvisorsView();
+               } else if (viewId === 'city') {
+                   initializeCityEnhancedView();
+               }
+           }
+
+           // --- FONCTIONS ENHANCED POUR LES NOUVELLES INTERFACES ---
+           
+           // Interface des Conseillers Enhanced
+           function consultAdvisor(advisorType) {
+               const advisorData = {
+                   military: {
+                       name: "Quintus Cornelius",
+                       title: "Légat Militaire",
+                       advice: "Nos légions sont prêtes, César ! Je recommande de renforcer nos défenses avant d'étendre l'Empire.",
+                       actions: [
+                           { name: "Recruter des Légionnaires", cost: { gold: 100 }, effect: "military" },
+                           { name: "Améliorer les Fortifications", cost: { marble: 200 }, effect: "defense" },
+                           { name: "Organiser des Manœuvres", cost: { gold: 50 }, effect: "training" }
+                       ]
+                   },
+                   economic: {
+                       name: "Lucius Cornelius",
+                       title: "Questeur",
+                       advice: "Les finances de l'Empire sont stables. Je suggère d'investir dans le commerce pour augmenter nos revenus.",
+                       actions: [
+                           { name: "Développer le Commerce", cost: { gold: 150 }, effect: "trade" },
+                           { name: "Réduire les Taxes", cost: { gold: 100 }, effect: "happiness" },
+                           { name: "Construire des Marchés", cost: { wood: 200, gold: 100 }, effect: "economy" }
+                       ]
+                   },
+                   diplomatic: {
+                       name: "Valeria Drusilla",
+                       title: "Ambassadrice",
+                       advice: "Les relations avec nos voisins sont tendues. Une approche diplomatique pourrait éviter des conflits coûteux.",
+                       actions: [
+                           { name: "Envoyer des Ambassadeurs", cost: { gold: 200 }, effect: "diplomacy" },
+                           { name: "Organiser un Banquet", cost: { wine: 50, gold: 100 }, effect: "relations" },
+                           { name: "Signer un Traité Commercial", cost: { gold: 300 }, effect: "trade_agreement" }
+                       ]
+                   },
+                   research: {
+                       name: "Fabia Maxima",
+                       title: "Grande Vestale",
+                       advice: "Les dieux nous accordent leur faveur. Nos recherches progressent bien, mais nous pourrions accélérer le processus.",
+                       actions: [
+                           { name: "Accélérer les Recherches", cost: { crystal: 100, gold: 150 }, effect: "research_boost" },
+                           { name: "Construire une Bibliothèque", cost: { wood: 300, marble: 150 }, effect: "knowledge" },
+                           { name: "Former des Érudits", cost: { gold: 200 }, effect: "scholars" }
+                       ]
+                   },
+                   construction: {
+                       name: "Titus Fabius",
+                       title: "Architecte Impérial",
+                       advice: "Nos projets de construction avancent selon les plans. Je recommande d'améliorer nos infrastructures.",
+                       actions: [
+                           { name: "Accélérer la Construction", cost: { wood: 200, gold: 100 }, effect: "build_speed" },
+                           { name: "Améliorer les Routes", cost: { marble: 150, gold: 200 }, effect: "infrastructure" },
+                           { name: "Former des Artisans", cost: { gold: 150 }, effect: "crafters" }
+                       ]
+                   },
+                   espionage: {
+                       name: "Gaius Valerius",
+                       title: "Maître Espion",
+                       advice: "Mes agents rapportent des mouvements suspects chez nos ennemis. La vigilance est de mise.",
+                       actions: [
+                           { name: "Recruter des Espions", cost: { gold: 250 }, effect: "spies" },
+                           { name: "Infiltrer les Ennemis", cost: { gold: 300 }, effect: "intelligence" },
+                           { name: "Renforcer la Sécurité", cost: { gold: 200 }, effect: "security" }
+                       ]
+                   }
+               };
+
+               const advisor = advisorData[advisorType];
+               if (!advisor) return;
+
+               const consultationPanel = document.getElementById('advisor-consultation');
+               const consultationTitle = document.getElementById('consultation-title');
+               const consultationContent = document.getElementById('consultation-content');
+
+               consultationTitle.textContent = `Consultation avec ${advisor.name}`;
+               
+               let html = `
+                   <div style="text-align: center; margin-bottom: 2rem;">
+                       <div class="advisor-portrait" style="background-image: url('Romain/${advisor.name.replace(' ', '_')}_asset_pack/portrait.png'); width: 100px; height: 100px; margin: 0 auto 1rem;"></div>
+                       <h4 style="color: var(--color-primary); margin-bottom: 0.5rem;">${advisor.name}</h4>
+                       <div style="color: var(--color-text-muted); margin-bottom: 1rem;">${advisor.title}</div>
+                       <div style="background: var(--color-panel-light); padding: 1rem; border-radius: 0.5rem; border-left: 4px solid var(--color-primary);">
+                           "${advisor.advice}"
+                       </div>
+                   </div>
+                   
+                   <h4 style="color: var(--color-primary); margin-bottom: 1rem;">Actions Recommandées</h4>
+                   <div style="display: flex; flex-direction: column; gap: 1rem;">
+               `;
+
+               advisor.actions.forEach((action, index) => {
+                   const canAfford = Object.entries(action.cost).every(([resource, amount]) => 
+                       gameState.resources[resource] >= amount
+                   );
+                   
+                   const costText = Object.entries(action.cost)
+                       .map(([resource, amount]) => `${amount} ${resource}`)
+                       .join(', ');
+
+                   html += `
+                       <div class="advisor-action" style="background: var(--color-panel-light); padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--color-border);">
+                           <div style="display: flex; justify-content: space-between; align-items: center;">
+                               <div>
+                                   <div style="font-weight: bold; color: var(--color-text); margin-bottom: 0.25rem;">${action.name}</div>
+                                   <div style="color: var(--color-text-muted); font-size: 0.9rem;">Coût: ${costText}</div>
+                               </div>
+                               <button onclick="executeAdvisorAction('${advisorType}', ${index})" 
+                                       class="advisor-btn" 
+                                       style="padding: 0.5rem 1rem; font-size: 0.9rem;" 
+                                       ${!canAfford ? 'disabled' : ''}>
+                                   Exécuter
+                               </button>
+                           </div>
+                       </div>
+                   `;
+               });
+
+               html += '</div>';
+               consultationContent.innerHTML = html;
+               consultationPanel.style.display = 'block';
+           }
+
+           function closeConsultation() {
+               document.getElementById('advisor-consultation').style.display = 'none';
+           }
+
+           function executeAdvisorAction(advisorType, actionIndex) {
+               const advisorData = {
+                   military: { actions: [
+                       { name: "Recruter des Légionnaires", cost: { gold: 100 }, effect: "military" },
+                       { name: "Améliorer les Fortifications", cost: { marble: 200 }, effect: "defense" },
+                       { name: "Organiser des Manœuvres", cost: { gold: 50 }, effect: "training" }
+                   ]},
+                   economic: { actions: [
+                       { name: "Développer le Commerce", cost: { gold: 150 }, effect: "trade" },
+                       { name: "Réduire les Taxes", cost: { gold: 100 }, effect: "happiness" },
+                       { name: "Construire des Marchés", cost: { wood: 200, gold: 100 }, effect: "economy" }
+                   ]},
+                   // ... autres conseillers
+               };
+
+               const action = advisorData[advisorType]?.actions[actionIndex];
+               if (!action) return;
+
+               // Vérifier si le joueur peut se permettre l'action
+               const canAfford = Object.entries(action.cost).every(([resource, amount]) => 
+                   gameState.resources[resource] >= amount
+               );
+
+               if (!canAfford) {
+                   logEvent("❌ Ressources insuffisantes pour cette action.");
+                   return;
+               }
+
+               // Déduire les coûts
+               Object.entries(action.cost).forEach(([resource, amount]) => {
+                   gameState.resources[resource] -= amount;
+               });
+
+               // Appliquer les effets
+               switch(action.effect) {
+                   case 'military':
+                       gameState.military.land.legionary += 10;
+                       logEvent("⚔️ 10 légionnaires recrutés !");
+                       break;
+                   case 'defense':
+                       // Augmenter la défense de la ville
+                       logEvent("🛡️ Fortifications améliorées !");
+                       break;
+                   case 'trade':
+                       // Bonus de commerce temporaire
+                       logEvent("💰 Commerce développé !");
+                       break;
+                   case 'happiness':
+                       // Augmenter le bonheur
+                       logEvent("😊 La population est plus heureuse !");
+                       break;
+                   // ... autres effets
+               }
+
+               updateAllUI();
+               closeConsultation();
+               logEvent(`✅ ${action.name} exécuté avec succès !`);
+           }
+
+           function initializeAdvisorsView() {
+               // Initialisation de la vue des conseillers si nécessaire
+               console.log("Vue des conseillers initialisée");
+           }
+
+           // Interface de Ville Enhanced
+           function initializeCityEnhancedView() {
+               renderBuildingsGridEnhanced();
+               updateCityResourcesDisplay();
+           }
+
+           function renderBuildingsGridEnhanced() {
+               const buildingsGrid = document.getElementById('buildings-grid');
+               if (!buildingsGrid) return;
+
+               const buildingAssets = {
+                   "Hôtel de Ville": "Batiment/palatium_asset.png",
+                   "Caserne": "Batiment/castra_asset.png",
+                   "Académie": "Batiment/basilica_asset.png",
+                   "Taverne": "Batiment/thermae_asset.png",
+                   "Musée": "Batiment/templum_asset.png",
+                   "Muraille": "Batiment/muraille_asset.png",
+                   "Port": "Batiment/portus_asset.png",
+                   "Chantier Naval": "Batiment/navale_asset.png",
+                   "Marché": "Batiment/mercatus_asset.png",
+                   "Foresterie": "Batiment/silva_asset.png"
+               };
+
+               let html = '';
+               Object.entries(gameState.buildings).forEach(([buildingName, buildingData]) => {
+                   const config = window.config?.buildings[buildingName];
+                   if (!config) return;
+
+                   const assetPath = buildingAssets[buildingName] || 'Batiment/default_asset.png';
+                   const level = buildingData.level || 0;
+                   const isMaxLevel = level >= (config.levels?.length || 1);
+
+                   html += `
+                       <div class="building-card-enhanced" onclick="selectBuilding('${buildingName}')" 
+                            style="background: var(--color-panel); border-radius: 0.5rem; padding: 1rem; text-align: center; cursor: pointer; transition: all 0.3s ease; border: 1px solid var(--color-border);">
+                           <div class="building-image" style="width: 80px; height: 80px; background-image: url('${assetPath}'); background-size: contain; background-repeat: no-repeat; background-position: center; margin: 0 auto 0.5rem; border-radius: 8px;"></div>
+                           <div class="building-name" style="font-weight: bold; color: var(--color-text); margin-bottom: 0.25rem; font-size: 0.9rem;">${buildingName}</div>
+                           <div class="building-level" style="color: var(--color-primary); font-size: 0.8rem;">Niv. ${level}</div>
+                           ${!isMaxLevel ? `<div class="upgrade-indicator" style="color: var(--color-success); font-size: 0.7rem; margin-top: 0.25rem;">⬆️ Amélioration disponible</div>` : ''}
+                       </div>
+                   `;
+               });
+
+               buildingsGrid.innerHTML = html;
+           }
+
+           function updateCityResourcesDisplay() {
+               // Mettre à jour l'affichage des ressources dans la sidebar
+               Object.entries(gameState.resources).forEach(([resource, amount]) => {
+                   const element = document.getElementById(`${resource}-amount`);
+                   if (element) {
+                       element.textContent = Math.floor(amount).toLocaleString();
+                   }
+               });
+
+               // Mettre à jour les statistiques de population
+               const populationElement = document.getElementById('city-population');
+               const happinessElement = document.getElementById('city-happiness');
+               
+               if (populationElement) {
+                   populationElement.textContent = Math.floor(gameState.population || 1000).toLocaleString();
+               }
+               
+               if (happinessElement) {
+                   const happiness = Math.floor((gameState.happiness || 75));
+                   happinessElement.textContent = `${happiness}%`;
+                   happinessElement.className = happiness >= 70 ? 'positive' : happiness >= 50 ? 'neutral' : 'negative';
+               }
+           }
+
+           function selectBuilding(buildingName) {
+               // Logique de sélection de bâtiment
+               logEvent(`🏗️ ${buildingName} sélectionné`);
+               // Ici on pourrait ouvrir un panneau de détails du bâtiment
+           }
+
+           // Fonctions pour les boutons d'action rapide
+           function openBuildingView() {
+               logEvent("🏗️ Ouverture de la vue construction...");
+               // Logique pour ouvrir la vue de construction
+           }
+
+           function openMilitaryView() {
+               switchView('military');
+           }
+
+           function openTradeView() {
+               switchView('trade');
+           }
+
+           function openResearchView() {
+               switchView('research');
            }
 
            // --- LOGIQUE DE JEU PRINCIPALE ---
@@ -3711,6 +4668,4 @@
                    {
                        name: "Pack du Chercheur",
                        description: "Accélérez vos recherches",
-                       cost: { gold: 1500, wine: 100 },
-                       reward: { research: 800, crystal: 300 },
-                       available: gameState.resources.gold >= 1500 && gameState.r
+            
