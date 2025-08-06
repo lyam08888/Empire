@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empire - Démonstration des Nouvelles Interfaces</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            font-family: 'Arial', sans-serif;
+            color: #e2e8f0;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .demo-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .demo-title {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .demo-subtitle {
+            font-size: 1.2rem;
+            color: #94a3b8;
+            margin-bottom: 2rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .feature-card {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            padding: 2rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(251, 191, 36, 0.2);
+            border-color: #fbbf24;
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            margin: 0 auto 1rem;
+            border-radius: 50%;
+            border: 3px solid #fbbf24;
+            padding: 1rem;
+        }
+
+        .feature-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #fbbf24;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .feature-description {
+            color: #94a3b8;
+            text-align: center;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-highlights {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-highlights li {
+            padding: 0.3rem 0;
+            color: #10b981;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .feature-highlights li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .demo-btn {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .demo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .assets-showcase {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .showcase-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #fbbf24;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .assets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .asset-item {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .asset-item:hover {
+            transform: scale(1.05);
+            background: rgba(30, 41, 59, 0.8);
+        }
+
+        .asset-image {
+            width: 64px;
+            height: 64px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            margin: 0 auto 0.5rem;
+            border-radius: 8px;
+        }
+
+        .asset-name {
+            font-size: 0.8rem;
+            color: #e2e8f0;
+            font-weight: bold;
+        }
+
+        .implementation-guide {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            padding: 2rem;
+        }
+
+        .guide-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #fbbf24;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .guide-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .guide-step {
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            border-left: 4px solid #10b981;
+        }
+
+        .step-number {
+            background: #10b981;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .step-title {
+            font-weight: bold;
+            color: #e2e8f0;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-description {
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .demo-title {
+                font-size: 2rem;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .assets-grid {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <!-- En-tête -->
+        <header class="demo-header">
+            <h1 class="demo-title">🏛️ Empire Enhanced</h1>
+            <p class="demo-subtitle">
+                Découvrez la nouvelle interface graphique d'Empire utilisant tous les assets disponibles
+            </p>
+        </header>
+
+        <!-- Fonctionnalités principales -->
+        <section class="features-grid">
+            <div class="feature-card" onclick="openDemo('worldmap')">
+                <div class="feature-icon" style="background-image: url('Ville/imperial_rome_asset.png');"></div>
+                <h3 class="feature-title">Carte du Monde Améliorée</h3>
+                <p class="feature-description">
+                    Une carte interactive avec tous les types de villes romaines, navigation fluide et interface moderne.
+                </p>
+                <ul class="feature-highlights">
+                    <li>Visualisation des différents types de cités</li>
+                    <li>Navigation par glisser-déposer</li>
+                    <li>Zoom adaptatif</li>
+                    <li>Minimap et contrôles intuitifs</li>
+                </ul>
+                <button class="demo-btn">Voir la Carte</button>
+            </div>
+
+            <div class="feature-card" onclick="openDemo('city')">
+                <div class="feature-icon" style="background-image: url('Batiment/palatium_asset.png');"></div>
+                <h3 class="feature-title">Interface de Ville</h3>
+                <p class="feature-description">
+                    Gestion de ville repensée avec tous les bâtiments romains et une interface moderne.
+                </p>
+                <ul class="feature-highlights">
+                    <li>Assets de bâtiments authentiques</li>
+                    <li>Interface responsive</li>
+                    <li>Gestion des ressources en temps réel</li>
+                    <li>File de construction visuelle</li>
+                </ul>
+                <button class="demo-btn">Gérer la Ville</button>
+            </div>
+
+            <div class="feature-card" onclick="openDemo('military')">
+                <div class="feature-icon" style="background-image: url('Romain/Quintus_Cornelius_Crassus_asset_pack/legatus_homme_bust.png');"></div>
+                <h3 class="feature-title">Forces Militaires</h3>
+                <p class="feature-description">
+                    Gestion complète des légions et de la flotte avec personnages romains authentiques.
+                </p>
+                <ul class="feature-highlights">
+                    <li>Légionnaires, centurions, prétoriens</li>
+                    <li>Flotte avec trirèmes et liburnes</li>
+                    <li>Statistiques détaillées</li>
+                    <li>Historique des batailles</li>
+                </ul>
+                <button class="demo-btn">Commander les Légions</button>
+            </div>
+
+            <div class="feature-card" onclick="openDemo('advisors')">
+                <div class="feature-icon" style="background-image: url('Romain/Valeria_Drusilla_asset_pack/patrician_female_femme_bust.png');"></div>
+                <h3 class="feature-title">Conseil Impérial</h3>
+                <p class="feature-description">
+                    Système de conseillers avec personnages uniques pour chaque domaine de l'Empire.
+                </p>
+                <ul class="feature-highlights">
+                    <li>6 conseillers spécialisés</li>
+                    <li>Décisions stratégiques</li>
+                    <li>Rapports en temps réel</li>
+                    <li>Interface immersive</li>
+                </ul>
+                <button class="demo-btn">Consulter le Sénat</button>
+            </div>
+        </section>
+
+        <!-- Showcase des Assets -->
+        <section class="assets-showcase">
+            <h2 class="showcase-title">🎨 Assets Utilisés</h2>
+            
+            <h3 style="color: #fbbf24; margin-bottom: 1rem;">Types de Villes</h3>
+            <div class="assets-grid">
+                <div class="asset-item">
+                    <div class="asset-image" style="background-image: url('Ville/vicus_asset.png');"></div>
+                    <div class="asset-name">Vicus</div>
+                </div>
+                <div class="asset-item">
+                    <div class="asset-image" style="background-image: url('Ville/civitas_asset.png');"></div>
+                    <div class="asset-name">Civitas</div>
+                </div>
+                <div class="asset-item">
+                    <div class="asset-image" style="background-image: url('Ville/municipium_asset.png');"></div>
+                    <div class="asset-name">Municipium</div>
+                </div>
+                <div class="asset-item">
+                    <div class="asset-image" style="background-image: url('Ville/urbs_asset.png');"></div>
+                    <div class="asset-name">Urbs</div>
+                </div>
+                <div class="asset-item">
+                    <div class="asset-image" style="background-image: url('Ville/imperial_rome_asset.png');"></div>
+                    <div class="asset-name">Rome Impériale</div>
+                </div>
+            </div>
+
+            <h3 style="color: #fbbf24; margin: 2rem 0 1rem;">Bâtiments Romains</h3>
+            <div class="assets-grid">
+                <div class="asset-item">
+                    <div class="asset-image" style="background-image: url('Batiment/palatium_asset.png');"></div>
+                    <div class="asset-name">Palatium</div>
+                </div>
+                <div class="asset-item">
+                    <div class="asset-image" style="background-image: url('Batiment/amphitheatrum_asset.png');"></div>
+                    <div class="asset-name">Amphithéâtre</div>
+                </div>
+                <div class="asset-item">
+                    <div class="asset-image" style="background-image: url('Batiment/basilica_asset.png');"></div>
+                    <div class="asset-name">Basilique</div>
+                </div>
+                <div class="asset-item">
+                    <div class="asset-image" style="background-image: url('Batiment/thermae_asset.png');"></div>
+                    <div class="asset-name">Thermes</div>
+                </div>
+                <div class="asset-item">
+                    <div class="asset-image" style="background-image: url('Batiment/templum_asset.png');"></div>
+                    <div class="asset-name">Temple</div>
+                </div>
+            </div>
+
+            <h3 style="color: #fbbf24; margin: 2rem 0 1rem;">Personnages Romains</h3>
+            <div class="assets-grid">
+                <div class="asset-item">
+                    <div class="asset-image" style="background-image: url('Romain/Lucius_Julius_Scipio_asset_pack/legionary_homme_bust.png');"></div>
+                    <div class="asset-name">Légionnaire</div>
+                </div>
+                <div class="asset-item">
+                    <div class="asset-image" style="background-image: url('Romain/Quintus_Valerius_Cicero_asset_pack/centurion_homme_bust.png');"></div>
+                    <div class="asset-name">Centurion</div>
+                </div>
+                <div class="asset-item">
+                    <div class="asset-image" style="background-image: url('Romain/Titus_Fabius_Scipio_asset_pack/praetorian_homme_bust.png');"></div>
+                    <div class="asset-name">Prétorien</div>
+                </div>
+                <div class="asset-item">
+                    <div class="asset-image" style="background-image: url('Romain/Valeria_Drusilla_asset_pack/patrician_female_femme_bust.png');"></div>
+                    <div class="asset-name">Patricienne</div>
+                </div>
+                <div class="asset-item">
+                    <div class="asset-image" style="background-image: url('Romain/Fabia_Maxima_asset_pack/vestal_femme_bust.png');"></div>
+                    <div class="asset-name">Vestale</div>
+                </div>
+            </div>
+
+            <h3 style="color: #fbbf24; margin: 2rem 0 1rem;">Flotte Navale</h3>
+            <div class="assets-grid">
+                <div class="asset-item">
+                    <div class="asset-image" style="background-image: url('Bateau/trireme_asset.png');"></div>
+                    <div class="asset-name">Trirème</div>
+                </div>
+                <div class="asset-item">
+                    <div class="asset-image" style="background-image: url('Bateau/liburna_asset.png');"></div>
+                    <div class="asset-name">Liburne</div>
+                </div>
+                <div class="asset-item">
+                    <div class="asset-image" style="background-image: url('Bateau/corbita_asset.png');"></div>
+                    <div class="asset-name">Corbite</div>
+                </div>
+                <div class="asset-item">
+                    <div class="asset-image" style="background-image: url('Bateau/navis_oneraria_asset.png');"></div>
+                    <div class="asset-name">Navis Oneraria</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Guide d'implémentation -->
+        <section class="implementation-guide">
+            <h2 class="guide-title">🚀 Guide d'Implémentation</h2>
+            
+            <div class="guide-steps">
+                <div class="guide-step">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Intégration des Templates</div>
+                    <div class="step-description">
+                        Remplacez les anciens templates par les nouvelles versions enhanced. 
+                        Tous les fichiers sont prêts à être utilisés avec le système existant.
+                    </div>
+                </div>
+
+                <div class="guide-step">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Configuration des Assets</div>
+                    <div class="step-description">
+                        Les assets sont automatiquement référencés dans les nouveaux templates. 
+                        Assurez-vous que les dossiers Ville, Batiment, Romain et Bateau sont accessibles.
+                    </div>
+                </div>
+
+                <div class="guide-step">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Mise à jour des Liens</div>
+                    <div class="step-description">
+                        Modifiez les liens de navigation pour pointer vers les nouvelles interfaces :
+                        worldmap_enhanced.php, city_enhanced.php, military_enhanced.php, advisors_enhanced.php
+                    </div>
+                </div>
+
+                <div class="guide-step">
+                    <div class="step-number">4</div>
+                    <div class="step-title">Test et Optimisation</div>
+                    <div class="step-description">
+                        Testez toutes les fonctionnalités sur différents appareils. 
+                        Les interfaces sont responsive et s'adaptent automatiquement.
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function openDemo(type) {
+            switch(type) {
+                case 'worldmap':
+                    alert('Redirection vers Templates/worldmap_enhanced.php\n\nFonctionnalités :\n- Carte interactive avec zoom\n- Visualisation des types de villes\n- Navigation fluide\n- Sidebar avec informations');
+                    break;
+                case 'city':
+                    alert('Redirection vers Templates/city_enhanced.php\n\nFonctionnalités :\n- Interface moderne avec assets de bâtiments\n- Gestion des ressources en temps réel\n- Conseillers intégrés\n- Design responsive');
+                    break;
+                case 'military':
+                    alert('Redirection vers Templates/military_enhanced.php\n\nFonctionnalités :\n- Gestion des légions avec personnages romains\n- Interface navale avec assets de bateaux\n- Statistiques détaillées\n- Système de recrutement');
+                    break;
+                case 'advisors':
+                    alert('Redirection vers Templates/advisors_enhanced.php\n\nFonctionnalités :\n- 6 conseillers spécialisés\n- Décisions stratégiques\n- Rapports en temps réel\n- Interface immersive');
+                    break;
+            }
+        }
+
+        // Animation d'entrée
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.feature-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+
+            const assetItems = document.querySelectorAll('.asset-item');
+            assetItems.forEach((item, index) => {
+                item.style.opacity = '0';
+                item.style.transform = 'scale(0.8)';
+                setTimeout(() => {
+                    item.style.transition = 'all 0.4s ease';
+                    item.style.opacity = '1';
+                    item.style.transform = 'scale(1)';
+                }, 1000 + index * 50);
+            });
+        });
+    </script>
+</body>
+</html>
