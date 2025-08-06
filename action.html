@@ -2802,120 +2802,108 @@
            }
 
            function produceResources(seconds) {
-               const townHallLevel = gameState.buildings.townHall?.level || 1;
-               const academyLevel = gameState.buildings.academy?.level || 0;
+               // Production selon les formules exactes du GDD Imperium
+               // Production horaire = Base * (1 + 0.1 * (Niveau - 1)) * Bonus île * Bonus alliance
                
-               // Production de base de l'île capitale
-               const capitalKey = "7-7";
-               const capitalData = gameState.islandDetails[capitalKey];
+               const hourlyProduction = seconds / 3600; // Conversion en production par seconde
                
-               let baseProduction = {
-                   gold: townHallLevel * 2 * seconds / 3600,
-                   wood: 5 * seconds / 3600,
-                   research: academyLevel > 0 ? academyLevel * 2 * seconds / 3600 : 0,
+               // Bonus île (île capitale a +15% selon le defaultGameState)
+               const islandBonus = 1.15;
+               
+               // Bonus alliance (simulé à +10% pour l'exemple)
+               const allianceBonus = gameState.alliance ? 1.10 : 1.0;
+               
+               let production = {
+                   wood: 0,
+                   stone: 0,
+                   iron: 0,
                    wine: 0,
-                   marble: 0,
-                   crystal: 0,
-                   sulfur: 0
+                   gold: 0
                };
                
-               // Bonus des ressources naturelles de l'île capitale
-               if (capitalData && capitalData.naturalResources) {
-                   capitalData.naturalResources.forEach(resource => {
-                       if (baseProduction[resource] !== undefined) {
-                           baseProduction[resource] *= 1.5; // +50% pour les ressources naturelles
-                       } else {
-                           baseProduction[resource] = 1 * seconds / 3600; // Production de base pour les nouvelles ressources
-                       }
-                   });
-               }
-               
-               // Bonus des districts de l'île capitale
-               if (capitalData && capitalData.districts) {
-                   baseProduction.gold += (capitalData.districts.commercial.income || 0) * seconds / 3600;
+               // Production des bâtiments selon les formules Imperium
+               Object.entries(gameState.buildings).forEach(([buildingId, building]) => {
+                   if (!building || building.level === 0 || building.constructing) return;
                    
-                   const industrialBonus = (capitalData.districts.industrial.production || 0) / 100;
-                   Object.keys(baseProduction).forEach(resource => {
-                       if (resource !== 'gold') {
-                           baseProduction[resource] *= (1 + industrialBonus);
-                       }
-                   });
-               }
-               
-               // Production des colonies
-               gameState.colonizedIslands.forEach(colony => {
-                   const colonyKey = `${colony.x}-${colony.y}`;
-                   const colonyData = gameState.islandDetails[colonyKey];
-                   
-                   if (colonyData) {
-                       // Production basée sur le développement de la colonie
-                       const developmentMultiplier = colonyData.development * 0.5;
-                       
-                       // Ressources naturelles de la colonie
-                       if (colonyData.naturalResources) {
-                           colonyData.naturalResources.forEach(resource => {
-                               const amount = developmentMultiplier * 2 * seconds / 3600;
-                               baseProduction[resource] = (baseProduction[resource] || 0) + amount;
-                           });
-                       }
-                       
-                       // Production des districts de la colonie
-                       if (colonyData.districts) {
-                           baseProduction.gold += (colonyData.districts.commercial.income || 0) * 0.5 * seconds / 3600;
-                       }
-                   }
-               });
-               
-               // Bonus des bâtiments spécialisés
-               Object.entries(gameState.buildings).forEach(([id, building]) => {
-                   if (!building.type) return;
-                   const level = building.level || 0;
+                   const level = building.level;
+                   const baseProduction = 10; // Base : 10 unités/h (niveau 1)
+                   const levelMultiplier = 1 + 0.1 * (level - 1);
+                   const finalProduction = baseProduction * levelMultiplier * islandBonus * allianceBonus * hourlyProduction;
                    
                    switch(building.type) {
-                       case "Foresterie":
-                           baseProduction.wood += level * 1.5 * seconds / 3600;
+                       case "Camp de Bûcherons":
+                           production.wood += finalProduction;
                            break;
-                       case "Cave à Vin":
-                           baseProduction.wine += level * 1 * seconds / 3600;
+                       case "Carrière":
+                           production.stone += finalProduction * 0.8; // 8 unités/h de base
                            break;
-                       case "Carrière de Pierre":
-                           baseProduction.marble += level * 0.8 * seconds / 3600;
+                       case "Mine de Fer":
+                           production.iron += finalProduction * 0.6; // 6 unités/h de base
                            break;
-                       case "Verrerie":
-                           baseProduction.crystal += level * 0.6 * seconds / 3600;
+                       case "Vignoble":
+                           production.wine += finalProduction * 0.4; // 4 unités/h de base
                            break;
-                       case "Alchimiste":
-                           baseProduction.sulfur += level * 0.5 * seconds / 3600;
+                       case "Forum":
+                           // Le Forum génère de l'or selon les recherches
+                           if (gameState.research.completed.includes("Monnaie")) {
+                               production.gold += level * 2 * hourlyProduction; // +2 or/min par niveau
+                           }
                            break;
                    }
                });
                
-               // Bonus des routes commerciales
-               gameState.tradeRoutes.forEach(route => {
-                   const profit = calculateTradeRouteProfit(route);
-                   baseProduction.gold += profit * seconds / 3600; // Profit par minute converti
-               });
+               // Consommation de vin selon le GDD
+               const wineConsumption = gameState.population.wineConsumption * hourlyProduction;
+               production.wine -= wineConsumption;
                
-               // Bonus de niveau du joueur
-               const levelBonus = gameState.playerStats.level * 0.05; // 5% par niveau
-               Object.keys(baseProduction).forEach(resource => {
-                   baseProduction[resource] *= (1 + levelBonus);
-               });
-               
-               // Bonus des technologies recherchées
-               if (gameState.researchCompleted.includes('Commerce')) {
-                   baseProduction.gold *= 1.25;
-               }
-               if (gameState.researchCompleted.includes('Philosophie')) {
-                   baseProduction.research *= 1.2;
+               // Calcul du bonheur selon la consommation de vin
+               const wineAvailable = gameState.resources.wine + production.wine;
+               let happinessFromWine = 0;
+               if (wineAvailable >= wineConsumption) {
+                   happinessFromWine = Math.floor(wineAvailable / 10) * 2; // +2 bonheur / 10 unités
                }
                
-               // Appliquer la production finale
-               Object.entries(baseProduction).forEach(([resource, amount]) => {
-                   gameState.resources[resource] = (gameState.resources[resource] || 0) + Math.max(0, amount);
+               // Bonus bonheur des tavernes
+               const tavernLevel = gameState.buildings.tavern?.level || 0;
+               const happinessFromTavern = tavernLevel > 0 ? 5 + (tavernLevel - 1) * 10 : 0; // +5 à +50 selon niveau
+               
+               // Mise à jour du bonheur total
+               gameState.population.happiness = Math.min(100, Math.max(0, 
+                   50 + happinessFromWine + happinessFromTavern
+               ));
+               
+               // Malus de productivité si bonheur < 50
+               const happinessPenalty = gameState.population.happiness < 50 ? 0.9 : 1.0; // -10% si bonheur bas
+               
+               // Application du malus de bonheur
+               Object.keys(production).forEach(resource => {
+                   production[resource] *= happinessPenalty;
                });
                
-               gameState.lastUpdate = Date.now();
+               // Vérification de la capacité de stockage selon la formule Imperium
+               // Capacité = 500 * Niveau_Entrepôt ^ 1.2
+               const warehouseLevel = gameState.buildings.warehouse?.level || 1;
+               const storageCapacity = 500 * Math.pow(warehouseLevel, 1.2);
+               
+               // Application de la production avec vérification des limites de stockage
+               Object.entries(production).forEach(([resource, amount]) => {
+                   const newAmount = gameState.resources[resource] + amount;
+                   
+                   if (newAmount > storageCapacity && resource !== 'gold') {
+                       // Les ressources dépassant la capacité sont perdues (sauf l'or)
+                       gameState.resources[resource] = storageCapacity;
+                       if (amount > 0 && newAmount - storageCapacity > 0.1) {
+                           logEvent(`⚠️ Entrepôt plein ! ${Math.floor(newAmount - storageCapacity)} ${resource} perdus.`);
+                       }
+                   } else {
+                       gameState.resources[resource] = Math.max(0, newAmount);
+                   }
+               });
+               
+               // Mise à jour de la population max selon le Forum
+               // Population max = 50 + 25 * Niveau_Forum
+               const forumLevel = gameState.buildings.forum?.level || 1;
+               gameState.population.max = 50 + 25 * forumLevel;
            }
 
            function processQueues() {
@@ -2998,9 +2986,34 @@
            // --- FONCTIONS D'AFFICHAGE ---
            function updateAllUI() { updateResourceUI(); updatePlayerUI(); updateQueueUI(); updateActionAvailability(); }
            function updateResourceUI() { 
-               for (const res in dom.res) { 
-                   if(dom.res[res]) dom.res[res].textContent = Math.floor(gameState.resources[res]); 
-               } 
+               // Mise à jour des ressources Imperium
+               const resourceElements = {
+                   wood: document.getElementById('resWood'),
+                   stone: document.getElementById('resStone'),
+                   iron: document.getElementById('resIron'),
+                   wine: document.getElementById('resWine'),
+                   gold: document.getElementById('resGold')
+               };
+               
+               Object.entries(resourceElements).forEach(([resource, element]) => {
+                   if (element && gameState.resources[resource] !== undefined) {
+                       element.textContent = Math.floor(gameState.resources[resource]).toLocaleString();
+                   }
+               });
+               
+               // Mise à jour des informations de population et bonheur
+               const populationElement = document.getElementById('city-population');
+               const happinessElement = document.getElementById('city-happiness');
+               
+               if (populationElement && gameState.population) {
+                   populationElement.textContent = `${gameState.population.current}/${gameState.population.max}`;
+               }
+               
+               if (happinessElement && gameState.population) {
+                   const happiness = Math.floor(gameState.population.happiness);
+                   happinessElement.textContent = `${happiness}%`;
+                   happinessElement.className = happiness >= 70 ? 'positive' : happiness >= 50 ? 'neutral' : 'negative';
+               }
            }
            
            function updatePlayerUI() {
@@ -4110,183 +4123,4 @@
                        // Ajouter le contenu de la tuile
                        if (building) {
                            tile.classList.add(building.type);
-                           tile.innerHTML = building.icon;
-                           tile.title = `${building.name} - ${building.description || ''}`;
-                       } else if (resource) {
-                           tile.classList.add('resource');
-                           tile.innerHTML = resource.icon;
-                           tile.title = `${resource.name} - Cliquez pour exploiter`;
-                       } else {
-                           tile.innerHTML = terrain.icon;
-                           tile.title = `${terrain.name} - ${terrain.description || ''}`;
-                       }
-                       
-                       // Ajouter les événements de clic
-                       tile.addEventListener('click', () => handleIslandTileClick(x, y, terrain, building, resource));
-                       
-                       dom.islandGrid.appendChild(tile);
-                   }
-               }
-               
-               // Mettre à jour les détails de l'île
-               updateIslandDetails(islandData);
-           }
-           
-           function updateIslandHeader(islandData) {
-               const nameEl = document.getElementById('current-island-name');
-               const populationEl = document.getElementById('island-population');
-               const happinessEl = document.getElementById('island-happiness');
-               const developmentEl = document.getElementById('island-development');
-               
-               if (nameEl) nameEl.textContent = islandData.name;
-               if (populationEl) populationEl.textContent = islandData.population.toLocaleString();
-               if (happinessEl) happinessEl.textContent = `${islandData.happiness}%`;
-               if (developmentEl) developmentEl.textContent = `Niv. ${islandData.development}`;
-           }
-           
-           function updateIslandDetails(islandData) {
-               const terrainEl = document.getElementById('terrain-types');
-               const resourcesEl = document.getElementById('natural-resources');
-               
-               if (terrainEl) {
-                   terrainEl.textContent = islandData.terrain.join(', ');
-               }
-               
-               if (resourcesEl) {
-                   resourcesEl.textContent = islandData.naturalResources.join(', ');
-               }
-           }
-           
-           function getTerrainForTile(x, y, islandData) {
-               // Génération procédurale du terrain basée sur la position
-               const seed = x * 7 + y * 11 + (islandData.name.length * 3);
-               const terrainRandom = (seed % 100) / 100;
-               
-               // Zones d'eau autour des bords
-               if (x === 0 || x === 8 || y === 0 || y === 8) {
-                   if (terrainRandom < 0.8) {
-                       return { type: 'water', name: 'Eau', icon: '🌊', description: 'Eaux côtières' };
-                   }
-               }
-               
-               // Centre de l'île - plus de chances d'avoir des montagnes
-               if (x >= 3 && x <= 5 && y >= 3 && y <= 5) {
-                   if (terrainRandom < 0.3) {
-                       return { type: 'mountain', name: 'Montagne', icon: '⛰️', description: 'Terrain montagneux riche en minerais' };
-                   }
-               }
-               
-               // Forêts
-               if (terrainRandom < 0.4) {
-                   return { type: 'forest', name: 'Forêt', icon: '🌲', description: 'Forêt dense, source de bois' };
-               }
-               
-               // Plaines par défaut
-               return { type: 'land', name: 'Plaines', icon: '🌾', description: 'Terres fertiles pour l\'agriculture' };
-           }
-           
-           function getBuildingOnTile(x, y, islandData) {
-               // Vérifier s'il y a un bâtiment spécial sur cette tuile
-               if (x === 4 && y === 4) {
-                   return { type: 'playerCity', name: 'Votre Ville', icon: '🏛️', description: 'Votre capitale sur cette île' };
-               }
-               
-               // Autres bâtiments basés sur les données de l'île
-               const buildings = islandData.specialBuildings || [];
-               const building = buildings.find(b => b.x === x && b.y === y);
-               
-               return building || null;
-           }
-           
-           function getResourceOnTile(x, y, islandData) {
-               // Ressources naturelles dispersées
-               const seed = x * 13 + y * 17;
-               const resourceRandom = (seed % 100) / 100;
-               
-               if (resourceRandom < 0.1) { // 10% de chance
-                   const resources = [
-                       { name: 'Mine de Fer', icon: '⛏️', type: 'iron' },
-                       { name: 'Carrière de Pierre', icon: '🪨', type: 'stone' },
-                       { name: 'Gisement d\'Or', icon: '💰', type: 'gold' },
-                       { name: 'Source de Cristal', icon: '💎', type: 'crystal' }
-                   ];
-                   
-                   return resources[seed % resources.length];
-               }
-               
-               return null;
-           }
-           
-           function handleIslandTileClick(x, y, terrain, building, resource) {
-               if (building && building.type === 'playerCity') {
-                   // Retourner à la vue ville
-                   document.querySelector('[data-view="city"]').click();
-                   return;
-               }
-               
-               if (resource) {
-                   // Exploiter la ressource
-                   harvestResource(x, y, resource.type);
-                   return;
-               }
-               
-               if (terrain.type === 'land' || terrain.type === 'forest') {
-                   // Possibilité de construire
-                   showBuildingOptions(x, y, terrain);
-               } else {
-                   // Afficher les informations du terrain
-                   showModal(terrain.name, terrain.description || 'Terrain non constructible');
-               }
-           }
-                       const isCenter = (x === 2 || x === 3) && (y === 2 || y === 3);
-                       
-                       html += `
-                           <div class="island-tile ${terrain}" 
-                                onclick="selectTile(${x}, ${y})" 
-                                title="${getTerrainName(terrain)} ${building ? '- ' + building : ''}"
-                                style="aspect-ratio: 1; border: 2px solid var(--color-border); border-radius: 0.25rem; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; position: relative; ${isCenter ? 'border-color: var(--color-primary);' : ''}">
-                               ${getTerrainIcon(terrain)}
-                               ${building ? `<div style="position: absolute; top: -5px; right: -5px; background: var(--color-primary); border-radius: 50%; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem;">🏗️</div>` : ''}
-                           </div>
-                       `;
-                   }
-               }
-               
-               html += `
-                       </div>
-                       <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
-                           <div><span style="color: #22c55e;">🌲</span> Forêt</div>
-                           <div><span style="color: #84cc16;">🌾</span> Plaines</div>
-                           <div><span style="color: #a3a3a3;">⛰️</span> Collines</div>
-                           <div><span style="color: #3b82f6;">🌊</span> Côte</div>
-                           <div><span style="color: #f59e0b;">🏜️</span> Désert</div>
-                           <div><span style="color: #8b5cf6;">💎</span> Gisement</div>
-                       </div>
-                   </div>
-               `;
-               
-               // Districts de l'île
-               html += `
-                   <div class="card">
-                       <h4>🏘️ District Résidentiel</h4>
-                       <p>Population: ${islandData.districts.residential.population}</p>
-                       <p>Niveau: ${islandData.districts.residential.level}</p>
-                       <button onclick="upgradeDistrict('residential')" class="action-btn" ${canUpgradeDistrict('residential') ? '' : 'disabled'}>
-                           Améliorer (${getDistrictUpgradeCost('residential').gold} or)
-                       </button>
-                   </div>
-                   
-                   <div class="card">
-                       <h4>🏪 District Commercial</h4>
-                       <p>Revenus: +${islandData.districts.commercial.income} or/min</p>
-                       <p>Niveau: ${islandData.districts.commercial.level}</p>
-                       <button onclick="upgradeDistrict('commercial')" class="action-btn" ${canUpgradeDistrict('commercial') ? '' : 'disabled'}>
-                           Améliorer (${getDistrictUpgradeCost('commercial').gold} or)
-                       </button>
-                   </div>
-                   
-                   <div class="card">
-                       <h4>🏭 District Industriel</h4>
-                       <p>Production: +${islandData.districts.industrial.production}% ressources</p>
-                       <p>Niveau: ${islandData.districts.industrial.level}</p>
-                       <button onclick="upgradeDistrict('industrial')" class="action-btn" ${canUpgradeD
+                           tile.innerHTM
