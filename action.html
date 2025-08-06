@@ -1493,13 +1493,11 @@
                    </div>
                </div>
                <div class="resources">
-                   <div class="resource-item" title="Bois">🌲 <span id="resWood">0</span></div>
-                   <div class="resource-item" title="Vin">🍇 <span id="resWine">0</span></div>
-                   <div class="resource-item" title="Marbre">🏛️ <span id="resMarble">0</span></div>
-                   <div class="resource-item" title="Cristal">💎 <span id="resCrystal">0</span></div>
-                   <div class="resource-item" title="Soufre">🔥 <span id="resSulfur">0</span></div>
-                   <div class="resource-item" title="Or">💰 <span id="resGold">0</span></div>
-                   <div class="resource-item" title="Points de Recherche">🔬 <span id="resResearch">0</span></div>
+                   <div class="resource-item" title="Bois - Production de base sur toutes les îles">🌲 <span id="resWood">0</span></div>
+                   <div class="resource-item" title="Pierre - Fortifications, bâtiments avancés">🪨 <span id="resStone">0</span></div>
+                   <div class="resource-item" title="Fer - Unités militaires">⚔️ <span id="resIron">0</span></div>
+                   <div class="resource-item" title="Vin - Bonheur de la population">🍇 <span id="resWine">0</span></div>
+                   <div class="resource-item" title="Or - Commerce, entretien des troupes">💰 <span id="resGold">0</span></div>
                </div>
                <div class="player-info">
                    <div style="font-size: 0.8rem; margin-bottom: 0.25rem;">
@@ -1991,78 +1989,258 @@
            // --- CONFIGURATION DU JEU ---
            const config = {
                buildings: {
-                   "Hôtel de Ville": { description: "Augmente la population et le revenu en or.", icon: "🏛️", levels: [ { cost: { wood: 150 }, buildTime: 10 }, { cost: { wood: 350 }, buildTime: 25 } ] },
-                   "Caserne": { description: "Permet de recruter des unités.", icon: "⚔️", levels: [ { cost: { wood: 200, gold: 50 }, buildTime: 15 }, { cost: { wood: 450, gold: 120 }, buildTime: 35 } ] },
-                   "Entrepôt": { description: "Augmente le stockage.", icon: "🧱", levels: [ { cost: { wood: 250 }, buildTime: 12 }, { cost: { wood: 500 }, buildTime: 30 } ] },
-                   "Académie": { description: "Produit des points de recherche.", icon: "🔬", levels: [ { cost: { wood: 300, crystal: 100 }, buildTime: 20 }, { cost: { wood: 600, crystal: 250 }, buildTime: 45 } ] },
-                   "Taverne": { description: "Augmente le bonheur des habitants.", icon: "🍺", levels: [ { cost: { wood: 220, wine: 40 }, buildTime: 15 }, { cost: { wood: 450, wine: 100 }, buildTime: 35 } ] },
-                   "Musée": { description: "Exhibe des trésors culturels.", icon: "🏺", levels: [ { cost: { wood: 300, marble: 100 }, buildTime: 20 }, { cost: { wood: 600, marble: 250 }, buildTime: 45 } ] },
-                   "Muraille": { description: "Renforce la défense de la ville.", icon: "🛡️", levels: [ { cost: { wood: 250, marble: 150 }, buildTime: 25 }, { cost: { wood: 550, marble: 350 }, buildTime: 60 } ] },
-                   "Port": { description: "Permet les échanges maritimes.", icon: "⚓", levels: [ { cost: { wood: 400 }, buildTime: 30 }, { cost: { wood: 800 }, buildTime: 60 } ] },
-                   "Chantier Naval": { description: "Construit des navires de guerre.", icon: "🚢", levels: [ { cost: { wood: 500, sulfur: 200 }, buildTime: 35 }, { cost: { wood: 900, sulfur: 400 }, buildTime: 70 } ] },
-                   "Marché": { description: "Centre des échanges commerciaux.", icon: "🏬", levels: [ { cost: { wood: 300, gold: 100 }, buildTime: 20 }, { cost: { wood: 650, gold: 250 }, buildTime: 45 } ] },
-                   "Foresterie": { description: "Augmente la production de bois.", icon: "🌲", levels: [ { cost: { wood: 200 }, buildTime: 12 }, { cost: { wood: 450 }, buildTime: 30 } ] },
-                   "Carrière de Pierre": { description: "Augmente la production de marbre.", icon: "🪨", levels: [ { cost: { wood: 200, marble: 50 }, buildTime: 15 }, { cost: { wood: 500, marble: 120 }, buildTime: 35 } ] },
-                   "Verrerie": { description: "Produit du cristal.", icon: "🧪", levels: [ { cost: { wood: 250, crystal: 80 }, buildTime: 18 }, { cost: { wood: 550, crystal: 200 }, buildTime: 40 } ] },
-                   "Cave à Vin": { description: "Produit du vin.", icon: "🍷", levels: [ { cost: { wood: 220, wine: 50 }, buildTime: 18 }, { cost: { wood: 520, wine: 120 }, buildTime: 40 } ] },
-                   "Alchimiste": { description: "Transforme le soufre.", icon: "⚗️", levels: [ { cost: { wood: 240, sulfur: 60 }, buildTime: 18 }, { cost: { wood: 540, sulfur: 150 }, buildTime: 40 } ] },
-                   "Menuiserie": { description: "Réduit le coût en bois des constructions.", icon: "🪵", levels: [ { cost: { wood: 300 }, buildTime: 22 }, { cost: { wood: 650 }, buildTime: 50 } ] },
-                   "Architecte": { description: "Réduit le coût en marbre.", icon: "📐", levels: [ { cost: { wood: 300, marble: 100 }, buildTime: 22 }, { cost: { wood: 650, marble: 220 }, buildTime: 50 } ] },
-                   "Opticien": { description: "Réduit le coût en cristal.", icon: "👓", levels: [ { cost: { wood: 300, crystal: 100 }, buildTime: 22 }, { cost: { wood: 650, crystal: 220 }, buildTime: 50 } ] },
-                   "Vignoble": { description: "Augmente la production de vin.", icon: "🍇", levels: [ { cost: { wood: 240, wine: 40 }, buildTime: 16 }, { cost: { wood: 540, wine: 100 }, buildTime: 38 } ] },
-                   "Artificier": { description: "Améliore les unités spéciales.", icon: "🎇", levels: [ { cost: { wood: 320, sulfur: 80 }, buildTime: 24 }, { cost: { wood: 700, sulfur: 180 }, buildTime: 55 } ] }
+                   // Bâtiments selon le GDD Imperium avec formules exactes
+                   "Forum": { 
+                       description: "Augmente population max et débloque nouveaux bâtiments", 
+                       icon: "🏛️", 
+                       category: "government",
+                       effect: "Population max = 50 + 25 * Niveau",
+                       levels: [
+                           { cost: { wood: 200, stone: 100 }, buildTime: 5 },   // Niveau 1: T = 5 * 1^1.5 = 5 min
+                           { cost: { wood: 300, stone: 140 }, buildTime: 11 },  // Niveau 2: T = 5 * 2^1.5 = 11 min
+                           { cost: { wood: 450, stone: 196 }, buildTime: 18 },  // Niveau 3: T = 5 * 3^1.5 = 18 min
+                           { cost: { wood: 675, stone: 274 }, buildTime: 25 }   // Niveau 4: T = 5 * 4^1.5 = 25 min
+                       ]
+                   },
+                   "Camp de Bûcherons": { 
+                       description: "Produit du bois (production de base)", 
+                       icon: "🌲", 
+                       category: "production",
+                       effect: "Production = 10 * (1 + 0.1 * (Niveau - 1)) * Bonus île",
+                       levels: [
+                           { cost: { wood: 150 }, buildTime: 5 },
+                           { cost: { wood: 225 }, buildTime: 11 },
+                           { cost: { wood: 338 }, buildTime: 18 },
+                           { cost: { wood: 507 }, buildTime: 25 }
+                       ]
+                   },
+                   "Carrière": { 
+                       description: "Produit de la pierre pour fortifications", 
+                       icon: "🪨", 
+                       category: "production",
+                       effect: "Production = 8 * (1 + 0.1 * (Niveau - 1)) * Bonus île",
+                       levels: [
+                           { cost: { wood: 200, stone: 50 }, buildTime: 8 },
+                           { cost: { wood: 300, stone: 70 }, buildTime: 16 },
+                           { cost: { wood: 450, stone: 98 }, buildTime: 26 },
+                           { cost: { wood: 675, stone: 137 }, buildTime: 38 }
+                       ]
+                   },
+                   "Mine de Fer": { 
+                       description: "Produit du fer pour unités militaires", 
+                       icon: "⛏️", 
+                       category: "production",
+                       effect: "Production = 6 * (1 + 0.1 * (Niveau - 1)) * Bonus île",
+                       levels: [
+                           { cost: { wood: 250, stone: 100 }, buildTime: 10 },
+                           { cost: { wood: 375, stone: 140 }, buildTime: 20 },
+                           { cost: { wood: 563, stone: 196 }, buildTime: 32 },
+                           { cost: { wood: 844, stone: 274 }, buildTime: 46 }
+                       ]
+                   },
+                   "Vignoble": { 
+                       description: "Produit du vin pour le bonheur", 
+                       icon: "🍇", 
+                       category: "production",
+                       effect: "Production = 4 * (1 + 0.1 * (Niveau - 1)) * Bonus île",
+                       levels: [
+                           { cost: { wood: 180, stone: 80 }, buildTime: 7 },
+                           { cost: { wood: 270, stone: 112 }, buildTime: 14 },
+                           { cost: { wood: 405, stone: 157 }, buildTime: 23 },
+                           { cost: { wood: 608, stone: 220 }, buildTime: 34 }
+                       ]
+                   },
+                   "Entrepôt": { 
+                       description: "Augmente la capacité de stockage", 
+                       icon: "🏪", 
+                       category: "logistics",
+                       effect: "Capacité = 500 * Niveau^1.2",
+                       levels: [
+                           { cost: { wood: 300 }, buildTime: 6 },
+                           { cost: { wood: 450 }, buildTime: 12 },
+                           { cost: { wood: 675 }, buildTime: 20 },
+                           { cost: { wood: 1013 }, buildTime: 30 }
+                       ]
+                   },
+                   "Caserne": { 
+                       description: "Permet de recruter des unités terrestres", 
+                       icon: "⚔️", 
+                       category: "military",
+                       effect: "Débloque unités: Velites, Hastati, Légionnaires, Equites",
+                       levels: [
+                           { cost: { wood: 400, stone: 200, iron: 100 }, buildTime: 15 },
+                           { cost: { wood: 600, stone: 280, iron: 140 }, buildTime: 30 },
+                           { cost: { wood: 900, stone: 392, iron: 196 }, buildTime: 48 },
+                           { cost: { wood: 1350, stone: 549, iron: 274 }, buildTime: 70 }
+                       ]
+                   },
+                   "Chantier Naval": { 
+                       description: "Construit des navires de guerre et marchands", 
+                       icon: "⚓", 
+                       category: "military",
+                       effect: "Débloque navires: Marchands, Trirèmes, Quinquérèmes",
+                       levels: [
+                           { cost: { wood: 500, stone: 150, iron: 200 }, buildTime: 20 },
+                           { cost: { wood: 750, stone: 210, iron: 280 }, buildTime: 40 },
+                           { cost: { wood: 1125, stone: 294, iron: 392 }, buildTime: 64 },
+                           { cost: { wood: 1688, stone: 412, iron: 549 }, buildTime: 92 }
+                       ]
+                   },
+                   "Académie": { 
+                       description: "Permet la recherche technologique", 
+                       icon: "🔬", 
+                       category: "research",
+                       effect: "Débloque les 4 branches de recherche",
+                       levels: [
+                           { cost: { wood: 350, stone: 250, gold: 200 }, buildTime: 18 },
+                           { cost: { wood: 525, stone: 350, gold: 280 }, buildTime: 36 },
+                           { cost: { wood: 788, stone: 490, gold: 392 }, buildTime: 58 },
+                           { cost: { wood: 1181, stone: 686, gold: 549 }, buildTime: 84 }
+                       ]
+                   },
+                   "Taverne": { 
+                       description: "Augmente le bonheur de la population", 
+                       icon: "🍺", 
+                       category: "social",
+                       effect: "Bonheur +5 à +50 selon niveau",
+                       levels: [
+                           { cost: { wood: 250, wine: 50 }, buildTime: 8 },
+                           { cost: { wood: 375, wine: 70 }, buildTime: 16 },
+                           { cost: { wood: 563, wine: 98 }, buildTime: 26 },
+                           { cost: { wood: 844, wine: 137 }, buildTime: 38 }
+                       ]
+                   },
+                   "Muraille": { 
+                       description: "Renforce la défense de la ville", 
+                       icon: "🛡️", 
+                       category: "defense",
+                       effect: "Défense +25% par niveau",
+                       levels: [
+                           { cost: { wood: 300, stone: 400 }, buildTime: 12 },
+                           { cost: { wood: 450, stone: 560 }, buildTime: 24 },
+                           { cost: { wood: 675, stone: 784 }, buildTime: 38 },
+                           { cost: { wood: 1013, stone: 1098 }, buildTime: 56 }
+                       ]
+                   }
                },
                research: {
-                   economy: { 
-                       name: "Économie", 
-                       icon: "💰", 
+                   // 4 branches de recherche selon le GDD Imperium
+                   urbanisme: { 
+                       name: "Urbanisme", 
+                       icon: "🏛️", 
+                       description: "Débloque bâtiments avancés et améliorations urbaines",
                        techs: { 
-                           "Commerce": { description: "Augmente les revenus en or de 25%.", cost: { research: 200 }, time: 30 },
-                           "Expansion": { description: "Permet de fonder une nouvelle colonie.", cost: { research: 500 }, time: 60 },
-                           "Banque": { description: "Génère des intérêts sur votre or.", cost: { research: 800 }, time: 90 },
-                           "Routes Commerciales": { description: "Réduit les coûts de transport de 50%.", cost: { research: 1200 }, time: 120 }
+                           "Aqueducs": { description: "Augmente la population max de 25%.", cost: { gold: 100, stone: 50 }, time: 2 },      // Temps = Base * 2^1 = 2h
+                           "Amphithéâtres": { description: "Bonus bonheur +20 pour toute la ville.", cost: { gold: 200, stone: 100 }, time: 4 },  // Temps = Base * 2^2 = 4h
+                           "Thermes": { description: "Réduit la consommation de vin de 30%.", cost: { gold: 400, stone: 200 }, time: 8 },        // Temps = Base * 2^3 = 8h
+                           "Égouts": { description: "Prévient les épidémies et maladies.", cost: { gold: 800, stone: 400 }, time: 16 }           // Temps = Base * 2^4 = 16h
                        } 
                    },
-                   military: { 
+                   militaire: { 
                        name: "Militaire", 
                        icon: "⚔️", 
+                       description: "Nouvelles unités, sièges et discipline militaire",
                        techs: { 
-                           "Tactiques": { description: "Augmente l'attaque des unités de 15%.", cost: { research: 250 }, time: 40 },
-                           "Balistique": { description: "Améliore la précision des catapultes.", cost: { research: 400 }, time: 60 },
-                           "Fortification": { description: "Augmente la défense des murailles de 30%.", cost: { research: 600 }, time: 80 },
-                           "Poudre à Canon": { description: "Débloque les unités à poudre.", cost: { research: 1000 }, time: 100 }
+                           "Phalange": { description: "Débloque les Hastati (infanterie de base).", cost: { gold: 150, iron: 100 }, time: 3 },
+                           "Discipline": { description: "Augmente l'attaque de toutes les unités de 15%.", cost: { gold: 300, iron: 200 }, time: 6 },
+                           "Machines de Siège": { description: "Débloque les Balistes pour sièges.", cost: { gold: 600, iron: 400 }, time: 12 },
+                           "Légions": { description: "Débloque les Légionnaires (infanterie lourde).", cost: { gold: 1200, iron: 800 }, time: 24 }
                        } 
                    },
-                   science: {
-                       name: "Science",
-                       icon: "🔬",
+                   economie: {
+                       name: "Économie",
+                       icon: "💰",
+                       description: "Routes commerciales et optimisation de production",
                        techs: {
-                           "Philosophie": { description: "Augmente la production de recherche de 20%.", cost: { research: 300 }, time: 50 },
-                           "Mathématiques": { description: "Réduit le temps de construction de 15%.", cost: { research: 500 }, time: 70 },
-                           "Ingénierie": { description: "Débloque des bâtiments avancés.", cost: { research: 750 }, time: 90 },
-                           "Alchimie": { description: "Permet la transmutation des ressources.", cost: { research: 1100 }, time: 110 }
+                           "Commerce": { description: "Augmente les revenus en or de 25%.", cost: { gold: 200, wood: 100 }, time: 2 },
+                           "Routes Commerciales": { description: "Réduit les coûts de transport de 50%.", cost: { gold: 400, wood: 200 }, time: 4 },
+                           "Monnaie": { description: "Génère +2 or/min par niveau de Forum.", cost: { gold: 800, wood: 400 }, time: 8 },
+                           "Banque Impériale": { description: "Génère des intérêts sur votre or (1%/jour).", cost: { gold: 1600, wood: 800 }, time: 16 }
                        }
                    },
-                   navigation: {
-                       name: "Navigation",
-                       icon: "⛵",
+                   diplomatie: {
+                       name: "Diplomatie",
+                       icon: "🤝",
+                       description: "Alliances, espionnage et commerce avancé",
                        techs: {
-                           "Cartographie": { description: "Révèle 3 îles aléatoirement.", cost: { research: 350 }, time: 45 },
-                           "Navigation": { description: "Augmente la vitesse des navires de 25%.", cost: { research: 550 }, time: 65 },
-                           "Astronomie": { description: "Améliore l'exploration maritime.", cost: { research: 800 }, time: 85 },
-                           "Boussole": { description: "Réduit les coûts d'exploration de 40%.", cost: { research: 1200 }, time: 105 }
+                           "Ambassades": { description: "Permet de former des alliances.", cost: { gold: 250, wine: 50 }, time: 3 },
+                           "Espionnage": { description: "Débloque les missions d'espionnage.", cost: { gold: 500, wine: 100 }, time: 6 },
+                           "Traités": { description: "Bonus alliance +10% (défense et économie).", cost: { gold: 1000, wine: 200 }, time: 12 },
+                           "Réseau d'Espions": { description: "Révèle les mouvements ennemis.", cost: { gold: 2000, wine: 400 }, time: 24 }
                        }
                    }
                },
                units: {
-                   "Hoplite": { description: "Unité de base solide.", icon: "🛡️", cost: { wood: 50, sulfur: 30, gold: 10 }, time: 5 },
-                   "Archer": { description: "Attaque à distance.", icon: "🏹", cost: { wood: 40, gold: 15 }, time: 4 },
-                   "Catapulte": { description: "Siège puissant contre les bâtiments.", icon: "🏹", cost: { wood: 200, sulfur: 100, gold: 50 }, time: 15 },
-                   "Cavalier": { description: "Unité rapide et mobile.", icon: "🐎", cost: { wood: 80, gold: 30 }, time: 8 },
-                   "Phalange": { description: "Formation défensive redoutable.", icon: "🛡️", cost: { wood: 120, sulfur: 60, gold: 25 }, time: 12 },
-                   "Éclaireur": { description: "Unité de reconnaissance rapide.", icon: "👁️", cost: { wood: 30, gold: 20 }, time: 3 },
-                   "Bélier": { description: "Spécialisé dans la destruction des murailles.", icon: "🐏", cost: { wood: 150, sulfur: 80, gold: 40 }, time: 10 },
-                   "Médecin": { description: "Soigne les unités blessées.", icon: "⚕️", cost: { wood: 60, crystal: 40, gold: 35 }, time: 7 }
+                   // Unités terrestres selon le GDD Imperium
+                   land: {
+                       "Velites": { 
+                           description: "Éclaireurs rapides, faibles", 
+                           icon: "🏃", 
+                           stats: { attack: 5, defense: 3, speed: 8 },
+                           cost: { wood: 30, iron: 20, gold: 15 }, 
+                           time: 3,
+                           requires: "Caserne niveau 1"
+                       },
+                       "Hastati": { 
+                           description: "Infanterie de base", 
+                           icon: "⚔️", 
+                           stats: { attack: 8, defense: 6, speed: 5 },
+                           cost: { wood: 50, iron: 40, gold: 25 }, 
+                           time: 5,
+                           requires: "Caserne niveau 1 + Recherche Phalange"
+                       },
+                       "Légionnaires": { 
+                           description: "Infanterie lourde", 
+                           icon: "🛡️", 
+                           stats: { attack: 12, defense: 10, speed: 4 },
+                           cost: { wood: 80, iron: 60, gold: 40 }, 
+                           time: 8,
+                           requires: "Caserne niveau 2 + Recherche Légions"
+                       },
+                       "Equites": { 
+                           description: "Cavalerie", 
+                           icon: "🐎", 
+                           stats: { attack: 10, defense: 7, speed: 10 },
+                           cost: { wood: 70, iron: 50, gold: 60 }, 
+                           time: 7,
+                           requires: "Caserne niveau 2"
+                       },
+                       "Balistes": { 
+                           description: "Siège", 
+                           icon: "🏹", 
+                           stats: { attack: 20, defense: 5, speed: 2 },
+                           cost: { wood: 150, iron: 100, gold: 80 }, 
+                           time: 12,
+                           requires: "Caserne niveau 3 + Recherche Machines de Siège"
+                       }
+                   },
+                   // Unités navales selon le GDD Imperium
+                   naval: {
+                       "Navires Marchands": { 
+                           description: "Transport de ressources et colonisation", 
+                           icon: "🚢", 
+                           stats: { cargo: 500, defense: 2, speed: 6 },
+                           cost: { wood: 200, iron: 50, gold: 100 }, 
+                           time: 15,
+                           requires: "Chantier Naval niveau 1"
+                       },
+                       "Trirèmes": { 
+                           description: "Guerre rapide", 
+                           icon: "⚓", 
+                           stats: { attack: 15, defense: 8, speed: 8 },
+                           cost: { wood: 300, iron: 100, gold: 150 }, 
+                           time: 20,
+                           requires: "Chantier Naval niveau 2"
+                       },
+                       "Quinquérèmes": { 
+                           description: "Transport lourd", 
+                           icon: "🛳️", 
+                           stats: { attack: 20, defense: 12, cargo: 1000, speed: 5 },
+                           cost: { wood: 500, iron: 200, gold: 250 }, 
+                           time: 30,
+                           requires: "Chantier Naval niveau 3"
+                       }
+                   }
                },
                diplomacy: {
                    alliances: { "Les Spartiates": { tag: "SPQR", members: 15, points: 12000 } },
@@ -2106,9 +2284,61 @@
            // --- ÉTAT DU JEU ---
            let gameState;
            const defaultGameState = {
-               resources: { wood: 1000, wine: 100, marble: 100, crystal: 100, sulfur: 100, gold: 5000, research: 0 },
-               buildings: { "townHall": { type: "Hôtel de Ville", level: 1 }, "plot1": { type: "Caserne", level: 1 }, "plot2": { type: null, level: 0 }, "plot3": { type: null, level: 0 }, "academy": { type: "Académie", level: 1 }, "plot4": { type: null, level: 0 }, "plot5": { type: null, level: 0 }, "plot6": { type: null, level: 0 }, "plot7": { type: null, level: 0 }, "plot8": { type: null, level: 0 } },
-               researchCompleted: [],
+               // Ressources selon le GDD Imperium (5 ressources principales)
+               resources: { 
+                   wood: 500,      // Production de base sur toutes les îles
+                   stone: 200,     // Fortifications, bâtiments avancés  
+                   iron: 100,      // Unités militaires
+                   wine: 50,       // Bonheur de la population (consommation journalière)
+                   gold: 1000      // Commerce, entretien des troupes, accélérations
+               },
+               // Bâtiments selon le système Imperium
+               buildings: { 
+                   "forum": { type: "Forum", level: 1, constructing: false, timeLeft: 0 }, 
+                   "lumbercamp": { type: "Camp de Bûcherons", level: 1, constructing: false, timeLeft: 0 }, 
+                   "quarry": { type: "Carrière", level: 0, constructing: false, timeLeft: 0 }, 
+                   "ironmine": { type: "Mine de Fer", level: 0, constructing: false, timeLeft: 0 }, 
+                   "vineyard": { type: "Vignoble", level: 0, constructing: false, timeLeft: 0 }, 
+                   "warehouse": { type: "Entrepôt", level: 1, constructing: false, timeLeft: 0 },
+                   "barracks": { type: "Caserne", level: 0, constructing: false, timeLeft: 0 },
+                   "shipyard": { type: "Chantier Naval", level: 0, constructing: false, timeLeft: 0 },
+                   "academy": { type: "Académie", level: 0, constructing: false, timeLeft: 0 },
+                   "tavern": { type: "Taverne", level: 0, constructing: false, timeLeft: 0 },
+                   "wall": { type: "Muraille", level: 0, constructing: false, timeLeft: 0 }
+               },
+               // Armée selon les unités romaines du GDD
+               military: {
+                   land: {
+                       velites: 0,        // Éclaireurs rapides, faibles
+                       hastati: 0,        // Infanterie de base
+                       legionnaires: 0,   // Infanterie lourde
+                       equites: 0,        // Cavalerie
+                       balistes: 0        // Siège
+                   },
+                   naval: {
+                       merchant: 0,       // Navires marchands (transport)
+                       trireme: 0,        // Trirèmes (guerre rapide)
+                       quinquereme: 0     // Quinquérèmes (transport lourd)
+                   }
+               },
+               // Système de recherche avec 4 branches selon le GDD
+               research: {
+                   completed: [],
+                   inProgress: null,
+                   branches: {
+                       urbanisme: { level: 0, researching: false, timeLeft: 0 },    // Débloque bâtiments
+                       militaire: { level: 0, researching: false, timeLeft: 0 },    // Nouvelles unités, sièges
+                       economie: { level: 0, researching: false, timeLeft: 0 },     // Routes commerciales, optimisation
+                       diplomatie: { level: 0, researching: false, timeLeft: 0 }    // Alliances, espionnage
+                   }
+               },
+               // Population et bonheur selon le GDD
+               population: {
+                   current: 75,        // Population actuelle
+                   max: 75,           // Population max = 50 + 25 * Niveau_Forum
+                   happiness: 80,     // Influencé par vin et bâtiments
+                   wineConsumption: 5 // Consommation de vin par jour
+               },
                queues: { build: [], research: [], military: [] },
                cooldowns: { build: 0, research: 0, military: 0 },
                exploredIslands: [{ x: 7, y: 7, name: "Île Capitale", type: "capital", resources: ["wood", "wine"], population: 1000, development: 1 }],
@@ -4059,613 +4289,4 @@
                        <h4>🏭 District Industriel</h4>
                        <p>Production: +${islandData.districts.industrial.production}% ressources</p>
                        <p>Niveau: ${islandData.districts.industrial.level}</p>
-                       <button onclick="upgradeDistrict('industrial')" class="action-btn" ${canUpgradeDistrict('industrial') ? '' : 'disabled'}>
-                           Améliorer (${getDistrictUpgradeCost('industrial').gold} or)
-                       </button>
-                   </div>
-                   
-                   <div class="card">
-                       <h4>🛡️ District Militaire</h4>
-                       <p>Défense: ${islandData.districts.military.defense} points</p>
-                       <p>Niveau: ${islandData.districts.military.level}</p>
-                       <button onclick="upgradeDistrict('military')" class="action-btn" ${canUpgradeDistrict('military') ? '' : 'disabled'}>
-                           Améliorer (${getDistrictUpgradeCost('military').gold} or)
-                       </button>
-                   </div>
-               `;
-               
-               // Infrastructure de l'île
-               html += `
-                   <div class="card" style="grid-column: 1 / -1;">
-                       <h3>🛤️ Infrastructure</h3>
-                       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
-                           <div>
-                               <h4>🛣️ Routes (Niveau ${islandData.infrastructure.roads})</h4>
-                               <p>Réduit les coûts de transport de ${islandData.infrastructure.roads * 10}%</p>
-                               <button onclick="upgradeInfrastructure('roads')" class="action-btn" ${canUpgradeInfrastructure('roads') ? '' : 'disabled'}>
-                                   Améliorer (${getInfrastructureCost('roads').gold} or, ${getInfrastructureCost('roads').wood} bois)
-                               </button>
-                           </div>
-                           <div>
-                               <h4>⚓ Ports (Niveau ${islandData.infrastructure.ports})</h4>
-                               <p>+${islandData.infrastructure.ports * 15}% revenus commerciaux</p>
-                               <button onclick="upgradeInfrastructure('ports')" class="action-btn" ${canUpgradeInfrastructure('ports') ? '' : 'disabled'}>
-                                   Améliorer (${getInfrastructureCost('ports').gold} or, ${getInfrastructureCost('ports').marble} marbre)
-                               </button>
-                           </div>
-                           <div>
-                               <h4>🏰 Défenses (Niveau ${islandData.infrastructure.defenses})</h4>
-                               <p>+${islandData.infrastructure.defenses * 20} points de défense</p>
-                               <button onclick="upgradeInfrastructure('defenses')" class="action-btn" ${canUpgradeInfrastructure('defenses') ? '' : 'disabled'}>
-                                   Améliorer (${getInfrastructureCost('defenses').gold} or, ${getInfrastructureCost('defenses').sulfur} soufre)
-                               </button>
-                           </div>
-                       </div>
-                   </div>
-               `;
-               
-               // Ressources naturelles de l'île
-               html += `
-                   <div class="card" style="grid-column: 1 / -1;">
-                       <h3>🌿 Ressources Naturelles</h3>
-                       <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
-               `;
-               
-               islandData.naturalResources.forEach(resource => {
-                   const resourceIcon = {
-                       wood: '🌲', wine: '🍇', marble: '🏛️', 
-                       crystal: '💎', sulfur: '🔥', gold: '💰'
-                   }[resource];
-                   
-                   html += `
-                       <div style="background: var(--color-panel-light); padding: 0.75rem; border-radius: 0.5rem; text-align: center;">
-                           <div style="font-size: 1.5rem;">${resourceIcon}</div>
-                           <div style="font-size: 0.9rem; margin-top: 0.25rem;">${resource}</div>
-                       </div>
-                   `;
-               });
-               
-               html += `
-                       </div>
-                       <p style="margin-top: 1rem; color: var(--color-text-muted); font-style: italic;">
-                           Les ressources naturelles augmentent la production de base de ces ressources sur cette île.
-                       </p>
-                   </div>
-               `;
-               
-               dom.islandGrid.innerHTML = html;
-           }
-
-           function updateContextPanel(plotId) {
-               if (window.innerWidth <= 900) return; // Ne pas utiliser sur mobile
-               let html = '';
-               if (!plotId) {
-                   html = '<h3>Informations</h3><p>Sélectionnez un élément pour voir ses détails.</p>';
-               } else {
-                   const building = gameState.buildings[plotId];
-                   if (building && building.type) {
-                       const { type, level } = building; const spec = config.buildings[type]; const nextLevel = level < spec.levels.length ? level + 1 : null;
-                       html = `<h3>${type} (Niv ${level})</h3><p>${spec.description}</p>`;
-                       if (gameState.queues.build.some(item => item.id === plotId)) { html += `<p style="color: var(--color-primary); margin-top: 1rem;">Amélioration en cours...</p>`; }
-                       else if (isCooldownActive('build')) { html += `<button class="action-btn" disabled>Cooldown...</button>`; }
-                       else if (nextLevel) { html += `<button class="action-btn" data-action="build" data-id="${plotId}" data-name="${type}" data-level="${nextLevel}">Améliorer</button>`; }
-                       else { html += `<p style="color: var(--color-primary); margin-top: 1rem;">Niveau maximum</p>`; }
-                   } else {
-
-                       html = `<h3>Emplacement Vide</h3><p>Cliquez pour construire :</p><div style="display:flex; flex-direction:column; gap:0.5rem;">`;
-                       for (const type in config.buildings) { html += isCooldownActive('build') ? `<button class="action-btn" disabled>${config.buildings[type].icon} ${type}</button>` : `<button class="action-btn" data-action="build" data-id="${plotId}" data-name="${type}" data-level="1">${config.buildings[type].icon} ${type}</button>`; }
-                       html += `</div>`;
-
-                   }
-               }
-               dom.contextPanel.innerHTML = html;
-
-               const chooseBtn = dom.contextPanel.querySelector('#chooseBuildingBtn');
-               if (chooseBtn) chooseBtn.addEventListener('click', () => showBuildSelection(plotId));
-
-           }
-
-           function showContextModalForBuilding(plotId) {
-               const building = gameState.buildings[plotId];
-               if (building && building.type) {
-                    const { type, level } = building;
-                    const spec = config.buildings[type];
-                    const nextLevel = level < spec.levels.length ? level + 1 : null;
-                    if(nextLevel && !gameState.queues.build.some(item => item.id === plotId)) {
-                       showModal('build', plotId, type, nextLevel);
-                    } else {
-                       showModal(type, `Niveau ${level}. ${spec.description}`);
-                    }
-               } else {
-                   showBuildSelection(plotId);
-               }
-           }
-
-           function showBuildSelection(plotId) {
-               // Créer une modal simple pour la sélection de bâtiments sur mobile
-               let html = '<h4>Choisir un bâtiment</h4><div class="build-select-grid">';
-               for (const type in config.buildings) {
-                   const spec = config.buildings[type];
-                   const cost = Object.entries(spec.levels[0].cost).map(([res, val]) => `${res}: ${val}`).join(', ');
-                   html += `<div class="build-option">
-                       <div>${spec.icon}</div>
-                       <div style="font-size: 0.8rem; margin: 0.25rem 0;">${type}</div>
-                       <div class="cost">${cost}</div>
-                       <button class="action-btn" data-action="build" data-id="${plotId}" data-name="${type}" data-level="1" style="font-size: 0.7rem; padding: 0.25rem;">Construire</button>
-                   </div>`;
-               }
-               html += '</div>';
-               
-               dom.modalTitle.textContent = 'Construction';
-               dom.modalMessage.innerHTML = html;
-               dom.modalCost.innerHTML = '';
-               dom.modalConfirmBtn.style.display = 'none';
-               dom.modalCancelBtn.textContent = 'Fermer';
-               dom.modal.style.display = 'flex';
-           }
-           
-           // --- SYSTÈME D'XP ET ACHIEVEMENTS ---
-           function addXP(amount) {
-               gameState.playerStats.xp += amount;
-               const xpNeeded = gameState.playerStats.level * 100;
-               if (gameState.playerStats.xp >= xpNeeded) {
-                   const oldLevel = gameState.playerStats.level;
-                   gameState.playerStats.level++;
-                   gameState.playerStats.xp -= xpNeeded;
-                   
-                   // Notification de niveau
-                   showLevelUpNotification(oldLevel, gameState.playerStats.level);
-                   
-                   // Bonus de niveau : +10% de production
-                   Object.keys(gameState.resources).forEach(res => {
-                       if (res !== 'research') {
-                           const bonus = Math.floor(gameState.resources[res] * 0.1);
-                           gameState.resources[res] += bonus;
-                           if (bonus > 0) animateResourceGain(res);
-                       }
-                   });
-               }
-           }
-           
-           function showLevelUpNotification(oldLevel, newLevel) {
-               const notification = document.createElement('div');
-               notification.className = 'level-up-notification';
-               notification.innerHTML = `
-                   <div>🎉 NIVEAU SUPÉRIEUR ! 🎉</div>
-                   <div>Niveau ${oldLevel} → ${newLevel}</div>
-                   <div style="font-size: 0.9rem; margin-top: 0.5rem;">Bonus de ressources accordé !</div>
-               `;
-               document.body.appendChild(notification);
-               
-               setTimeout(() => {
-                   notification.remove();
-               }, 3000);
-           }
-           
-           function showAchievementNotification(achievement) {
-               const notification = document.createElement('div');
-               notification.className = 'achievement-notification';
-               notification.innerHTML = `
-                   <div style="font-weight: bold;">🏆 Achievement Débloqué !</div>
-                   <div>${achievement.name}</div>
-                   <div style="font-size: 0.8rem; opacity: 0.9;">${achievement.desc}</div>
-               `;
-               document.body.appendChild(notification);
-               
-               setTimeout(() => {
-                   notification.remove();
-               }, 4000);
-           }
-           
-           function animateResourceGain(resourceType) {
-               const element = document.getElementById(`res${resourceType.charAt(0).toUpperCase() + resourceType.slice(1)}`);
-               if (element) {
-                   element.parentElement.classList.add('resource-gain');
-                   setTimeout(() => {
-                       element.parentElement.classList.remove('resource-gain');
-                   }, 1000);
-               }
-           }
-           
-           function checkAchievements() {
-               const achievements = [
-                   { id: 'builder1', name: 'Premier Constructeur', desc: 'Construire 5 bâtiments', condition: () => gameState.playerStats.totalBuildings >= 5 },
-                   { id: 'builder2', name: 'Architecte', desc: 'Construire 15 bâtiments', condition: () => gameState.playerStats.totalBuildings >= 15 },
-                   { id: 'builder3', name: 'Maître Bâtisseur', desc: 'Construire 30 bâtiments', condition: () => gameState.playerStats.totalBuildings >= 30 },
-                   { id: 'researcher1', name: 'Érudit', desc: 'Terminer 3 recherches', condition: () => gameState.researchCompleted.length >= 3 },
-                   { id: 'researcher2', name: 'Savant', desc: 'Terminer 8 recherches', condition: () => gameState.researchCompleted.length >= 8 },
-                   { id: 'military1', name: 'Général', desc: 'Recruter 20 unités', condition: () => gameState.playerStats.totalUnits >= 20 },
-                   { id: 'military2', name: 'Conquérant', desc: 'Recruter 50 unités', condition: () => gameState.playerStats.totalUnits >= 50 },
-                   { id: 'rich1', name: 'Riche Marchand', desc: 'Posséder 10000 or', condition: () => gameState.resources.gold >= 10000 },
-                   { id: 'rich2', name: 'Empereur Doré', desc: 'Posséder 50000 or', condition: () => gameState.resources.gold >= 50000 },
-                   { id: 'explorer1', name: 'Explorateur', desc: 'Explorer 10 îles', condition: () => gameState.exploredIslands.length >= 10 },
-                   { id: 'colonizer1', name: 'Colonisateur', desc: 'Coloniser 3 îles', condition: () => gameState.colonizedIslands.length >= 3 },
-                   { id: 'level5', name: 'Vétéran', desc: 'Atteindre le niveau 5', condition: () => gameState.playerStats.level >= 5 },
-                   { id: 'level10', name: 'Expert', desc: 'Atteindre le niveau 10', condition: () => gameState.playerStats.level >= 10 }
-               ];
-               
-               achievements.forEach(achievement => {
-                   if (!gameState.achievements.includes(achievement.id) && achievement.condition()) {
-                       gameState.achievements.push(achievement.id);
-                       showAchievementNotification(achievement);
-                       logEvent(`🏆 Achievement débloqué : ${achievement.name}`);
-                       addXP(100);
-                   }
-               });
-           }
-
-           function renderResearchTree() {
-               dom.researchGrid.innerHTML = '';
-               for (const branchKey in config.research) {
-                   const branch = config.research[branchKey]; let branchHtml = `<div class="card"><h3>${branch.name}</h3>`;
-                   for (const techKey in branch.techs) {
-                       const tech = branch.techs[techKey]; const isCompleted = gameState.researchCompleted.includes(techKey);
-                       const isResearching = gameState.queues.research.some(t => t.name === techKey);
-                       branchHtml += `<div class="card"><h4>${techKey}</h4><p>${tech.description}</p><p class="cost">Coût: 🔬${tech.cost.research}</p>`;
-                       if (isCompleted) { branchHtml += `<button class="action-btn" disabled>Terminé</button>`; }
-                       else if (isResearching) { branchHtml += `<button class="action-btn" disabled>En cours...</button>`; }
-                       else if (isCooldownActive('research')) { branchHtml += `<button class="action-btn" disabled>Cooldown...</button>`; }
-                       else { branchHtml += `<button class="action-btn" data-action="research" data-name="${techKey}" data-level="1">Rechercher</button>`; }
-                       branchHtml += `</div>`;
-                   }
-                   branchHtml += `</div>`; dom.researchGrid.innerHTML += branchHtml;
-               }
-           }
-           function renderMilitaryUnits() {
-               dom.militaryGrid.innerHTML = '';
-               for (const unitKey in config.units) {
-                   const unit = config.units[unitKey]; const isRecruiting = gameState.queues.military.some(u => u.name === unitKey);
-                   let html = `<div class="card"><h4>${unitKey} ${unit.icon}</h4><p>${unit.description}</p><p class="cost">Coût: 🌲${unit.cost.wood || 0} 🔥${unit.cost.sulfur || 0} 💰${unit.cost.gold || 0}</p>`;
-                   if (isRecruiting) { html += `<button class="action-btn" disabled>En formation...</button>`; }
-                   else if (isCooldownActive('military')) { html += `<button class="action-btn" disabled>Cooldown...</button>`; }
-                   else { html += `<button class="action-btn" data-action="military" data-name="${unitKey}" data-level="1">Recruter</button>`; }
-                   html += `</div>`; dom.militaryGrid.innerHTML += html;
-               }
-           }
-           function renderBattle() {
-               dom.battleGrid.innerHTML = `
-                   <div class="card">
-                       <h3>Simulateur de Bataille</h3>
-                       <p>Testez vos stratégies militaires !</p>
-                       <div style="margin: 1rem 0;">
-                           <h4>Votre Armée</h4>
-                           <div>Hoplites: <input type="number" id="attackerHoplites" value="10" min="0" max="100" style="width: 60px;"></div>
-                           <div>Archers: <input type="number" id="attackerArchers" value="5" min="0" max="100" style="width: 60px;"></div>
-                       </div>
-                       <div style="margin: 1rem 0;">
-                           <h4>Armée Ennemie</h4>
-                           <div>Hoplites: <input type="number" id="defenderHoplites" value="8" min="0" max="100" style="width: 60px;"></div>
-                           <div>Défense Muraille: <input type="number" id="wallDefense" value="20" min="0" max="200" style="width: 60px;"></div>
-                       </div>
-                       <button class="action-btn" id="simulateBattleBtn">⚔️ Lancer le Combat</button>
-                       <div id="battleResult" class="battle-result" style="margin-top: 1rem; padding: 1rem; background: var(--color-panel-light); border-radius: 0.5rem;"></div>
-                   </div>`;
-               const btn = document.getElementById('simulateBattleBtn');
-               if (btn) {
-                   btn.addEventListener('click', () => {
-                       const attackerHoplites = parseInt(document.getElementById('attackerHoplites').value) || 0;
-                       const attackerArchers = parseInt(document.getElementById('attackerArchers').value) || 0;
-                       const defenderHoplites = parseInt(document.getElementById('defenderHoplites').value) || 0;
-                       const wallDef = parseInt(document.getElementById('wallDefense').value) || 0;
-                       
-                       const attacker = { 
-                           units: [
-                               { type: 'hoplite', count: attackerHoplites }, 
-                               { type: 'archer', count: attackerArchers }
-                           ].filter(u => u.count > 0),
-                           resources: {} 
-                       };
-                       const defender = { 
-                           units: [{ type: 'hoplite', count: defenderHoplites }].filter(u => u.count > 0), 
-                           wallDefense: wallDef, 
-                           resources: { wood: 100, gold: 150, wine: 50 } 
-                       };
-                       
-                       const result = simulateBattle(attacker, defender);
-                       const resultEl = document.getElementById('battleResult');
-                       const lootText = Object.keys(result.loot).length ? Object.entries(result.loot).map(([r,v]) => `${r}: ${v}`).join(', ') : 'aucun';
-                       
-                       resultEl.innerHTML = `
-                           <h4>Résultat du Combat</h4>
-                           <p><strong>Vainqueur:</strong> ${result.winner === 'attacker' ? '🎉 Vous' : '💀 Défenseur'}</p>
-                           <p><strong>Butin récupéré:</strong> ${lootText}</p>
-                           <div style="margin-top: 0.5rem;">
-                               <div><strong>Pertes Attaquant:</strong> ${result.casualties.attacker.map(c => `${c.lost} ${c.type}`).join(', ') || 'aucune'}</div>
-                               <div><strong>Pertes Défenseur:</strong> ${result.casualties.defender.map(c => `${c.lost} ${c.type}`).join(', ') || 'aucune'}</div>
-                           </div>
-                       `;
-                   });
-               }
-           }
-           
-           // Fonction de simulation de bataille améliorée
-           function simulateBattle(attacker, defender) {
-               const unitStats = {
-                   hoplite: { attack: 10, defense: 20 },
-                   archer: { attack: 8, defense: 10 }
-               };
-               
-               let atkPower = attacker.units.reduce((total, unit) => 
-                   total + (unitStats[unit.type]?.attack || 0) * unit.count, 0);
-               let defPower = defender.units.reduce((total, unit) => 
-                   total + (unitStats[unit.type]?.defense || 0) * unit.count, 0) + (defender.wallDefense || 0);
-               
-               const winner = atkPower > defPower ? "attacker" : "defender";
-               
-               // Calcul des pertes proportionnelles
-               const totalPower = atkPower + defPower || 1;
-               const atkLossRatio = Math.min(0.8, defPower / totalPower);
-               const defLossRatio = Math.min(0.8, atkPower / totalPower);
-               
-               const attackerLosses = attacker.units.map(u => ({
-                   type: u.type,
-                   lost: Math.ceil(u.count * atkLossRatio * (0.5 + Math.random() * 0.5))
-               }));
-               
-               const defenderLosses = defender.units.map(u => ({
-                   type: u.type,
-                   lost: Math.ceil(u.count * defLossRatio * (0.5 + Math.random() * 0.5))
-               }));
-               
-               // Calcul du butin
-               const loot = {};
-               if (winner === "attacker") {
-                   for (let [res, amt] of Object.entries(defender.resources || {})) {
-                       loot[res] = Math.floor(amt * (0.3 + Math.random() * 0.4));
-                   }
-               }
-               
-               return {
-                   winner,
-                   loot,
-                   casualties: { attacker: attackerLosses, defender: defenderLosses }
-               };
-           }
-           function renderDiplomacy() {
-               dom.diplomacyGrid.innerHTML = '';
-               let html = '<div><h3>Alliances</h3>';
-               for(const name in config.diplomacy.alliances) {
-                   const ally = config.diplomacy.alliances[name];
-                   html += `<div class="card"><h4>${name} [${ally.tag}]</h4><p>Membres: ${ally.members} | Points: ${ally.points}</p><button class="action-btn">Voir</button></div>`;
-               }
-               html += '</div><div><h3>Traités</h3>';
-               for(const name in config.diplomacy.treaties) {
-                   const treaty = config.diplomacy.treaties[name];
-                   html += `<div class="card"><h4>${name}</h4><p>${treaty.description}</p><button class="action-btn" data-action="diplomacy" data-name="${name}">Signer</button></div>`;
-               }
-               html += '</div>'; dom.diplomacyGrid.innerHTML += html;
-           }
-           
-           function renderAchievements() {
-               const achievementsGrid = document.getElementById('achievements-grid');
-               if (!achievementsGrid) return;
-               
-               const allAchievements = [
-                   { id: 'builder1', name: 'Premier Constructeur', desc: 'Construire 5 bâtiments', icon: '🏗️' },
-                   { id: 'builder2', name: 'Architecte', desc: 'Construire 15 bâtiments', icon: '🏛️' },
-                   { id: 'builder3', name: 'Maître Bâtisseur', desc: 'Construire 30 bâtiments', icon: '🏰' },
-                   { id: 'researcher1', name: 'Érudit', desc: 'Terminer 3 recherches', icon: '📚' },
-                   { id: 'researcher2', name: 'Savant', desc: 'Terminer 8 recherches', icon: '🧪' },
-                   { id: 'military1', name: 'Général', desc: 'Recruter 20 unités', icon: '⚔️' },
-                   { id: 'military2', name: 'Conquérant', desc: 'Recruter 50 unités', icon: '👑' },
-                   { id: 'rich1', name: 'Riche Marchand', desc: 'Posséder 10000 or', icon: '💰' },
-                   { id: 'rich2', name: 'Empereur Doré', desc: 'Posséder 50000 or', icon: '👑' },
-                   { id: 'explorer1', name: 'Explorateur', desc: 'Explorer 10 îles', icon: '🗺️' },
-                   { id: 'colonizer1', name: 'Colonisateur', desc: 'Coloniser 3 îles', icon: '🏝️' },
-                   { id: 'level5', name: 'Vétéran', desc: 'Atteindre le niveau 5', icon: '⭐' },
-                   { id: 'level10', name: 'Expert', desc: 'Atteindre le niveau 10', icon: '🌟' }
-               ];
-               
-               let html = `
-                   <div class="card" style="grid-column: 1 / -1;">
-                       <h3>📊 Statistiques du Joueur</h3>
-                       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
-                           <div><strong>Niveau:</strong> ${gameState.playerStats.level}</div>
-                           <div><strong>XP:</strong> ${gameState.playerStats.xp}/${gameState.playerStats.level * 100}</div>
-                           <div><strong>Bâtiments construits:</strong> ${gameState.playerStats.totalBuildings}</div>
-                           <div><strong>Unités recrutées:</strong> ${gameState.playerStats.totalUnits}</div>
-                           <div><strong>Recherches terminées:</strong> ${gameState.researchCompleted.length}</div>
-                           <div><strong>Îles explorées:</strong> ${gameState.exploredIslands.length}</div>
-                           <div><strong>Colonies fondées:</strong> ${gameState.colonizedIslands.length}</div>
-                           <div><strong>Achievements débloqués:</strong> ${gameState.achievements.length}/${allAchievements.length}</div>
-                       </div>
-                   </div>
-               `;
-               
-               allAchievements.forEach(achievement => {
-                   const isUnlocked = gameState.achievements.includes(achievement.id);
-                   html += `
-                       <div class="card ${isUnlocked ? 'achievement-unlocked' : 'achievement-locked'}" style="opacity: ${isUnlocked ? '1' : '0.6'}; border: 2px solid ${isUnlocked ? 'var(--color-success)' : 'var(--color-border)'};">
-                           <div style="font-size: 2rem; text-align: center; margin-bottom: 0.5rem;">${achievement.icon}</div>
-                           <h4 style="color: ${isUnlocked ? 'var(--color-success)' : 'var(--color-text-muted)'};">${achievement.name}</h4>
-                           <p>${achievement.desc}</p>
-                           <div style="text-align: center; margin-top: 0.5rem;">
-                               ${isUnlocked ? '<span style="color: var(--color-success); font-weight: bold;">✅ DÉBLOQUÉ</span>' : '<span style="color: var(--color-text-muted);">🔒 Verrouillé</span>'}
-                           </div>
-                       </div>
-                   `;
-               });
-               
-               achievementsGrid.innerHTML = html;
-           }
-           
-           function renderQuests() {
-               const questsGrid = document.getElementById('quests-grid');
-               if (!questsGrid) return;
-               
-               let html = `
-                   <div class="card" style="grid-column: 1 / -1;">
-                       <h3>📋 Quêtes Actives (${gameState.activeQuests.length})</h3>
-                       <div style="margin-top: 1rem;">
-               `;
-               
-               if (gameState.activeQuests.length === 0) {
-                   html += '<p style="color: var(--color-text-muted); font-style: italic;">Aucune quête active pour le moment.</p>';
-               } else {
-                   gameState.activeQuests.forEach(quest => {
-                       const isReady = typeof quest.condition === 'function' ? quest.condition() : false;
-                       const progress = isReady ? '✅ Prêt à terminer' : '⏳ En cours';
-                       const rewardText = Object.entries(quest.reward)
-                           .map(([res, amt]) => `${res}: ${amt}`)
-                           .join(', ');
-                       
-                       html += `
-                           <div style="background: var(--color-panel-light); padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.5rem; border-left: 4px solid var(--color-primary);">
-                               <h4 style="margin: 0 0 0.5rem 0; color: var(--color-primary);">${quest.title}</h4>
-                               <p style="margin: 0 0 0.5rem 0;">${quest.description}</p>
-                               <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
-                                   <span style="color: var(--color-text-muted);">Récompenses: ${rewardText}</span>
-                                   <span style="font-weight: bold; color: ${isReady ? 'var(--color-success)' : 'var(--color-warning)'};">${progress}</span>
-                               </div>
-                           </div>
-                       `;
-                   });
-               }
-               
-               html += `
-                       </div>
-                   </div>
-                   
-                   <div class="card" style="grid-column: 1 / -1;">
-                       <h3>✅ Quêtes Terminées (${gameState.completedQuests.length})</h3>
-                       <div style="margin-top: 1rem;">
-               `;
-               
-               if (gameState.completedQuests.length === 0) {
-                   html += '<p style="color: var(--color-text-muted); font-style: italic;">Aucune quête terminée.</p>';
-               } else {
-                   const completedQuestDetails = gameState.completedQuests.map(questId => 
-                       QUEST_TEMPLATES.find(template => template.id === questId)
-                   ).filter(Boolean);
-                   
-                   completedQuestDetails.forEach(quest => {
-                       html += `
-                           <div style="background: var(--color-success); color: white; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem; opacity: 0.8;">
-                               <h4 style="margin: 0 0 0.25rem 0;">${quest.title}</h4>
-                               <p style="margin: 0; font-size: 0.9rem;">${quest.description}</p>
-                           </div>
-                       `;
-                   });
-               }
-               
-               html += `
-                       </div>
-                   </div>
-                   
-                   <div class="card" style="grid-column: 1 / -1;">
-                       <h3>🎲 Événements Récents (${gameState.eventHistory.length})</h3>
-                       <div style="margin-top: 1rem; max-height: 300px; overflow-y: auto;">
-               `;
-               
-               if (gameState.eventHistory.length === 0) {
-                   html += '<p style="color: var(--color-text-muted); font-style: italic;">Aucun événement récent.</p>';
-               } else {
-                   // Afficher les événements du plus récent au plus ancien
-                   const sortedEvents = [...gameState.eventHistory].reverse();
-                   sortedEvents.forEach(event => {
-                       const timeAgo = Math.floor((Date.now() - event.timestamp) / 60000);
-                       const timeText = timeAgo < 1 ? 'À l\'instant' : `Il y a ${timeAgo} min`;
-                       
-                       html += `
-                           <div style="background: var(--color-panel-light); padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem; border-left: 4px solid #8b5cf6;">
-                               <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.25rem;">
-                                   <h4 style="margin: 0; color: #8b5cf6;">${event.title}</h4>
-                                   <span style="font-size: 0.8rem; color: var(--color-text-muted);">${timeText}</span>
-                               </div>
-                               <p style="margin: 0 0 0.25rem 0; font-size: 0.9rem;">${event.description}</p>
-                               <p style="margin: 0; font-size: 0.9rem; font-weight: bold; color: var(--color-primary);">${event.result}</p>
-                           </div>
-                       `;
-                   });
-               }
-               
-               html += `
-                       </div>
-                   </div>
-               `;
-               
-               questsGrid.innerHTML = html;
-           }
-           
-           function renderTrade() {
-               const tradeGrid = document.getElementById('trade-grid');
-               if (!tradeGrid) return;
-               
-               // Taux de change dynamiques basés sur les ressources du joueur
-               const exchangeRates = {
-                   wood: { gold: 2, wine: 0.5, marble: 0.8, crystal: 0.3, sulfur: 0.4 },
-                   wine: { gold: 8, wood: 2, marble: 1.5, crystal: 0.8, sulfur: 1 },
-                   marble: { gold: 5, wood: 1.2, wine: 0.7, crystal: 0.6, sulfur: 0.8 },
-                   crystal: { gold: 15, wood: 3, wine: 1.2, marble: 1.8, sulfur: 2 },
-                   sulfur: { gold: 12, wood: 2.5, wine: 1, marble: 1.2, crystal: 0.5 },
-                   gold: { wood: 0.4, wine: 0.1, marble: 0.15, crystal: 0.05, sulfur: 0.07 }
-               };
-               
-               let html = `
-                   <div class="card" style="grid-column: 1 / -1;">
-                       <h3>💱 Marché des Ressources</h3>
-                       <p>Échangez vos ressources selon les taux du marché. Les prix fluctuent selon l'offre et la demande.</p>
-                   </div>
-               `;
-               
-               // Créer les cartes d'échange pour chaque ressource
-               Object.keys(exchangeRates).forEach(fromResource => {
-                   if (fromResource === 'research') return; // Pas d'échange pour la recherche
-                   
-                   const playerAmount = Math.floor(gameState.resources[fromResource] || 0);
-                   const resourceIcon = {
-                       wood: '🌲', wine: '🍇', marble: '🏛️', 
-                       crystal: '💎', sulfur: '🔥', gold: '💰'
-                   }[fromResource];
-                   
-                   html += `
-                       <div class="card">
-                           <h4>${resourceIcon} ${fromResource.charAt(0).toUpperCase() + fromResource.slice(1)}</h4>
-                           <p>Disponible: <strong>${playerAmount}</strong></p>
-                           <div style="margin-top: 1rem;">
-                   `;
-                   
-                   Object.entries(exchangeRates[fromResource]).forEach(([toResource, rate]) => {
-                       const toIcon = {
-                           wood: '🌲', wine: '🍇', marble: '🏛️', 
-                           crystal: '💎', sulfur: '🔥', gold: '💰'
-                       }[toResource];
-                       
-                       html += `
-                           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; padding: 0.5rem; background: var(--color-panel-light); border-radius: 0.25rem;">
-                               <span>1 → ${rate} ${toIcon}</span>
-                               <div>
-                                   <input type="number" id="trade-${fromResource}-${toResource}" min="1" max="${playerAmount}" value="1" style="width: 60px; margin-right: 0.5rem;">
-                                   <button onclick="executeTrade('${fromResource}', '${toResource}', ${rate})" class="action-btn" style="font-size: 0.8rem; padding: 0.25rem 0.5rem;" ${playerAmount < 1 ? 'disabled' : ''}>
-                                       Échanger
-                                   </button>
-                               </div>
-                           </div>
-                       `;
-                   });
-                   
-                   html += `
-                           </div>
-                       </div>
-                   `;
-               });
-               
-               // Ajouter une section pour les offres spéciales
-               html += `
-                   <div class="card" style="grid-column: 1 / -1;">
-                       <h3>🎯 Offres Spéciales du Jour</h3>
-                       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
-               `;
-               
-               const specialOffers = [
-                   {
-                       name: "Pack du Constructeur",
-                       description: "Parfait pour vos projets de construction",
-                       cost: { gold: 1000 },
-                       reward: { wood: 500, marble: 200, crystal: 100 },
-                       available: gameState.resources.gold >= 1000
-                   },
-                   {
-                       name: "Pack du Chercheur",
-                       description: "Accélérez vos recherches",
-            
+                       <button onclick="upgradeDistrict('industrial')" class="action-btn" ${canUpgradeD
